@@ -2,4 +2,7 @@ language: go
 
 go:
   - 1.8.x
-  
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install libhdf5
