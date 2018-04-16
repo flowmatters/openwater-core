@@ -8,7 +8,8 @@ import (
 /*OW-SPEC
 Muskingum:
   inputs:
-    inflow: m^3.s^-1
+		inflow: m^3.s^-1
+		lateral: m^3.s^-1
 	states:
 		S:
 		prevInflow:
@@ -45,8 +46,9 @@ func muskingum(inflows, laterals data.ND1Float64,
 
 	for i := 0; i < nDays; i++ {
 		inflow := inflows.Get1(i)
+		lateral := laterals.Get1(i)
 
-		outflow := a1*inflow + a2*prevInflow + a3*prevOutflow
+		outflow := a1*(inflow+lateral) + a2*prevInflow + a3*prevOutflow
 		outflows.Set1(i, outflow)
 
 		prevOutflow = outflow

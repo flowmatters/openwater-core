@@ -1,4 +1,4 @@
-package rr
+package routing
 
 /* WARNING: GENERATED CODE
  *
@@ -50,7 +50,7 @@ func (m *Muskingum)  Description() sim.ModelDescription{
   sim.DescribeParameter("DeltaT",0,""),}
 
   result.Inputs = []string{
-  "inflow",}
+  "inflow","lateral",}
   result.Outputs = []string{
   "outflow",}
 
@@ -178,7 +178,7 @@ func (m *Muskingum) Run(inputs data.ND3Float64, states data.ND2Float64, outputs 
     
     
 
-		s,previnflow,prevoutflow= muskingum(inflow,s,previnflow,prevoutflow,k,x,deltat,outflow)
+		s,previnflow,prevoutflow= muskingum(inflow,lateral,s,previnflow,prevoutflow,k,x,deltat,outflow)
 
     
     
