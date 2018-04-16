@@ -59,6 +59,5 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println("Processes", processes)
-
+	fmt.Println("Batches for ", aModel.ModelName, aModel.Batches)
 }
