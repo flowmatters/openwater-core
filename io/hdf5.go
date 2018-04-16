@@ -12,12 +12,14 @@ import (
 	"gonum.org/v1/hdf5"
 )
 
-type H5Ref struct {
+//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64"
+
+type H5RefArrayType struct {
 	Filename string
 	Dataset  string
 }
 
-func (h H5Ref) Load() (data.NDFloat64, error) {
+func (h H5RefArrayType) Load() (data.NDArrayType, error) {
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
 		return nil, err
@@ -37,13 +39,13 @@ func (h H5Ref) Load() (data.NDFloat64, error) {
 	}
 
 	shape := conv.UintsToInts(dims)
-	result := data.NewArray(shape)
+	result := data.NewArrayArrayType(shape)
 	impl := result.Unroll()
 	ds.Read(&impl)
 	return result, nil
 }
 
-func (h H5Ref) Write(data data.NDFloat64) error {
+func (h H5RefArrayType) Write(data data.NDArrayType) error {
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDWR)
 	if err != nil {
 		if _, err := os.Stat(h.Filename); os.IsNotExist(err) {
@@ -89,7 +91,7 @@ func (h H5Ref) Write(data data.NDFloat64) error {
 	return nil
 }
 
-func (h H5Ref) LoadText() ([]string, error) {
+func (h H5RefArrayType) LoadText() ([]string, error) {
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
 		return nil, err
@@ -136,7 +138,7 @@ func (h H5Ref) LoadText() ([]string, error) {
 	return result, nil
 }
 
-func (h H5Ref) GetDatasets() ([]string, error) {
+func (h H5RefArrayType) GetDatasets() ([]string, error) {
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
 		return nil, err
@@ -169,7 +171,7 @@ func (h H5Ref) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
-func ParseH5Ref(path string) H5Ref {
+func ParseH5RefArrayType(path string) H5RefArrayType {
 	components := strings.Split(path, ":")
-	return H5Ref{components[0], components[1]}
+	return H5RefArrayType{components[0], components[1]}
 }

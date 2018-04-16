@@ -76,7 +76,7 @@ func extractGR4JStates(states data.ND1Float64) (float64, int, int, []float64, []
 }
 
 func packGR4JStates(s float64, n1 int, n2 int, q1 []float64, q9 []float64) data.ND2Float64 {
-	result := data.NewArray2D(1, 3+n1+n2)
+	result := data.NewArray2DFloat64(1, 3+n1+n2)
 	//result := make(sim.StateSet, 3+n1+n2)
 	result.Set2(0, 0, s)
 	result.Set2(0, 1, float64(n1))

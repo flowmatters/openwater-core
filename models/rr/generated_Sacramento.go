@@ -122,7 +122,7 @@ func (m *Sacramento)  Description() sim.ModelDescription{
 
 func (m *Sacramento) InitialiseStates(n int) data.ND2Float64 {
   // Zero states
-	var result = data.NewArray2D(n,6)
+	var result = data.NewArray2DFloat64(n,6)
 
 	// for i := 0; i < n; i++ {
   //   stateSet := make(sim.StateSet,6)
@@ -141,7 +141,7 @@ func (m *Sacramento) InitialiseStates(n int) data.ND2Float64 {
   //   
 
   //   if result==nil {
-  //     result = data.NewArray2D(stateSet.Len(0),n)
+  //     result = data.NewArray2DFloat64(stateSet.Len(0),n)
   //   }
   //   result.Apply([]int{0,i},[]int{1,1},stateSet)
 	// }
@@ -181,7 +181,7 @@ func (m *Sacramento) Run(inputs data.ND3Float64, states data.ND2Float64, outputs
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3D( 5, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 5, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   // fmt.Println("Running Sacramento for ",numCells,"cells")

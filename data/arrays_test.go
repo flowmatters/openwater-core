@@ -13,7 +13,7 @@ func TestOffset(t *testing.T) {
 	lenI := 3
 	lenJ := 2
 	lenK := 4
-	arr := newArray([]int{lenI, lenJ, lenK})
+	arr := newArrayfloat64([]int{lenI, lenJ, lenK})
 	expOffset := []int{8, 4, 1}
 	if !equal(expOffset, arr.Offset) {
 		t.Errorf("Incorrect Offset. Expected %v, got %v", expOffset, arr.Offset)
@@ -24,7 +24,7 @@ func testData3D() ND3Float64 {
 	lenI := 3
 	lenJ := 2
 	lenK := 4
-	arr := NewArray3D(lenI, lenJ, lenK)
+	arr := NewArray3DFloat64(lenI, lenJ, lenK)
 
 	a := 0
 	for i := 0; i < lenI; i++ {
@@ -40,7 +40,7 @@ func testData3D() ND3Float64 {
 }
 
 func testData2D() ND2Float64 {
-	arr := NewArray2D(2, 4)
+	arr := NewArray2DFloat64(2, 4)
 	arr.Set2(0, 0, 0)
 	arr.Set2(0, 1, 1)
 	arr.Set2(0, 2, 35)
@@ -91,7 +91,7 @@ func TestContiguous(t *testing.T) {
 }
 
 func TestContiguousBig(t *testing.T) {
-	arr := NewArray3D(20, 30, 10)
+	arr := NewArray3DFloat64(20, 30, 10)
 	contig1 := arr.Slice([]int{5, 0, 0}, []int{3, 30, 10}, []int{1, 1, 1})
 	disContig1 := arr.Slice([]int{5, 0, 0}, []int{3, 30, 10}, []int{1, 1, 2})
 	disContig2 := arr.Slice([]int{5, 0, 0}, []int{3, 30, 9}, []int{1, 1, 1})
@@ -188,7 +188,7 @@ func TestApplySlice(t *testing.T) {
 	assert := assert.New(t)
 
 	arr := testData2D()
-	subst1D := NewArray1D(2)
+	subst1D := NewArray1DFloat64(2)
 	subst1D.Set1(0, 21.0)
 	subst1D.Set1(1, 22.0)
 	subst2D, e := subst1D.Reshape([]int{1, 2})
@@ -228,7 +228,7 @@ func TestApply(t *testing.T) {
 func TestARange(t *testing.T) {
 	assert := assert.New(t)
 
-	arr := ARange(12.0).MustReshape([]int{3, 4}).(ND2Float64)
+	arr := ARangeFloat64(12.0).MustReshape([]int{3, 4}).(ND2Float64)
 
 	expShape := []int{3, 4}
 	assert.True(equal(expShape, arr.Shape()), "Slice shape should be %v. Got %v", expShape, arr.Shape())
@@ -243,7 +243,7 @@ func TestCArrayBasic(t *testing.T) {
 	assert := assert.New(t)
 	shape := []int{10, 5, 2}
 
-	cArray := makeCArrayForTest(shape)
+	cArray := makefloat64CArrayForTest(shape)
 
 	assert.Equal(0.0, cArray.Get([]int{0, 0, 0}))
 	assert.Equal(1.0, cArray.Get([]int{0, 0, 1}))
@@ -257,7 +257,7 @@ func TestCArraySlice(t *testing.T) {
 	assert := assert.New(t)
 	shape := []int{10, 5, 2}
 
-	cArray := makeCArrayForTest(shape)
+	cArray := makefloat64CArrayForTest(shape)
 
 	sliced := cArray.Slice([]int{9, 3, 0}, []int{1, 2, 2}, nil)
 

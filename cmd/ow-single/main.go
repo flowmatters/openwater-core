@@ -97,7 +97,7 @@ func (m singleModel) Initialise() (error, sim.TimeSteppingModel, data.ND3Float64
 		}
 
 		if inputs == nil {
-			inputs = data.NewArray3D(1, len(desc.Inputs), len(thisInput))
+			inputs = data.NewArray3DFloat64(1, len(desc.Inputs), len(thisInput))
 		}
 
 		inputs.Apply([]int{0, i, 0}, 2, 1, thisInput)
@@ -107,7 +107,7 @@ func (m singleModel) Initialise() (error, sim.TimeSteppingModel, data.ND3Float64
 }
 
 func uniformParameters(params []float64, n int) data.ND2Float64 {
-	res := data.NewArray2D(len(params), n)
+	res := data.NewArray2DFloat64(len(params), n)
 	for i := 0; i < len(params); i++ {
 		for j := 0; j < n; j++ {
 			res.Set2(i, j, params[i])

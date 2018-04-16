@@ -62,14 +62,14 @@ func (m *EmcDwc)  Description() sim.ModelDescription{
 
 func (m *EmcDwc) InitialiseStates(n int) data.ND2Float64 {
   // Zero states
-	var result = data.NewArray2D(n,0)
+	var result = data.NewArray2DFloat64(n,0)
 
 	// for i := 0; i < n; i++ {
   //   stateSet := make(sim.StateSet,0)
   //   
 
   //   if result==nil {
-  //     result = data.NewArray2D(stateSet.Len(0),n)
+  //     result = data.NewArray2DFloat64(stateSet.Len(0),n)
   //   }
   //   result.Apply([]int{0,i},[]int{1,1},stateSet)
 	// }
@@ -109,7 +109,7 @@ func (m *EmcDwc) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3D( 3, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 3, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   // fmt.Println("Running EmcDwc for ",numCells,"cells")
@@ -142,11 +142,11 @@ func (m *EmcDwc) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
 		cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
 //    fmt.Println("cellInputs Shape",cellInputs.Shape())
     
-//    fmt.Println("{quickFlow m^3.s^-1}",tmpTS.Shape())
+//    fmt.Println("{quickflow m^3.s^-1}",tmpTS.Shape())
 		quickflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
     
-//    fmt.Println("{slowFlow m^3.s^-}",tmpTS.Shape())
-		slowflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+//    fmt.Println("{baseflow m^3.s^-}",tmpTS.Shape())
+		baseflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
     
 
     
@@ -164,7 +164,7 @@ func (m *EmcDwc) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
     
     
 
-		 emcDWC(quickflow,slowflow,emc,dwc,quickload,slowload,totalload)
+		 emcDWC(quickflow,baseflow,emc,dwc,quickload,slowload,totalload)
 
     
     

@@ -59,14 +59,14 @@ func (m *RunoffCoefficient)  Description() sim.ModelDescription{
 
 func (m *RunoffCoefficient) InitialiseStates(n int) data.ND2Float64 {
   // Zero states
-	var result = data.NewArray2D(n,0)
+	var result = data.NewArray2DFloat64(n,0)
 
 	// for i := 0; i < n; i++ {
   //   stateSet := make(sim.StateSet,0)
   //   
 
   //   if result==nil {
-  //     result = data.NewArray2D(stateSet.Len(0),n)
+  //     result = data.NewArray2DFloat64(stateSet.Len(0),n)
   //   }
   //   result.Apply([]int{0,i},[]int{1,1},stateSet)
 	// }
@@ -106,7 +106,7 @@ func (m *RunoffCoefficient) Run(inputs data.ND3Float64, states data.ND2Float64, 
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3D( 1, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 1, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   // fmt.Println("Running RunoffCoefficient for ",numCells,"cells")

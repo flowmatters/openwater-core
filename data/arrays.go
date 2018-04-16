@@ -1,52 +1,55 @@
 package data
 
+import "github.com/joelrahman/genny/generic"
+
+//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64"
+
+type ArrayType generic.Number
+
 // type NDArray interface {
 // }
 
-type NDFloat64 interface {
+type NDArrayType interface {
 	Len(axis int) int
 	Shape() []int
 	NDims() int
 	NewIndex(val int) []int
 
-	Get(loc []int) float64
-	Set(loc []int, val float64)
-	Slice(loc []int, dims []int, step []int) NDFloat64
-	Apply(loc []int, dim int, step int, vals []float64)
-	ApplySlice(loc []int, step []int, vals NDFloat64)
+	Get(loc []int) ArrayType
+	Set(loc []int, val ArrayType)
+	Slice(loc []int, dims []int, step []int) NDArrayType
+	Apply(loc []int, dim int, step int, vals []ArrayType)
+	ApplySlice(loc []int, step []int, vals NDArrayType)
 	Contiguous() bool
-	Unroll() []float64
-	Reshape(newShape []int) (NDFloat64, error)
-	MustReshape(newShape []int) NDFloat64
-	ReshapeFast(newShape []int) (NDFloat64, error)
-	// getUnderlying(i int) float64
-	// setUnderlying(i int, v float64)
-	// takeImplementation(other NDFloat64) error
+	Unroll() []ArrayType
+	Reshape(newShape []int) (NDArrayType, error)
+	MustReshape(newShape []int) NDArrayType
+	ReshapeFast(newShape []int) (NDArrayType, error)
 }
 
-type ND1Float64 interface {
-	NDFloat64
+type ND1ArrayType interface {
+	NDArrayType
 	Len1() int
-	Get1(loc int) float64
-	Set1(loc int, val float64)
-	Apply1(loc int, step int, vals []float64)
+	Get1(loc int) ArrayType
+	Set1(loc int, val ArrayType)
+	Apply1(loc int, step int, vals []ArrayType)
 }
 
-type ND2Float64 interface {
-	NDFloat64
+type ND2ArrayType interface {
+	NDArrayType
 	Len2() int
-	Get2(loc1 int, loc2 int) float64
-	Set2(loc1 int, loc2 int, val float64)
+	Get2(loc1 int, loc2 int) ArrayType
+	Set2(loc1 int, loc2 int, val ArrayType)
 }
 
-type ND3Float64 interface {
-	NDFloat64
+type ND3ArrayType interface {
+	NDArrayType
 	Len3() int
-	Get3(loc1 int, loc2 int, loc3 int) float64
-	Set3(loc1 int, loc2 int, loc3 int, val float64)
+	Get3(loc1 int, loc2 int, loc3 int) ArrayType
+	Set3(loc1 int, loc2 int, loc3 int, val ArrayType)
 }
 
-type ndFloat64Common struct {
+type ndArrayTypeCommon struct {
 	OriginalDims []int
 	Dims         []int
 	Start        int
@@ -54,27 +57,27 @@ type ndFloat64Common struct {
 	Step         []int
 }
 
-func (nd *ndFloat64Common) Len(ax int) int {
+func (nd *ndArrayTypeCommon) Len(ax int) int {
 	return nd.Dims[ax]
 }
 
-func (nd *ndFloat64Common) Shape() []int {
+func (nd *ndArrayTypeCommon) Shape() []int {
 	return nd.Dims
 }
 
-func (nd *ndFloat64Common) NDims() int {
+func (nd *ndArrayTypeCommon) NDims() int {
 	return len(nd.Dims)
 }
 
-func (nd *ndFloat64Common) NewIndex(val int) []int {
+func (nd *ndArrayTypeCommon) NewIndex(val int) []int {
 	return uniform(nd.NDims(), val)
 }
 
-func (nd *ndFloat64Common) Index(loc []int) int {
+func (nd *ndArrayTypeCommon) Index(loc []int) int {
 	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
 }
 
-func (nd *ndFloat64Common) Contiguous() bool {
+func (nd *ndArrayTypeCommon) Contiguous() bool {
 	// What about step!
 	var i int
 	contiguousOffset := 1
@@ -105,28 +108,19 @@ func (nd *ndFloat64Common) Contiguous() bool {
 	return true
 }
 
-func (nd *ndFloat64Common) Len1() int {
+func (nd *ndArrayTypeCommon) Len1() int {
 	return nd.Dims[0]
 }
 
-func (nd *ndFloat64Common) Len2() int {
+func (nd *ndArrayTypeCommon) Len2() int {
 	return nd.Dims[1]
 }
 
-func (nd *ndFloat64Common) Len3() int {
+func (nd *ndArrayTypeCommon) Len3() int {
 	return nd.Dims[2]
 }
 
-func offsets(dims []int) []int {
-	res := make([]int, len(dims))
-	res[len(dims)-1] = 1
-	for i := len(dims) - 2; i >= 0; i-- {
-		res[i] = res[i+1] * dims[i+1]
-	}
-	return res
-}
-
-func (nd *ndFloat64Common) slice(dest *ndFloat64Common, loc []int, dims []int, step []int) {
+func (nd *ndArrayTypeCommon) slice(dest *ndArrayTypeCommon, loc []int, dims []int, step []int) {
 	dest.OriginalDims = nd.OriginalDims
 	dest.Dims = dims
 	dest.Start = nd.Start + dotProduct(loc, nd.Offset)

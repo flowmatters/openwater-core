@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/flowmatters/openwater-core/sim"
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
 	_ "github.com/flowmatters/openwater-core/models"
+	"github.com/flowmatters/openwater-core/sim"
 )
 
 func max(a, b int) int {
@@ -29,9 +29,9 @@ func main() {
 	}
 
 	modelName := args[0]
-	inputPath := io.ParseH5Ref(args[1])
-	paramPath := io.ParseH5Ref(args[2])
-	outputPath := io.ParseH5Ref(args[3])
+	inputPath := io.ParseH5RefFloat64(args[1])
+	paramPath := io.ParseH5RefFloat64(args[2])
+	outputPath := io.ParseH5RefFloat64(args[3])
 
 	factory := sim.Catalog[modelName]
 	if factory == nil {

@@ -81,7 +81,7 @@ func NewParameter(name string) ParameterDescription {
 }
 
 func InitialiseOutputs(model TimeSteppingModel, nTimeSteps int, nCells int) data.ND3Float64 {
-	return data.NewArray3D(nCells, len(model.Description().Outputs), nTimeSteps)
+	return data.NewArray3DFloat64(nCells, len(model.Description().Outputs), nTimeSteps)
 }
 
 /*

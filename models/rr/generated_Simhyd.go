@@ -83,7 +83,7 @@ func (m *Simhyd)  Description() sim.ModelDescription{
 
 func (m *Simhyd) InitialiseStates(n int) data.ND2Float64 {
   // Zero states
-	var result = data.NewArray2D(n,3)
+	var result = data.NewArray2DFloat64(n,3)
 
 	// for i := 0; i < n; i++ {
   //   stateSet := make(sim.StateSet,3)
@@ -96,7 +96,7 @@ func (m *Simhyd) InitialiseStates(n int) data.ND2Float64 {
   //   
 
   //   if result==nil {
-  //     result = data.NewArray2D(stateSet.Len(0),n)
+  //     result = data.NewArray2DFloat64(stateSet.Len(0),n)
   //   }
   //   result.Apply([]int{0,i},[]int{1,1},stateSet)
 	// }
@@ -136,7 +136,7 @@ func (m *Simhyd) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3D( 3, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 4, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   // fmt.Println("Running Simhyd for ",numCells,"cells")

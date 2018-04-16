@@ -30,7 +30,7 @@ func TestReadStrings(t *testing.T) {
 	assert := assert.New(t)
 	fn := test_filename()
 
-	ref := H5Ref{Filename: fn, Dataset: "simple/strings"}
+	ref := H5RefFloat64{Filename: fn, Dataset: "simple/strings"}
 	theStrings, err := ref.LoadText()
 
 	assert.Nil(err)
@@ -43,7 +43,7 @@ func TestGetDatasetNames(t *testing.T) {
 	assert := assert.New(t)
 	fn := test_filename()
 
-	ref := H5Ref{Filename: fn, Dataset: "simple"}
+	ref := H5RefFloat64{Filename: fn, Dataset: "simple"}
 	datasetNames, err := ref.GetDatasets()
 
 	assert.Nil(err)

@@ -1,4 +1,4 @@
-package rr
+package routing
 
 import (
 	"github.com/flowmatters/openwater-core/data"
@@ -31,7 +31,7 @@ Muskingum:
 		flow routing
 */
 
-func muskingum(inflows data.ND1Float64,
+func muskingum(inflows, laterals data.ND1Float64,
 	s, prevInflow, prevOutflow float64,
 	k, x, deltaT float64,
 	outflows data.ND1Float64) (float64, float64, float64) {

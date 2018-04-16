@@ -91,7 +91,7 @@ func (m *GR4J) InitialiseStates(n int) data.ND2Float64 {
 		states := initGR4J(x1,x2,x3,x4)
 
     if result==nil {
-      result = data.NewArray2D(n,states.Len(1))
+      result = data.NewArray2DFloat64(n,states.Len(1))
     }
 //    fmt.Println(states.Shape(),result.Shape())
     result.ApplySlice([]int{i,0},[]int{1,1},states)
@@ -134,7 +134,7 @@ func (m *GR4J) Run(inputs data.ND3Float64, states data.ND2Float64, outputs data.
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3D( 1, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 1, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   // fmt.Println("Running GR4J for ",numCells,"cells")
