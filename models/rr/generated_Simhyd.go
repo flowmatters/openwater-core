@@ -70,7 +70,7 @@ func (m *Simhyd)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "rainfall","pet",}
   result.Outputs = []string{
-  "runoff","baseflow","store",}
+  "runoff","quickflow","baseflow","store",}
 
   result.States = []string{
   "SoilMoistureStore","Groundwater","TotalStore",}
@@ -179,9 +179,9 @@ func (m *Simhyd) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
     // fmt.Println("Tmp2",tmp2.Shape())
     
     initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
-    
-    // fmt.Println("IS Shape",initialStates.Shape())
-    // fmt.Println("IS",initialStates)
+//    fmt.Println("IS Shape",initialStates.Shape())
+//    fmt.Println("IS",initialStates)
+//    
 
     
     
@@ -213,14 +213,17 @@ func (m *Simhyd) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
     runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
     
     outputPosSlice[sim.DIMO_OUTPUT] = 1
-    baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+    quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
     
     outputPosSlice[sim.DIMO_OUTPUT] = 2
+    baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+    
+    outputPosSlice[sim.DIMO_OUTPUT] = 3
     store := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
     
     
 
-		soilmoisturestore,groundwater,totalstore= simhyd(rainfall,pet,soilmoisturestore,groundwater,totalstore,baseflowcoefficient,imperviousthreshold,infiltrationcoefficient,infiltrationshape,interflowcoefficient,perviousfraction,rainfallinterceptionstorecapacity,rechargecoefficient,soilmoisturestorecapacity,runoff,baseflow,store)
+		soilmoisturestore,groundwater,totalstore= simhyd(rainfall,pet,soilmoisturestore,groundwater,totalstore,baseflowcoefficient,imperviousthreshold,infiltrationcoefficient,infiltrationshape,interflowcoefficient,perviousfraction,rainfallinterceptionstorecapacity,rechargecoefficient,soilmoisturestorecapacity,runoff,quickflow,baseflow,store)
 
     
     
@@ -232,7 +235,7 @@ func (m *Simhyd) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
     
     
 
-//		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 3)
+//		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
     
 	}
 

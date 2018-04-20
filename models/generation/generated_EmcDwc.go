@@ -47,7 +47,7 @@ func (m *EmcDwc)  Description() sim.ModelDescription{
   sim.DescribeParameter("DWC",0,""),}
 
   result.Inputs = []string{
-  "quickFlow","slowFlow",}
+  "quickflow","baseflow",}
   result.Outputs = []string{
   "quickLoad","slowLoad","totalLoad",}
 
@@ -130,8 +130,8 @@ func (m *EmcDwc) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
     // fmt.Println("States",states.Shape())
     // fmt.Println("Tmp2",tmp2.Shape())
     
-    // fmt.Println("IS Shape",initialStates.Shape())
-    // fmt.Println("IS",initialStates)
+//    fmt.Println("No states")
+    
 
     
     
@@ -145,7 +145,7 @@ func (m *EmcDwc) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
 //    fmt.Println("{quickflow m^3.s^-1}",tmpTS.Shape())
 		quickflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
     
-//    fmt.Println("{baseflow m^3.s^-}",tmpTS.Shape())
+//    fmt.Println("{baseflow m^3.s^-1}",tmpTS.Shape())
 		baseflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
     
 
