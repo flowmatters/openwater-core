@@ -21,6 +21,7 @@ Simhyd:
 		soilMoistureStoreCapacity: ''
 	outputs:
 		runoff: mm
+		quickflow: mm
 		baseflow: mm
 		store: mm
 	implementation:
@@ -38,82 +39,86 @@ Simhyd:
 
 import (
 	"math"
+
 	"github.com/flowmatters/openwater-core/data"
 )
 
-const SOIL_ET_CONST = 10.0;
+const SOIL_ET_CONST = 10.0
 
 func simhyd(rainfall data.ND1Float64, pet data.ND1Float64,
 	initialStore float64, initialGW float64, initialTotalStore float64,
 	baseflowCoefficient float64, imperviousThreshold float64, infiltrationCoefficient float64,
 	infiltrationShape float64, interflowCoefficient float64, perviousFraction float64,
-	risc float64, rechargeCoefficient float64, smsc float64, 
-	runoff data.ND1Float64, baseflow data.ND1Float64, store data.ND1Float64) (
-		float64, // final store
-		float64, // final GW
-		float64){ // final total store
-		nDays := rainfall.Len1()
+	risc float64, rechargeCoefficient float64, smsc float64,
+	runoff, quickflow, baseflow, store data.ND1Float64) (
+	float64, // final store
+	float64, // final GW
+	float64) { // final total store
+	nDays := rainfall.Len1()
 
-		soilMoistureStore := initialStore
-		gw := initialGW
-		totalStore := initialTotalStore
+	soilMoistureStore := initialStore
+	gw := initialGW
+	totalStore := initialTotalStore
+	idx := []int{0}
 
-		for i:= 0; i < nDays; i++ {
-			rainToday := rainfall.Get1(i)
-			petToday := pet.Get1(i)
+	for i := 0; i < nDays; i++ {
+		idx[0] = i
+		rainToday := rainfall.Get(idx)
+		petToday := pet.Get(idx)
 
-			perviousIncident := rainToday;
-			imperviousIncident := rainToday;
+		perviousIncident := rainToday
+		imperviousIncident := rainToday
 
-			imperviousEt := math.Min(imperviousThreshold, imperviousIncident)
+		imperviousEt := math.Min(imperviousThreshold, imperviousIncident)
 
-			imperviousRunoff := imperviousIncident - imperviousEt;
+		imperviousRunoff := imperviousIncident - imperviousEt
 
-			interceptionEt := math.Min(perviousIncident, math.Min(petToday, risc));
+		interceptionEt := math.Min(perviousIncident, math.Min(petToday, risc))
 
-			throughfall := perviousIncident - interceptionEt;
+		throughfall := perviousIncident - interceptionEt
 
-			soilMoistureFraction := soilMoistureStore / smsc;
+		soilMoistureFraction := soilMoistureStore / smsc
 
-			infiltrationCapacity := infiltrationCoefficient * math.Exp(-infiltrationShape * soilMoistureFraction);
-			infiltration := math.Min(throughfall, infiltrationCapacity);
-			infiltrationXsRunoff := throughfall - infiltration;
+		infiltrationCapacity := infiltrationCoefficient * math.Exp(-infiltrationShape*soilMoistureFraction)
+		infiltration := math.Min(throughfall, infiltrationCapacity)
+		infiltrationXsRunoff := throughfall - infiltration
 
-			interflowRunoff := interflowCoefficient * soilMoistureFraction * infiltration;
-			infiltrationAfterInterflow := infiltration - interflowRunoff;
-			recharge := rechargeCoefficient * soilMoistureFraction * infiltrationAfterInterflow;
-			soilInput := infiltrationAfterInterflow - recharge;
-			soilMoistureStore += soilInput;
+		interflowRunoff := interflowCoefficient * soilMoistureFraction * infiltration
+		infiltrationAfterInterflow := infiltration - interflowRunoff
+		recharge := rechargeCoefficient * soilMoistureFraction * infiltrationAfterInterflow
+		soilInput := infiltrationAfterInterflow - recharge
+		soilMoistureStore += soilInput
 
-			soilMoistureFraction = soilMoistureStore / smsc;
+		soilMoistureFraction = soilMoistureStore / smsc
 
-			gw += recharge;
+		gw += recharge
 
-			if soilMoistureFraction > 1 {
-					gw += soilMoistureStore - smsc;
-					soilMoistureStore = smsc;
-					soilMoistureFraction = 1;
-			}
+		if soilMoistureFraction > 1 {
+			gw += soilMoistureStore - smsc
+			soilMoistureStore = smsc
+			soilMoistureFraction = 1
+		}
 
-			baseflowRunoff := baseflowCoefficient * gw;
-			gw -= baseflowRunoff;
+		baseflowRunoff := baseflowCoefficient * gw
+		gw -= baseflowRunoff
 
-			soilEt := math.Min(soilMoistureStore,math.Min(petToday - interceptionEt,soilMoistureFraction * SOIL_ET_CONST));
-			soilMoistureStore -= soilEt;
+		soilEt := math.Min(soilMoistureStore, math.Min(petToday-interceptionEt, soilMoistureFraction*SOIL_ET_CONST))
+		soilMoistureStore -= soilEt
 
-			totalStore = (soilMoistureStore + gw) * perviousFraction;
+		totalStore = (soilMoistureStore + gw) * perviousFraction
 
-			//totalEt := (1 - perviousFraction) * imperviousEt + perviousFraction * (interceptionEt + soilEt);
+		//totalEt := (1 - perviousFraction) * imperviousEt + perviousFraction * (interceptionEt + soilEt);
 
-			eventRunoff := (1 - perviousFraction) * imperviousRunoff +
-										perviousFraction * (infiltrationXsRunoff + interflowRunoff);
+		eventRunoff := (1-perviousFraction)*imperviousRunoff +
+			perviousFraction*(infiltrationXsRunoff+interflowRunoff)
 
-			totalRunoff := eventRunoff + perviousFraction * baseflowRunoff;
+		totalRunoff := eventRunoff + perviousFraction*baseflowRunoff
 
-			//effectiveRainfall := rainToday - totalEt;
-			store.Set1(i,soilMoistureStore)
-			baseflow.Set1(i,baseflowRunoff * perviousFraction);
-			runoff.Set1(i,totalRunoff);
+		//effectiveRainfall := rainToday - totalEt;
+		store.Set(idx, soilMoistureStore)
+		baseflow.Set(idx, baseflowRunoff*perviousFraction)
+		runoff.Set(idx, totalRunoff)
+		quickflow.Set(idx, eventRunoff)
 	}
-		return soilMoistureStore,gw,totalStore
-	}
+	return soilMoistureStore, gw, totalStore
+}

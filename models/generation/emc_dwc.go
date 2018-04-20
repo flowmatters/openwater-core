@@ -8,8 +8,8 @@ import (
 /*OW-SPEC
 EmcDwc:
 	inputs:
-		quickFlow: m^3.s^-1
-		slowFlow: m^3.s^-
+		quickflow: m^3.s^-1
+		baseflow: m^3.s^-1
   states:
   parameters:
 		EMC: '[0.1,10000]mg.L^-1 Event Mean Concentration'
@@ -31,17 +31,19 @@ EmcDwc:
 
 func emcDWC(quickflow, slowflow data.ND1Float64, emc, dwc float64, quickLoad, slowLoad, totalLoad data.ND1Float64) {
 	nDays := quickflow.Len1()
+	idx := []int{0}
 
 	for i := 0; i < nDays; i++ {
-		qf := quickflow.Get1(i)
-		sf := slowflow.Get1(i)
+		idx[0] = i
+		qf := quickflow.Get(idx)
+		sf := slowflow.Get(idx)
 
 		ql := qf * emc * conv.MG_PER_LITER_TO_KG_PER_M3
 		sl := sf * dwc * conv.MG_PER_LITER_TO_KG_PER_M3
 		total := ql + sl
 
-		quickLoad.Set1(i, ql)
-		slowLoad.Set1(i, sl)
-		totalLoad.Set1(i, total)
+		quickLoad.Set(idx, ql)
+		slowLoad.Set(idx, sl)
+		totalLoad.Set(idx, total)
 	}
 }
