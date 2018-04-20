@@ -12,11 +12,12 @@ import (
 	"gonum.org/v1/hdf5"
 )
 
-//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64"
+//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64,int,uint"
 
 type H5RefArrayType struct {
 	Filename string
 	Dataset  string
+	Slice    [][]int
 }
 
 func (h H5RefArrayType) Load() (data.NDArrayType, error) {
@@ -32,7 +33,17 @@ func (h H5RefArrayType) Load() (data.NDArrayType, error) {
 	}
 	defer ds.Close()
 
+	if h.Slice != nil {
+		for _, s := range h.Slice {
+			if s != nil {
+				return h.loadSubset(ds)
+			}
+		}
+	}
+
 	space := ds.Space()
+	defer space.Close()
+
 	dims, _, err := space.SimpleExtentDims()
 	if err != nil {
 		return nil, err
@@ -43,6 +54,42 @@ func (h H5RefArrayType) Load() (data.NDArrayType, error) {
 	impl := result.Unroll()
 	ds.Read(&impl)
 	return result, nil
+}
+
+func (h H5RefArrayType) loadSubset(ds *hdf5.Dataset) (data.NDArrayType, error) {
+	space := ds.Space()
+	defer space.Close()
+
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+	shape := conv.UintsToInts(dims)
+
+	offset, stride, count, block := makeHyperslab(h.Slice, shape)
+	filespace := space
+	err = filespace.SelectHyperslab(offset, stride, count, block)
+	if err != nil {
+		return nil, err
+	}
+
+	for dim, size := range shape {
+		if h.Slice[dim] != nil {
+			newSize := sliceSize(h.Slice[dim], size)
+			shape[dim] = newSize
+		}
+	}
+	ushape := conv.IntsToUints(shape)
+	memSpace, err := hdf5.CreateSimpleDataspace(ushape, ushape)
+	if err != nil {
+		return nil, err
+	}
+	defer memSpace.Close()
+
+	result := data.NewArrayArrayType(shape)
+	impl := result.Unroll()
+	err = ds.ReadSubset(&impl, memSpace, filespace)
+	return result, err
 }
 
 func (h H5RefArrayType) Write(data data.NDArrayType) error {
@@ -173,5 +220,5 @@ func (h H5RefArrayType) GetDatasets() ([]string, error) {
 
 func ParseH5RefArrayType(path string) H5RefArrayType {
 	components := strings.Split(path, ":")
-	return H5RefArrayType{components[0], components[1]}
+	return H5RefArrayType{components[0], components[1], nil}
 }
