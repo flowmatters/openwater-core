@@ -2,7 +2,7 @@ package data
 
 import "github.com/joelrahman/genny/generic"
 
-//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64"
+//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64,int,uint"
 
 type ArrayType generic.Number
 
@@ -55,6 +55,7 @@ type ndArrayTypeCommon struct {
 	Start        int
 	Offset       []int
 	Step         []int
+	OffsetStep   []int
 }
 
 func (nd *ndArrayTypeCommon) Len(ax int) int {
@@ -74,7 +75,13 @@ func (nd *ndArrayTypeCommon) NewIndex(val int) []int {
 }
 
 func (nd *ndArrayTypeCommon) Index(loc []int) int {
-	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
+	result := nd.Start
+	for i := 0; i < len(loc); i++ {
+		result += loc[i] * nd.OffsetStep[i]
+	}
+	return result
+
+	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
 }
 
 func (nd *ndArrayTypeCommon) Contiguous() bool {
@@ -131,4 +138,5 @@ func (nd *ndArrayTypeCommon) slice(dest *ndArrayTypeCommon, loc []int, dims []in
 	} else {
 		dest.Step = multiply(nd.Step, step)
 	}
+	dest.OffsetStep = multiply(dest.Step, dest.Offset)
 }

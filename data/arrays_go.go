@@ -1,6 +1,6 @@
 package data
 
-//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64"
+//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64,int,uint"
 
 import (
 	//	"fmt"
@@ -131,8 +131,8 @@ func (nd *ndArrayType) Reshape(newShape []int) (NDArrayType, error) {
 		result.OriginalDims = newShape
 		result.Dims = newShape
 		result.Step = ones(len(newShape))
-
 		result.Offset = offsets(newShape)
+		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
 	}
 
@@ -145,6 +145,7 @@ func (nd *ndArrayType) Reshape(newShape []int) (NDArrayType, error) {
 	result.Dims = newShape
 	result.Step = []int{nd.Step[seriesDim]}
 	result.Offset = []int{nd.Offset[seriesDim]}
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result, nil
 }
 
@@ -213,6 +214,7 @@ func newArrayArrayType(dims []int) *ndArrayType {
 	result.Dims = dims
 	result.Step = ones(len(dims))
 	result.Offset = offsets(dims)
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
 }
 

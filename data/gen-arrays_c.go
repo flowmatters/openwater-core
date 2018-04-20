@@ -134,6 +134,7 @@ func (nd *ndfloat64C) Reshape(newShape []int) (NDFloat64, error) {
 		result.Step = ones(len(newShape))
 
 		result.Offset = offsets(newShape)
+		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
 	}
 
@@ -146,6 +147,7 @@ func (nd *ndfloat64C) Reshape(newShape []int) (NDFloat64, error) {
 	result.Dims = newShape
 	result.Step = []int{nd.Step[seriesDim]}
 	result.Offset = []int{nd.Offset[seriesDim]}
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result, nil
 }
 
@@ -214,6 +216,7 @@ func newfloat64CArray(impl *[1 << 30]C.double, dims []int) *ndfloat64C {
 	result.Dims = dims
 	result.Step = ones(len(dims))
 	result.Offset = offsets(dims)
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
 }
 
@@ -350,6 +353,7 @@ func (nd *ndfloat32C) Reshape(newShape []int) (NDFloat32, error) {
 		result.Step = ones(len(newShape))
 
 		result.Offset = offsets(newShape)
+		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
 	}
 
@@ -362,6 +366,7 @@ func (nd *ndfloat32C) Reshape(newShape []int) (NDFloat32, error) {
 	result.Dims = newShape
 	result.Step = []int{nd.Step[seriesDim]}
 	result.Offset = []int{nd.Offset[seriesDim]}
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result, nil
 }
 
@@ -430,6 +435,7 @@ func newfloat32CArray(impl *[1 << 30]C.float, dims []int) *ndfloat32C {
 	result.Dims = dims
 	result.Step = ones(len(dims))
 	result.Offset = offsets(dims)
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
 }
 
@@ -566,6 +572,7 @@ func (nd *ndint32C) Reshape(newShape []int) (NDInt32, error) {
 		result.Step = ones(len(newShape))
 
 		result.Offset = offsets(newShape)
+		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
 	}
 
@@ -578,6 +585,7 @@ func (nd *ndint32C) Reshape(newShape []int) (NDInt32, error) {
 	result.Dims = newShape
 	result.Step = []int{nd.Step[seriesDim]}
 	result.Offset = []int{nd.Offset[seriesDim]}
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result, nil
 }
 
@@ -646,6 +654,7 @@ func newint32CArray(impl *[1 << 30]C.int, dims []int) *ndint32C {
 	result.Dims = dims
 	result.Step = ones(len(dims))
 	result.Offset = offsets(dims)
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
 }
 
@@ -782,6 +791,7 @@ func (nd *nduint32C) Reshape(newShape []int) (NDUint32, error) {
 		result.Step = ones(len(newShape))
 
 		result.Offset = offsets(newShape)
+		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
 	}
 
@@ -794,6 +804,7 @@ func (nd *nduint32C) Reshape(newShape []int) (NDUint32, error) {
 	result.Dims = newShape
 	result.Step = []int{nd.Step[seriesDim]}
 	result.Offset = []int{nd.Offset[seriesDim]}
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result, nil
 }
 
@@ -862,6 +873,7 @@ func newuint32CArray(impl *[1 << 30]C.uint, dims []int) *nduint32C {
 	result.Dims = dims
 	result.Step = ones(len(dims))
 	result.Offset = offsets(dims)
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
 }
 
@@ -998,6 +1010,7 @@ func (nd *ndint64C) Reshape(newShape []int) (NDInt64, error) {
 		result.Step = ones(len(newShape))
 
 		result.Offset = offsets(newShape)
+		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
 	}
 
@@ -1010,6 +1023,7 @@ func (nd *ndint64C) Reshape(newShape []int) (NDInt64, error) {
 	result.Dims = newShape
 	result.Step = []int{nd.Step[seriesDim]}
 	result.Offset = []int{nd.Offset[seriesDim]}
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result, nil
 }
 
@@ -1078,6 +1092,7 @@ func newint64CArray(impl *[1 << 30]C.long, dims []int) *ndint64C {
 	result.Dims = dims
 	result.Step = ones(len(dims))
 	result.Offset = offsets(dims)
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
 }
 
@@ -1214,6 +1229,7 @@ func (nd *nduint64C) Reshape(newShape []int) (NDUint64, error) {
 		result.Step = ones(len(newShape))
 
 		result.Offset = offsets(newShape)
+		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
 	}
 
@@ -1226,6 +1242,7 @@ func (nd *nduint64C) Reshape(newShape []int) (NDUint64, error) {
 	result.Dims = newShape
 	result.Step = []int{nd.Step[seriesDim]}
 	result.Offset = []int{nd.Offset[seriesDim]}
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result, nil
 }
 
@@ -1294,6 +1311,7 @@ func newuint64CArray(impl *[1 << 30]C.ulong, dims []int) *nduint64C {
 	result.Dims = dims
 	result.Step = ones(len(dims))
 	result.Offset = offsets(dims)
+	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
 }
 
@@ -1306,4 +1324,442 @@ func makeuint64CArrayForTest(shape []int) *nduint64C {
 	addr := (*[1 << 30]C.ulong)(unsafe.Pointer(slice.Data))
 
 	return newuint64CArray(addr, shape)
+}
+
+type ndintC struct {
+	ndintCommon
+	//	Impl *C.double
+	Impl *[1 << 30]C.int
+	//p2 := (*[1<<30]C.int)(unsafe.Pointer(p))
+}
+
+// func ArrayFromC(impl *C.double, shape []int) NDFloat64 {
+// res := ndintC{}
+// 	res.Dims = shape
+// 	res.OriginalDims = shape
+// 	res.Start = 0
+// 	res.Offset = uniform(len(shape), 0)
+// 	res.Step = ones(len(shape))
+// 	res.Impl = impl
+// 	return &res
+// }
+
+func (nd *ndintC) Get(loc []int) int {
+	return int(nd.Impl[nd.Index(loc)])
+}
+
+func (nd *ndintC) Set(loc []int, val int) {
+	nd.Impl[nd.Index(loc)] = C.int(val)
+}
+
+func (nd *ndintC) Slice(loc []int, dims []int, step []int) NDInt {
+	result := ndintC{}
+	nd.slice(&result.ndintCommon, loc, dims, step)
+	result.Impl = nd.Impl
+	return &result
+}
+
+func (nd *ndintC) Apply(loc []int, dim int, step int, vals []int) {
+	sliceDim := nd.NewIndex(1)
+	sliceDim[dim] = len(vals)
+	sliceStep := nd.NewIndex(1)
+	sliceStep[dim] = step
+	//	slice := nd.Slice(loc, sliceDim, sliceStep)
+
+	// if slice.Contiguous() {
+	// concrete := slice.(*ndintC)
+	// 	implSlice := concrete.Impl
+	// 	subset := implSlice[concrete.Start : concrete.Start+len(vals)]
+	// 	copy(subset, vals)
+	// } else {
+	start := loc[dim]
+	for i, v := range vals {
+		loc[dim] = start + i*step
+		nd.Set(loc, v)
+	}
+	loc[dim] = start
+	// }
+}
+
+func (nd *ndintC) ApplySlice(loc []int, step []int, vals NDInt) {
+	shape := vals.Shape()
+	slice := nd.Slice(loc, shape, step)
+	if slice.Contiguous() {
+		copy(slice.Unroll(), vals.Unroll())
+		return
+	}
+
+	idx := slice.NewIndex(0)
+	size := product(shape)
+	for pos := 0; pos < size; pos++ {
+		slice.Set(idx, vals.Get(idx))
+		increment(idx, shape)
+	}
+	// How to speed up
+}
+
+func (nd *ndintC) Unroll() []int {
+	// if nd.Contiguous() {
+	// 	s := nd.Start
+	// 	e := nd.Index(decrement(nd.Dims))
+	// 	return nd.Impl[s : e+1]
+	// }
+
+	//	fmt.Println(nd)
+
+	length := product(nd.Shape())
+	res := make([]int, length)
+
+	dimOffsets := offsets(nd.Dims)
+	//fmt.Println(dimOffsets)
+	for i := 0; i < length; i++ {
+		loc := idivMod(i, dimOffsets, nd.Dims)
+		//		fmt.Println(i, loc, nd.Index(loc))
+		//		fmt.Println(loc,i)
+		res[i] = nd.Get(loc)
+	}
+	return res
+}
+
+func (nd *ndintC) ReshapeFast(newShape []int) (NDInt, error) {
+	if !nd.Contiguous() {
+		return nil, errors.New("Array not contiguous")
+	}
+
+	return nd.Reshape(newShape)
+}
+
+func (nd *ndintC) Reshape(newShape []int) (NDInt, error) {
+	result := ndintC{}
+	size := product(newShape)
+	currentSize := product(nd.Shape())
+
+	if size != currentSize {
+		return nil, errors.New("Size mismatch")
+	}
+
+	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
+
+	if nd.Contiguous() || !reshapeToSeries {
+		result.Start = 0
+		result.Impl = nd.Impl
+		result.OriginalDims = newShape
+		result.Dims = newShape
+		result.Step = ones(len(newShape))
+
+		result.Offset = offsets(newShape)
+		result.OffsetStep = multiply(result.Step, result.Offset)
+		return &result, nil
+	}
+
+	seriesDim := argmax(nd.Shape())
+	// Special case 1D
+	result.Start = nd.Start
+	//result.takeImplementation(nd)
+	result.Impl = nd.Impl
+	result.OriginalDims = nd.OriginalDims
+	result.Dims = newShape
+	result.Step = []int{nd.Step[seriesDim]}
+	result.Offset = []int{nd.Offset[seriesDim]}
+	result.OffsetStep = multiply(result.Step, result.Offset)
+	return &result, nil
+}
+
+func (nd *ndintC) MustReshape(newShape []int) NDInt {
+	result, e := nd.Reshape(newShape)
+	if e != nil {
+		panic(e.Error())
+	}
+	return result
+}
+
+func (nd *ndintC) Get1(loc int) int {
+	var idx []int
+
+	if len(nd.Dims) == 1 {
+		idx = []int{loc}
+	} else {
+		idx = nd.NewIndex(0)
+		for i := 0; i < len(nd.Dims); i++ {
+			if nd.Dims[i] > 1 {
+				idx[i] = loc
+				break
+			}
+		}
+		//		fmt.Println("nDims>1",idx,nd.Dims,loc)
+	}
+	return nd.Get(idx)
+}
+
+func (nd *ndintC) Set1(loc int, val int) {
+	nd.Set([]int{loc}, val)
+}
+
+func (nd *ndintC) Apply1(loc int, step int, vals []int) {
+	for i := 0; i < len(vals); i++ {
+		nd.Set1(loc+i*step, vals[i])
+	}
+}
+
+func (nd *ndintC) Get2(loc1 int, loc2 int) int {
+	return nd.Get([]int{loc1, loc2})
+}
+
+func (nd *ndintC) Set2(loc1 int, loc2 int, val int) {
+	nd.Set([]int{loc1, loc2}, val)
+}
+
+func (nd *ndintC) Get3(loc1 int, loc2 int, loc3 int) int {
+	return nd.Get([]int{loc1, loc2, loc3})
+}
+
+func (nd *ndintC) Set3(loc1 int, loc2 int, loc3 int, val int) {
+	nd.Set([]int{loc1, loc2, loc3}, val)
+}
+
+func NewIntCArray(impl unsafe.Pointer, dims []int) NDInt {
+	return newintCArray((*[1 << 30]C.int)(impl), dims)
+}
+
+func newintCArray(impl *[1 << 30]C.int, dims []int) *ndintC {
+	result := ndintC{}
+	//	size := product(dims)
+	result.Start = 0
+	result.Impl = impl
+	result.OriginalDims = dims
+	result.Dims = dims
+	result.Step = ones(len(dims))
+	result.Offset = offsets(dims)
+	result.OffsetStep = multiply(result.Step, result.Offset)
+	return &result
+}
+
+func makeintCArrayForTest(shape []int) *ndintC {
+	goArray := ARangeInt(product(shape)).MustReshape(shape)
+	impl := goArray.Unroll()
+
+	v := reflect.Indirect(reflect.ValueOf(&impl))
+	slice := (*reflect.SliceHeader)(unsafe.Pointer(v.UnsafeAddr()))
+	addr := (*[1 << 30]C.int)(unsafe.Pointer(slice.Data))
+
+	return newintCArray(addr, shape)
+}
+
+type nduintC struct {
+	nduintCommon
+	//	Impl *C.double
+	Impl *[1 << 30]C.uint
+	//p2 := (*[1<<30]C.int)(unsafe.Pointer(p))
+}
+
+// func ArrayFromC(impl *C.double, shape []int) NDFloat64 {
+// res := nduintC{}
+// 	res.Dims = shape
+// 	res.OriginalDims = shape
+// 	res.Start = 0
+// 	res.Offset = uniform(len(shape), 0)
+// 	res.Step = ones(len(shape))
+// 	res.Impl = impl
+// 	return &res
+// }
+
+func (nd *nduintC) Get(loc []int) uint {
+	return uint(nd.Impl[nd.Index(loc)])
+}
+
+func (nd *nduintC) Set(loc []int, val uint) {
+	nd.Impl[nd.Index(loc)] = C.uint(val)
+}
+
+func (nd *nduintC) Slice(loc []int, dims []int, step []int) NDUint {
+	result := nduintC{}
+	nd.slice(&result.nduintCommon, loc, dims, step)
+	result.Impl = nd.Impl
+	return &result
+}
+
+func (nd *nduintC) Apply(loc []int, dim int, step int, vals []uint) {
+	sliceDim := nd.NewIndex(1)
+	sliceDim[dim] = len(vals)
+	sliceStep := nd.NewIndex(1)
+	sliceStep[dim] = step
+	//	slice := nd.Slice(loc, sliceDim, sliceStep)
+
+	// if slice.Contiguous() {
+	// concrete := slice.(*nduintC)
+	// 	implSlice := concrete.Impl
+	// 	subset := implSlice[concrete.Start : concrete.Start+len(vals)]
+	// 	copy(subset, vals)
+	// } else {
+	start := loc[dim]
+	for i, v := range vals {
+		loc[dim] = start + i*step
+		nd.Set(loc, v)
+	}
+	loc[dim] = start
+	// }
+}
+
+func (nd *nduintC) ApplySlice(loc []int, step []int, vals NDUint) {
+	shape := vals.Shape()
+	slice := nd.Slice(loc, shape, step)
+	if slice.Contiguous() {
+		copy(slice.Unroll(), vals.Unroll())
+		return
+	}
+
+	idx := slice.NewIndex(0)
+	size := product(shape)
+	for pos := 0; pos < size; pos++ {
+		slice.Set(idx, vals.Get(idx))
+		increment(idx, shape)
+	}
+	// How to speed up
+}
+
+func (nd *nduintC) Unroll() []uint {
+	// if nd.Contiguous() {
+	// 	s := nd.Start
+	// 	e := nd.Index(decrement(nd.Dims))
+	// 	return nd.Impl[s : e+1]
+	// }
+
+	//	fmt.Println(nd)
+
+	length := product(nd.Shape())
+	res := make([]uint, length)
+
+	dimOffsets := offsets(nd.Dims)
+	//fmt.Println(dimOffsets)
+	for i := 0; i < length; i++ {
+		loc := idivMod(i, dimOffsets, nd.Dims)
+		//		fmt.Println(i, loc, nd.Index(loc))
+		//		fmt.Println(loc,i)
+		res[i] = nd.Get(loc)
+	}
+	return res
+}
+
+func (nd *nduintC) ReshapeFast(newShape []int) (NDUint, error) {
+	if !nd.Contiguous() {
+		return nil, errors.New("Array not contiguous")
+	}
+
+	return nd.Reshape(newShape)
+}
+
+func (nd *nduintC) Reshape(newShape []int) (NDUint, error) {
+	result := nduintC{}
+	size := product(newShape)
+	currentSize := product(nd.Shape())
+
+	if size != currentSize {
+		return nil, errors.New("Size mismatch")
+	}
+
+	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
+
+	if nd.Contiguous() || !reshapeToSeries {
+		result.Start = 0
+		result.Impl = nd.Impl
+		result.OriginalDims = newShape
+		result.Dims = newShape
+		result.Step = ones(len(newShape))
+
+		result.Offset = offsets(newShape)
+		result.OffsetStep = multiply(result.Step, result.Offset)
+		return &result, nil
+	}
+
+	seriesDim := argmax(nd.Shape())
+	// Special case 1D
+	result.Start = nd.Start
+	//result.takeImplementation(nd)
+	result.Impl = nd.Impl
+	result.OriginalDims = nd.OriginalDims
+	result.Dims = newShape
+	result.Step = []int{nd.Step[seriesDim]}
+	result.Offset = []int{nd.Offset[seriesDim]}
+	result.OffsetStep = multiply(result.Step, result.Offset)
+	return &result, nil
+}
+
+func (nd *nduintC) MustReshape(newShape []int) NDUint {
+	result, e := nd.Reshape(newShape)
+	if e != nil {
+		panic(e.Error())
+	}
+	return result
+}
+
+func (nd *nduintC) Get1(loc int) uint {
+	var idx []int
+
+	if len(nd.Dims) == 1 {
+		idx = []int{loc}
+	} else {
+		idx = nd.NewIndex(0)
+		for i := 0; i < len(nd.Dims); i++ {
+			if nd.Dims[i] > 1 {
+				idx[i] = loc
+				break
+			}
+		}
+		//		fmt.Println("nDims>1",idx,nd.Dims,loc)
+	}
+	return nd.Get(idx)
+}
+
+func (nd *nduintC) Set1(loc int, val uint) {
+	nd.Set([]int{loc}, val)
+}
+
+func (nd *nduintC) Apply1(loc int, step int, vals []uint) {
+	for i := 0; i < len(vals); i++ {
+		nd.Set1(loc+i*step, vals[i])
+	}
+}
+
+func (nd *nduintC) Get2(loc1 int, loc2 int) uint {
+	return nd.Get([]int{loc1, loc2})
+}
+
+func (nd *nduintC) Set2(loc1 int, loc2 int, val uint) {
+	nd.Set([]int{loc1, loc2}, val)
+}
+
+func (nd *nduintC) Get3(loc1 int, loc2 int, loc3 int) uint {
+	return nd.Get([]int{loc1, loc2, loc3})
+}
+
+func (nd *nduintC) Set3(loc1 int, loc2 int, loc3 int, val uint) {
+	nd.Set([]int{loc1, loc2, loc3}, val)
+}
+
+func NewUintCArray(impl unsafe.Pointer, dims []int) NDUint {
+	return newuintCArray((*[1 << 30]C.uint)(impl), dims)
+}
+
+func newuintCArray(impl *[1 << 30]C.uint, dims []int) *nduintC {
+	result := nduintC{}
+	//	size := product(dims)
+	result.Start = 0
+	result.Impl = impl
+	result.OriginalDims = dims
+	result.Dims = dims
+	result.Step = ones(len(dims))
+	result.Offset = offsets(dims)
+	result.OffsetStep = multiply(result.Step, result.Offset)
+	return &result
+}
+
+func makeuintCArrayForTest(shape []int) *nduintC {
+	goArray := ARangeUint(product(shape)).MustReshape(shape)
+	impl := goArray.Unroll()
+
+	v := reflect.Indirect(reflect.ValueOf(&impl))
+	slice := (*reflect.SliceHeader)(unsafe.Pointer(v.UnsafeAddr()))
+	addr := (*[1 << 30]C.uint)(unsafe.Pointer(slice.Data))
+
+	return newuintCArray(addr, shape)
 }

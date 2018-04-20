@@ -53,6 +53,7 @@ type ndfloat64Common struct {
 	Start        int
 	Offset       []int
 	Step         []int
+	OffsetStep   []int
 }
 
 func (nd *ndfloat64Common) Len(ax int) int {
@@ -72,7 +73,13 @@ func (nd *ndfloat64Common) NewIndex(val int) []int {
 }
 
 func (nd *ndfloat64Common) Index(loc []int) int {
-	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
+	result := nd.Start
+	for i := 0; i < len(loc); i++ {
+		result += loc[i] * nd.OffsetStep[i]
+	}
+	return result
+
+	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
 }
 
 func (nd *ndfloat64Common) Contiguous() bool {
@@ -129,6 +136,7 @@ func (nd *ndfloat64Common) slice(dest *ndfloat64Common, loc []int, dims []int, s
 	} else {
 		dest.Step = multiply(nd.Step, step)
 	}
+	dest.OffsetStep = multiply(dest.Step, dest.Offset)
 }
 
 // type NDArray interface {
@@ -180,6 +188,7 @@ type ndfloat32Common struct {
 	Start        int
 	Offset       []int
 	Step         []int
+	OffsetStep   []int
 }
 
 func (nd *ndfloat32Common) Len(ax int) int {
@@ -199,7 +208,13 @@ func (nd *ndfloat32Common) NewIndex(val int) []int {
 }
 
 func (nd *ndfloat32Common) Index(loc []int) int {
-	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
+	result := nd.Start
+	for i := 0; i < len(loc); i++ {
+		result += loc[i] * nd.OffsetStep[i]
+	}
+	return result
+
+	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
 }
 
 func (nd *ndfloat32Common) Contiguous() bool {
@@ -256,6 +271,7 @@ func (nd *ndfloat32Common) slice(dest *ndfloat32Common, loc []int, dims []int, s
 	} else {
 		dest.Step = multiply(nd.Step, step)
 	}
+	dest.OffsetStep = multiply(dest.Step, dest.Offset)
 }
 
 // type NDArray interface {
@@ -307,6 +323,7 @@ type ndint32Common struct {
 	Start        int
 	Offset       []int
 	Step         []int
+	OffsetStep   []int
 }
 
 func (nd *ndint32Common) Len(ax int) int {
@@ -326,7 +343,13 @@ func (nd *ndint32Common) NewIndex(val int) []int {
 }
 
 func (nd *ndint32Common) Index(loc []int) int {
-	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
+	result := nd.Start
+	for i := 0; i < len(loc); i++ {
+		result += loc[i] * nd.OffsetStep[i]
+	}
+	return result
+
+	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
 }
 
 func (nd *ndint32Common) Contiguous() bool {
@@ -383,6 +406,7 @@ func (nd *ndint32Common) slice(dest *ndint32Common, loc []int, dims []int, step 
 	} else {
 		dest.Step = multiply(nd.Step, step)
 	}
+	dest.OffsetStep = multiply(dest.Step, dest.Offset)
 }
 
 // type NDArray interface {
@@ -434,6 +458,7 @@ type nduint32Common struct {
 	Start        int
 	Offset       []int
 	Step         []int
+	OffsetStep   []int
 }
 
 func (nd *nduint32Common) Len(ax int) int {
@@ -453,7 +478,13 @@ func (nd *nduint32Common) NewIndex(val int) []int {
 }
 
 func (nd *nduint32Common) Index(loc []int) int {
-	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
+	result := nd.Start
+	for i := 0; i < len(loc); i++ {
+		result += loc[i] * nd.OffsetStep[i]
+	}
+	return result
+
+	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
 }
 
 func (nd *nduint32Common) Contiguous() bool {
@@ -510,6 +541,7 @@ func (nd *nduint32Common) slice(dest *nduint32Common, loc []int, dims []int, ste
 	} else {
 		dest.Step = multiply(nd.Step, step)
 	}
+	dest.OffsetStep = multiply(dest.Step, dest.Offset)
 }
 
 // type NDArray interface {
@@ -561,6 +593,7 @@ type ndint64Common struct {
 	Start        int
 	Offset       []int
 	Step         []int
+	OffsetStep   []int
 }
 
 func (nd *ndint64Common) Len(ax int) int {
@@ -580,7 +613,13 @@ func (nd *ndint64Common) NewIndex(val int) []int {
 }
 
 func (nd *ndint64Common) Index(loc []int) int {
-	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
+	result := nd.Start
+	for i := 0; i < len(loc); i++ {
+		result += loc[i] * nd.OffsetStep[i]
+	}
+	return result
+
+	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
 }
 
 func (nd *ndint64Common) Contiguous() bool {
@@ -637,6 +676,7 @@ func (nd *ndint64Common) slice(dest *ndint64Common, loc []int, dims []int, step 
 	} else {
 		dest.Step = multiply(nd.Step, step)
 	}
+	dest.OffsetStep = multiply(dest.Step, dest.Offset)
 }
 
 // type NDArray interface {
@@ -688,6 +728,7 @@ type nduint64Common struct {
 	Start        int
 	Offset       []int
 	Step         []int
+	OffsetStep   []int
 }
 
 func (nd *nduint64Common) Len(ax int) int {
@@ -707,7 +748,13 @@ func (nd *nduint64Common) NewIndex(val int) []int {
 }
 
 func (nd *nduint64Common) Index(loc []int) int {
-	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
+	result := nd.Start
+	for i := 0; i < len(loc); i++ {
+		result += loc[i] * nd.OffsetStep[i]
+	}
+	return result
+
+	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
 }
 
 func (nd *nduint64Common) Contiguous() bool {
@@ -764,4 +811,275 @@ func (nd *nduint64Common) slice(dest *nduint64Common, loc []int, dims []int, ste
 	} else {
 		dest.Step = multiply(nd.Step, step)
 	}
+	dest.OffsetStep = multiply(dest.Step, dest.Offset)
+}
+
+// type NDArray interface {
+// }
+
+type NDInt interface {
+	Len(axis int) int
+	Shape() []int
+	NDims() int
+	NewIndex(val int) []int
+
+	Get(loc []int) int
+	Set(loc []int, val int)
+	Slice(loc []int, dims []int, step []int) NDInt
+	Apply(loc []int, dim int, step int, vals []int)
+	ApplySlice(loc []int, step []int, vals NDInt)
+	Contiguous() bool
+	Unroll() []int
+	Reshape(newShape []int) (NDInt, error)
+	MustReshape(newShape []int) NDInt
+	ReshapeFast(newShape []int) (NDInt, error)
+}
+
+type ND1Int interface {
+	NDInt
+	Len1() int
+	Get1(loc int) int
+	Set1(loc int, val int)
+	Apply1(loc int, step int, vals []int)
+}
+
+type ND2Int interface {
+	NDInt
+	Len2() int
+	Get2(loc1 int, loc2 int) int
+	Set2(loc1 int, loc2 int, val int)
+}
+
+type ND3Int interface {
+	NDInt
+	Len3() int
+	Get3(loc1 int, loc2 int, loc3 int) int
+	Set3(loc1 int, loc2 int, loc3 int, val int)
+}
+
+type ndintCommon struct {
+	OriginalDims []int
+	Dims         []int
+	Start        int
+	Offset       []int
+	Step         []int
+	OffsetStep   []int
+}
+
+func (nd *ndintCommon) Len(ax int) int {
+	return nd.Dims[ax]
+}
+
+func (nd *ndintCommon) Shape() []int {
+	return nd.Dims
+}
+
+func (nd *ndintCommon) NDims() int {
+	return len(nd.Dims)
+}
+
+func (nd *ndintCommon) NewIndex(val int) []int {
+	return uniform(nd.NDims(), val)
+}
+
+func (nd *ndintCommon) Index(loc []int) int {
+	result := nd.Start
+	for i := 0; i < len(loc); i++ {
+		result += loc[i] * nd.OffsetStep[i]
+	}
+	return result
+
+	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
+}
+
+func (nd *ndintCommon) Contiguous() bool {
+	// What about step!
+	var i int
+	contiguousOffset := 1
+	dimsMustBeOne := false
+
+	for i = len(nd.Dims) - 1; i >= 0; i-- {
+		if nd.Dims[i] > 1 {
+			if dimsMustBeOne {
+				return false
+			}
+
+			if nd.Step[i] > 1 {
+				return false
+			}
+
+			if nd.Offset[i] > contiguousOffset {
+				return false
+			}
+		}
+
+		if nd.Dims[i] != nd.OriginalDims[i] {
+			dimsMustBeOne = true
+		}
+
+		contiguousOffset *= nd.Dims[i]
+	}
+
+	return true
+}
+
+func (nd *ndintCommon) Len1() int {
+	return nd.Dims[0]
+}
+
+func (nd *ndintCommon) Len2() int {
+	return nd.Dims[1]
+}
+
+func (nd *ndintCommon) Len3() int {
+	return nd.Dims[2]
+}
+
+func (nd *ndintCommon) slice(dest *ndintCommon, loc []int, dims []int, step []int) {
+	dest.OriginalDims = nd.OriginalDims
+	dest.Dims = dims
+	dest.Start = nd.Start + dotProduct(loc, nd.Offset)
+	dest.Offset = multiply(nd.Offset, nd.Step)
+
+	if step == nil {
+		dest.Step = nd.Step
+	} else {
+		dest.Step = multiply(nd.Step, step)
+	}
+	dest.OffsetStep = multiply(dest.Step, dest.Offset)
+}
+
+// type NDArray interface {
+// }
+
+type NDUint interface {
+	Len(axis int) int
+	Shape() []int
+	NDims() int
+	NewIndex(val int) []int
+
+	Get(loc []int) uint
+	Set(loc []int, val uint)
+	Slice(loc []int, dims []int, step []int) NDUint
+	Apply(loc []int, dim int, step int, vals []uint)
+	ApplySlice(loc []int, step []int, vals NDUint)
+	Contiguous() bool
+	Unroll() []uint
+	Reshape(newShape []int) (NDUint, error)
+	MustReshape(newShape []int) NDUint
+	ReshapeFast(newShape []int) (NDUint, error)
+}
+
+type ND1Uint interface {
+	NDUint
+	Len1() int
+	Get1(loc int) uint
+	Set1(loc int, val uint)
+	Apply1(loc int, step int, vals []uint)
+}
+
+type ND2Uint interface {
+	NDUint
+	Len2() int
+	Get2(loc1 int, loc2 int) uint
+	Set2(loc1 int, loc2 int, val uint)
+}
+
+type ND3Uint interface {
+	NDUint
+	Len3() int
+	Get3(loc1 int, loc2 int, loc3 int) uint
+	Set3(loc1 int, loc2 int, loc3 int, val uint)
+}
+
+type nduintCommon struct {
+	OriginalDims []int
+	Dims         []int
+	Start        int
+	Offset       []int
+	Step         []int
+	OffsetStep   []int
+}
+
+func (nd *nduintCommon) Len(ax int) int {
+	return nd.Dims[ax]
+}
+
+func (nd *nduintCommon) Shape() []int {
+	return nd.Dims
+}
+
+func (nd *nduintCommon) NDims() int {
+	return len(nd.Dims)
+}
+
+func (nd *nduintCommon) NewIndex(val int) []int {
+	return uniform(nd.NDims(), val)
+}
+
+func (nd *nduintCommon) Index(loc []int) int {
+	result := nd.Start
+	for i := 0; i < len(loc); i++ {
+		result += loc[i] * nd.OffsetStep[i]
+	}
+	return result
+
+	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
+}
+
+func (nd *nduintCommon) Contiguous() bool {
+	// What about step!
+	var i int
+	contiguousOffset := 1
+	dimsMustBeOne := false
+
+	for i = len(nd.Dims) - 1; i >= 0; i-- {
+		if nd.Dims[i] > 1 {
+			if dimsMustBeOne {
+				return false
+			}
+
+			if nd.Step[i] > 1 {
+				return false
+			}
+
+			if nd.Offset[i] > contiguousOffset {
+				return false
+			}
+		}
+
+		if nd.Dims[i] != nd.OriginalDims[i] {
+			dimsMustBeOne = true
+		}
+
+		contiguousOffset *= nd.Dims[i]
+	}
+
+	return true
+}
+
+func (nd *nduintCommon) Len1() int {
+	return nd.Dims[0]
+}
+
+func (nd *nduintCommon) Len2() int {
+	return nd.Dims[1]
+}
+
+func (nd *nduintCommon) Len3() int {
+	return nd.Dims[2]
+}
+
+func (nd *nduintCommon) slice(dest *nduintCommon, loc []int, dims []int, step []int) {
+	dest.OriginalDims = nd.OriginalDims
+	dest.Dims = dims
+	dest.Start = nd.Start + dotProduct(loc, nd.Offset)
+	dest.Offset = multiply(nd.Offset, nd.Step)
+
+	if step == nil {
+		dest.Step = nd.Step
+	} else {
+		dest.Step = multiply(nd.Step, step)
+	}
+	dest.OffsetStep = multiply(dest.Step, dest.Offset)
 }
