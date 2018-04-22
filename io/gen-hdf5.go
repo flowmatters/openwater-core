@@ -112,7 +112,8 @@ func (h H5RefFloat64) Write(data data.NDFloat64) error {
 		// OR. just complain for now...
 
 	} else {
-		dtype, err := hdf5.NewDatatypeFromValue(0.0)
+		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
+		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
 		if err != nil {
 			return err
 		}
@@ -321,7 +322,8 @@ func (h H5RefFloat32) Write(data data.NDFloat32) error {
 		// OR. just complain for now...
 
 	} else {
-		dtype, err := hdf5.NewDatatypeFromValue(0.0)
+		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
+		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
 		if err != nil {
 			return err
 		}
@@ -530,7 +532,8 @@ func (h H5RefInt32) Write(data data.NDInt32) error {
 		// OR. just complain for now...
 
 	} else {
-		dtype, err := hdf5.NewDatatypeFromValue(0.0)
+		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
+		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
 		if err != nil {
 			return err
 		}
@@ -739,7 +742,8 @@ func (h H5RefUint32) Write(data data.NDUint32) error {
 		// OR. just complain for now...
 
 	} else {
-		dtype, err := hdf5.NewDatatypeFromValue(0.0)
+		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
+		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
 		if err != nil {
 			return err
 		}
@@ -948,7 +952,8 @@ func (h H5RefInt64) Write(data data.NDInt64) error {
 		// OR. just complain for now...
 
 	} else {
-		dtype, err := hdf5.NewDatatypeFromValue(0.0)
+		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
+		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
 		if err != nil {
 			return err
 		}
@@ -1157,7 +1162,8 @@ func (h H5RefUint64) Write(data data.NDUint64) error {
 		// OR. just complain for now...
 
 	} else {
-		dtype, err := hdf5.NewDatatypeFromValue(0.0)
+		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
+		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
 		if err != nil {
 			return err
 		}
@@ -1366,7 +1372,8 @@ func (h H5RefInt) Write(data data.NDInt) error {
 		// OR. just complain for now...
 
 	} else {
-		dtype, err := hdf5.NewDatatypeFromValue(0.0)
+		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
+		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
 		if err != nil {
 			return err
 		}
@@ -1575,7 +1582,8 @@ func (h H5RefUint) Write(data data.NDUint) error {
 		// OR. just complain for now...
 
 	} else {
-		dtype, err := hdf5.NewDatatypeFromValue(0.0)
+		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
+		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
 		if err != nil {
 			return err
 		}

@@ -157,3 +157,44 @@ func TestWrite3DFloat64Whole(t *testing.T) {
 			"Error in test data point %d [%d,%d,%d]", i, idx[0], idx[1], idx[2])
 	}
 }
+
+func TestWrite3DInt32Whole(t *testing.T) {
+	assert := assert.New(t)
+	test_fn := "_test_write_whole.h5"
+	ds := "int32_3d"
+
+	ref := H5RefInt32{Filename: test_fn, Dataset: ds}
+
+	the_data, err := data.ARangeInt32(1000).Reshape([]int{10, 20, 5})
+	assert.Nil(err)
+
+	indices := [][]int{
+		[]int{0, 0, 0},
+		[]int{5, 14, 2},
+		[]int{7, 3, 4},
+		[]int{9, 19, 4},
+	}
+
+	values := make([]int32, 4)
+	for i, idx := range indices {
+		values[i] = the_data.Get(idx)
+	}
+
+	err = ref.Write(the_data)
+	assert.Nil(err)
+
+	ref_read := H5RefInt32{Filename: test_fn, Dataset: ds}
+	read_data, err := ref_read.Load()
+	assert.Nil(err)
+
+	shp := read_data.Shape()
+	assert.Equal(3, len(shp))
+	assert.Equal(10, shp[0])
+	assert.Equal(20, shp[1])
+	assert.Equal(5, shp[2])
+
+	for i, idx := range indices {
+		assert.Equal(values[i], read_data.Get(idx),
+			"Error in test data point %d [%d,%d,%d]", i, idx[0], idx[1], idx[2])
+	}
+}

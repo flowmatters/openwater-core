@@ -110,7 +110,8 @@ func (h H5RefArrayType) Write(data data.NDArrayType) error {
 		// OR. just complain for now...
 
 	} else {
-		dtype, err := hdf5.NewDatatypeFromValue(0.0)
+		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
+		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
 		if err != nil {
 			return err
 		}
