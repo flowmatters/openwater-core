@@ -3,16 +3,20 @@ package io
 import (
 	"bytes"
 	"errors"
-	"os"
 	"reflect"
 	"strings"
 
+	"github.com/joelrahman/genny/generic"
+
 	"github.com/flowmatters/openwater-core/conv"
 	"github.com/flowmatters/openwater-core/data"
+	"github.com/flowmatters/openwater-core/util/slice"
 	"gonum.org/v1/hdf5"
 )
 
 //go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64,int,uint"
+
+type ArrayType generic.Type
 
 type H5RefArrayType struct {
 	Filename string
@@ -93,40 +97,15 @@ func (h H5RefArrayType) loadSubset(ds *hdf5.Dataset) (data.NDArrayType, error) {
 }
 
 func (h H5RefArrayType) Write(data data.NDArrayType) error {
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDWR)
+	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
-		if _, err := os.Stat(h.Filename); os.IsNotExist(err) {
-			f, err = hdf5.CreateFile(h.Filename, hdf5.F_ACC_TRUNC)
-			if err != nil {
-				return err
-			}
-		}
+		return err
 	}
 	defer f.Close()
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err == nil {
-		// Ensure dataspace is the write size...
-		// OR. just complain for now...
-
-	} else {
-		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
-		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
-		if err != nil {
-			return err
-		}
-
-		dims := conv.IntsToUints(data.Shape())
-		space, err := hdf5.CreateSimpleDataspace(dims, nil)
-		if err != nil {
-			return err
-		}
-		defer space.Close()
-
-		ds, err = f.CreateDataset(h.Dataset, dtype, space)
-		if err != nil {
-			return err
-		}
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)))
+	if err != nil {
+		return err
 	}
 	defer ds.Close()
 
@@ -135,6 +114,55 @@ func (h H5RefArrayType) Write(data data.NDArrayType) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (h H5RefArrayType) Create(shape []int, fillValue ArrayType) error {
+	f, err := openWriteOrCreate(h.Filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue)
+	if err == nil {
+		ds.Close()
+	}
+	return err
+}
+
+func (h H5RefArrayType) WriteSlice(data data.NDArrayType, loc []int) error {
+	f, err := openWriteOrCreate(h.Filename, false)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return err
+	}
+	defer ds.Close()
+
+	filespace := ds.Space()
+	defer filespace.Close()
+
+	shp := conv.IntsToUints(data.Shape())
+	stride_count := conv.IntsToUints(slice.Ones(len(loc)))
+	err = filespace.SelectHyperslab(conv.IntsToUints(loc), stride_count, stride_count, shp)
+	if err != nil {
+		return err
+	}
+
+	memSpace, err := hdf5.CreateSimpleDataspace(shp, shp)
+	if err != nil {
+		return err
+	}
+	defer memSpace.Close()
+
+	impl := data.Unroll()
+	err = ds.WriteSubset(&impl, memSpace, filespace)
 
 	return nil
 }

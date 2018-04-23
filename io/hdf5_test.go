@@ -1,6 +1,7 @@
 package io
 
 import (
+	"math"
 	"os"
 	"strings"
 	"testing"
@@ -158,6 +159,101 @@ func TestWrite3DFloat64Whole(t *testing.T) {
 	}
 }
 
+func TestWriteTwice(t *testing.T) {
+	assert := assert.New(t)
+	test_fn := "_test_write_twice.h5"
+	ds := "float64_1d"
+
+	ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+
+	the_data := data.ARangeFloat64(10)
+
+	err := ref.Write(the_data)
+	assert.Nil(err)
+
+	ref_read := H5RefFloat64{Filename: test_fn, Dataset: ds}
+	read_data, err := ref_read.Load()
+	assert.Nil(err)
+
+	shp := read_data.Shape()
+	assert.Equal(1, len(shp))
+	assert.Equal(10, shp[0])
+
+	assert.Equal(4.0, read_data.Get([]int{4}))
+
+	new_data := data.NewArray1DFloat64(10)
+	data.ScaleFloat64Array(new_data, the_data, 2)
+
+	err = ref.Write(new_data)
+	assert.Nil(err)
+
+	new_ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+	new_read_data, err := new_ref.Load()
+	assert.Nil(err)
+
+	shp = new_read_data.Shape()
+	assert.Equal(1, len(shp))
+	assert.Equal(10, shp[0])
+
+	assert.Equal(8.0, new_read_data.Get([]int{4}))
+}
+
+// func TestResizeOnRewrite(t *testing.T) {
+// 	assert := assert.New(t)
+// 	test_fn := "_test_write_twice_resize.h5"
+// 	ds := "float64_1d"
+
+// 	ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+
+// 	the_data := data.ARangeFloat64(10)
+
+// 	err := ref.Write(the_data)
+// 	assert.Nil(err)
+
+// 	ref_read := H5RefFloat64{Filename: test_fn, Dataset: ds}
+// 	read_data, err := ref_read.Load()
+// 	assert.Nil(err)
+
+// 	shp := read_data.Shape()
+// 	assert.Equal(1, len(shp))
+// 	assert.Equal(10, shp[0])
+
+// 	assert.Equal(4.0, read_data.Get([]int{4}))
+
+// 	new_data := data.ARangeFloat64(5)
+// 	data.ScaleFloat64Array(new_data, new_data, 2)
+
+// 	err = ref.Write(new_data)
+// 	assert.Nil(err)
+
+// 	new_ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+// 	new_read_data, err := new_ref.Load()
+// 	assert.Nil(err)
+
+// 	shp = new_read_data.Shape()
+// 	assert.Equal(1, len(shp))
+// 	assert.Equal(5, shp[0])
+
+// 	assert.Equal(8.0, new_read_data.Get([]int{4}))
+
+// 	new_data = data.ARangeFloat64(20)
+// 	data.ScaleFloat64Array(new_data, new_data, 2)
+
+// 	err = ref.Write(new_data)
+// 	assert.Nil(err)
+
+// 	new_ref = H5RefFloat64{Filename: test_fn, Dataset: ds}
+// 	new_read_data, err = new_ref.Load()
+// 	assert.Nil(err)
+
+// 	shp = new_read_data.Shape()
+// 	assert.Equal(1, len(shp))
+// 	assert.Equal(20, shp[0])
+
+// 	assert.Equal(24.0, new_read_data.Get([]int{12}))
+
+// }
+
 func TestWrite3DInt32Whole(t *testing.T) {
 	assert := assert.New(t)
 	test_fn := "_test_write_whole.h5"
@@ -196,5 +292,58 @@ func TestWrite3DInt32Whole(t *testing.T) {
 	for i, idx := range indices {
 		assert.Equal(values[i], read_data.Get(idx),
 			"Error in test data point %d [%d,%d,%d]", i, idx[0], idx[1], idx[2])
+	}
+}
+
+func TestWrite3DFloat64Partial(t *testing.T) {
+	assert := assert.New(t)
+	test_fn := "_test_write_partial.h5"
+	ds := "float64_3d"
+
+	ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+
+	the_data, err := data.ARangeFloat64(1000).Reshape([]int{10, 20, 5})
+	assert.Nil(err)
+
+	slice := the_data.Slice([]int{0, 0, 0}, []int{10, 1, 1}, []int{1, 1, 1})
+
+	indices := [][]int{
+		[]int{0, 0, 0},
+		[]int{5, 0, 0},
+		[]int{7, 0, 0},
+		[]int{9, 0, 0},
+	}
+
+	values := make([]float64, 4)
+	for i, idx := range indices {
+		values[i] = the_data.Get(idx)
+	}
+
+	err = ref.Create(the_data.Shape(), math.NaN())
+	for d2 := 0; d2 < 20; d2++ {
+		for d3 := 0; d3 < 5; d3++ {
+			err = ref.WriteSlice(slice, []int{0, d2, d3})
+			assert.Nil(err)
+		}
+	}
+
+	ref_read := H5RefFloat64{Filename: test_fn, Dataset: ds}
+	read_data, err := ref_read.Load()
+	assert.Nil(err)
+
+	shp := read_data.Shape()
+	assert.Equal(3, len(shp))
+	assert.Equal(10, shp[0])
+	assert.Equal(20, shp[1])
+	assert.Equal(5, shp[2])
+
+	for d2 := 0; d2 < 20; d2++ {
+		for d3 := 0; d3 < 5; d3++ {
+			for i, idx := range indices {
+				the_idx := []int{idx[0], d2, d3}
+				assert.Equal(values[i], read_data.Get(the_idx),
+					"Error in test data point %d [%d,%d,%d]", i, the_idx[0], the_idx[1], the_idx[2])
+			}
+		}
 	}
 }

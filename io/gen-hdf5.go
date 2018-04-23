@@ -7,12 +7,12 @@ package io
 import (
 	"bytes"
 	"errors"
-	"os"
 	"reflect"
 	"strings"
 
 	"github.com/flowmatters/openwater-core/conv"
 	"github.com/flowmatters/openwater-core/data"
+	"github.com/flowmatters/openwater-core/util/slice"
 	"gonum.org/v1/hdf5"
 )
 
@@ -95,40 +95,15 @@ func (h H5RefFloat64) loadSubset(ds *hdf5.Dataset) (data.NDFloat64, error) {
 }
 
 func (h H5RefFloat64) Write(data data.NDFloat64) error {
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDWR)
+	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
-		if _, err := os.Stat(h.Filename); os.IsNotExist(err) {
-			f, err = hdf5.CreateFile(h.Filename, hdf5.F_ACC_TRUNC)
-			if err != nil {
-				return err
-			}
-		}
+		return err
 	}
 	defer f.Close()
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err == nil {
-		// Ensure dataspace is the write size...
-		// OR. just complain for now...
-
-	} else {
-		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
-		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
-		if err != nil {
-			return err
-		}
-
-		dims := conv.IntsToUints(data.Shape())
-		space, err := hdf5.CreateSimpleDataspace(dims, nil)
-		if err != nil {
-			return err
-		}
-		defer space.Close()
-
-		ds, err = f.CreateDataset(h.Dataset, dtype, space)
-		if err != nil {
-			return err
-		}
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)))
+	if err != nil {
+		return err
 	}
 	defer ds.Close()
 
@@ -137,6 +112,55 @@ func (h H5RefFloat64) Write(data data.NDFloat64) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (h H5RefFloat64) Create(shape []int, fillValue float64) error {
+	f, err := openWriteOrCreate(h.Filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue)
+	if err == nil {
+		ds.Close()
+	}
+	return err
+}
+
+func (h H5RefFloat64) WriteSlice(data data.NDFloat64, loc []int) error {
+	f, err := openWriteOrCreate(h.Filename, false)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return err
+	}
+	defer ds.Close()
+
+	filespace := ds.Space()
+	defer filespace.Close()
+
+	shp := conv.IntsToUints(data.Shape())
+	stride_count := conv.IntsToUints(slice.Ones(len(loc)))
+	err = filespace.SelectHyperslab(conv.IntsToUints(loc), stride_count, stride_count, shp)
+	if err != nil {
+		return err
+	}
+
+	memSpace, err := hdf5.CreateSimpleDataspace(shp, shp)
+	if err != nil {
+		return err
+	}
+	defer memSpace.Close()
+
+	impl := data.Unroll()
+	err = ds.WriteSubset(&impl, memSpace, filespace)
 
 	return nil
 }
@@ -305,40 +329,15 @@ func (h H5RefFloat32) loadSubset(ds *hdf5.Dataset) (data.NDFloat32, error) {
 }
 
 func (h H5RefFloat32) Write(data data.NDFloat32) error {
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDWR)
+	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
-		if _, err := os.Stat(h.Filename); os.IsNotExist(err) {
-			f, err = hdf5.CreateFile(h.Filename, hdf5.F_ACC_TRUNC)
-			if err != nil {
-				return err
-			}
-		}
+		return err
 	}
 	defer f.Close()
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err == nil {
-		// Ensure dataspace is the write size...
-		// OR. just complain for now...
-
-	} else {
-		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
-		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
-		if err != nil {
-			return err
-		}
-
-		dims := conv.IntsToUints(data.Shape())
-		space, err := hdf5.CreateSimpleDataspace(dims, nil)
-		if err != nil {
-			return err
-		}
-		defer space.Close()
-
-		ds, err = f.CreateDataset(h.Dataset, dtype, space)
-		if err != nil {
-			return err
-		}
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)))
+	if err != nil {
+		return err
 	}
 	defer ds.Close()
 
@@ -347,6 +346,55 @@ func (h H5RefFloat32) Write(data data.NDFloat32) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (h H5RefFloat32) Create(shape []int, fillValue float32) error {
+	f, err := openWriteOrCreate(h.Filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue)
+	if err == nil {
+		ds.Close()
+	}
+	return err
+}
+
+func (h H5RefFloat32) WriteSlice(data data.NDFloat32, loc []int) error {
+	f, err := openWriteOrCreate(h.Filename, false)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return err
+	}
+	defer ds.Close()
+
+	filespace := ds.Space()
+	defer filespace.Close()
+
+	shp := conv.IntsToUints(data.Shape())
+	stride_count := conv.IntsToUints(slice.Ones(len(loc)))
+	err = filespace.SelectHyperslab(conv.IntsToUints(loc), stride_count, stride_count, shp)
+	if err != nil {
+		return err
+	}
+
+	memSpace, err := hdf5.CreateSimpleDataspace(shp, shp)
+	if err != nil {
+		return err
+	}
+	defer memSpace.Close()
+
+	impl := data.Unroll()
+	err = ds.WriteSubset(&impl, memSpace, filespace)
 
 	return nil
 }
@@ -515,40 +563,15 @@ func (h H5RefInt32) loadSubset(ds *hdf5.Dataset) (data.NDInt32, error) {
 }
 
 func (h H5RefInt32) Write(data data.NDInt32) error {
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDWR)
+	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
-		if _, err := os.Stat(h.Filename); os.IsNotExist(err) {
-			f, err = hdf5.CreateFile(h.Filename, hdf5.F_ACC_TRUNC)
-			if err != nil {
-				return err
-			}
-		}
+		return err
 	}
 	defer f.Close()
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err == nil {
-		// Ensure dataspace is the write size...
-		// OR. just complain for now...
-
-	} else {
-		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
-		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
-		if err != nil {
-			return err
-		}
-
-		dims := conv.IntsToUints(data.Shape())
-		space, err := hdf5.CreateSimpleDataspace(dims, nil)
-		if err != nil {
-			return err
-		}
-		defer space.Close()
-
-		ds, err = f.CreateDataset(h.Dataset, dtype, space)
-		if err != nil {
-			return err
-		}
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)))
+	if err != nil {
+		return err
 	}
 	defer ds.Close()
 
@@ -557,6 +580,55 @@ func (h H5RefInt32) Write(data data.NDInt32) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (h H5RefInt32) Create(shape []int, fillValue int32) error {
+	f, err := openWriteOrCreate(h.Filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue)
+	if err == nil {
+		ds.Close()
+	}
+	return err
+}
+
+func (h H5RefInt32) WriteSlice(data data.NDInt32, loc []int) error {
+	f, err := openWriteOrCreate(h.Filename, false)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return err
+	}
+	defer ds.Close()
+
+	filespace := ds.Space()
+	defer filespace.Close()
+
+	shp := conv.IntsToUints(data.Shape())
+	stride_count := conv.IntsToUints(slice.Ones(len(loc)))
+	err = filespace.SelectHyperslab(conv.IntsToUints(loc), stride_count, stride_count, shp)
+	if err != nil {
+		return err
+	}
+
+	memSpace, err := hdf5.CreateSimpleDataspace(shp, shp)
+	if err != nil {
+		return err
+	}
+	defer memSpace.Close()
+
+	impl := data.Unroll()
+	err = ds.WriteSubset(&impl, memSpace, filespace)
 
 	return nil
 }
@@ -725,40 +797,15 @@ func (h H5RefUint32) loadSubset(ds *hdf5.Dataset) (data.NDUint32, error) {
 }
 
 func (h H5RefUint32) Write(data data.NDUint32) error {
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDWR)
+	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
-		if _, err := os.Stat(h.Filename); os.IsNotExist(err) {
-			f, err = hdf5.CreateFile(h.Filename, hdf5.F_ACC_TRUNC)
-			if err != nil {
-				return err
-			}
-		}
+		return err
 	}
 	defer f.Close()
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err == nil {
-		// Ensure dataspace is the write size...
-		// OR. just complain for now...
-
-	} else {
-		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
-		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
-		if err != nil {
-			return err
-		}
-
-		dims := conv.IntsToUints(data.Shape())
-		space, err := hdf5.CreateSimpleDataspace(dims, nil)
-		if err != nil {
-			return err
-		}
-		defer space.Close()
-
-		ds, err = f.CreateDataset(h.Dataset, dtype, space)
-		if err != nil {
-			return err
-		}
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)))
+	if err != nil {
+		return err
 	}
 	defer ds.Close()
 
@@ -767,6 +814,55 @@ func (h H5RefUint32) Write(data data.NDUint32) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (h H5RefUint32) Create(shape []int, fillValue uint32) error {
+	f, err := openWriteOrCreate(h.Filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue)
+	if err == nil {
+		ds.Close()
+	}
+	return err
+}
+
+func (h H5RefUint32) WriteSlice(data data.NDUint32, loc []int) error {
+	f, err := openWriteOrCreate(h.Filename, false)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return err
+	}
+	defer ds.Close()
+
+	filespace := ds.Space()
+	defer filespace.Close()
+
+	shp := conv.IntsToUints(data.Shape())
+	stride_count := conv.IntsToUints(slice.Ones(len(loc)))
+	err = filespace.SelectHyperslab(conv.IntsToUints(loc), stride_count, stride_count, shp)
+	if err != nil {
+		return err
+	}
+
+	memSpace, err := hdf5.CreateSimpleDataspace(shp, shp)
+	if err != nil {
+		return err
+	}
+	defer memSpace.Close()
+
+	impl := data.Unroll()
+	err = ds.WriteSubset(&impl, memSpace, filespace)
 
 	return nil
 }
@@ -935,40 +1031,15 @@ func (h H5RefInt64) loadSubset(ds *hdf5.Dataset) (data.NDInt64, error) {
 }
 
 func (h H5RefInt64) Write(data data.NDInt64) error {
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDWR)
+	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
-		if _, err := os.Stat(h.Filename); os.IsNotExist(err) {
-			f, err = hdf5.CreateFile(h.Filename, hdf5.F_ACC_TRUNC)
-			if err != nil {
-				return err
-			}
-		}
+		return err
 	}
 	defer f.Close()
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err == nil {
-		// Ensure dataspace is the write size...
-		// OR. just complain for now...
-
-	} else {
-		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
-		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
-		if err != nil {
-			return err
-		}
-
-		dims := conv.IntsToUints(data.Shape())
-		space, err := hdf5.CreateSimpleDataspace(dims, nil)
-		if err != nil {
-			return err
-		}
-		defer space.Close()
-
-		ds, err = f.CreateDataset(h.Dataset, dtype, space)
-		if err != nil {
-			return err
-		}
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)))
+	if err != nil {
+		return err
 	}
 	defer ds.Close()
 
@@ -977,6 +1048,55 @@ func (h H5RefInt64) Write(data data.NDInt64) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (h H5RefInt64) Create(shape []int, fillValue int64) error {
+	f, err := openWriteOrCreate(h.Filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue)
+	if err == nil {
+		ds.Close()
+	}
+	return err
+}
+
+func (h H5RefInt64) WriteSlice(data data.NDInt64, loc []int) error {
+	f, err := openWriteOrCreate(h.Filename, false)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return err
+	}
+	defer ds.Close()
+
+	filespace := ds.Space()
+	defer filespace.Close()
+
+	shp := conv.IntsToUints(data.Shape())
+	stride_count := conv.IntsToUints(slice.Ones(len(loc)))
+	err = filespace.SelectHyperslab(conv.IntsToUints(loc), stride_count, stride_count, shp)
+	if err != nil {
+		return err
+	}
+
+	memSpace, err := hdf5.CreateSimpleDataspace(shp, shp)
+	if err != nil {
+		return err
+	}
+	defer memSpace.Close()
+
+	impl := data.Unroll()
+	err = ds.WriteSubset(&impl, memSpace, filespace)
 
 	return nil
 }
@@ -1145,40 +1265,15 @@ func (h H5RefUint64) loadSubset(ds *hdf5.Dataset) (data.NDUint64, error) {
 }
 
 func (h H5RefUint64) Write(data data.NDUint64) error {
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDWR)
+	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
-		if _, err := os.Stat(h.Filename); os.IsNotExist(err) {
-			f, err = hdf5.CreateFile(h.Filename, hdf5.F_ACC_TRUNC)
-			if err != nil {
-				return err
-			}
-		}
+		return err
 	}
 	defer f.Close()
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err == nil {
-		// Ensure dataspace is the write size...
-		// OR. just complain for now...
-
-	} else {
-		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
-		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
-		if err != nil {
-			return err
-		}
-
-		dims := conv.IntsToUints(data.Shape())
-		space, err := hdf5.CreateSimpleDataspace(dims, nil)
-		if err != nil {
-			return err
-		}
-		defer space.Close()
-
-		ds, err = f.CreateDataset(h.Dataset, dtype, space)
-		if err != nil {
-			return err
-		}
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)))
+	if err != nil {
+		return err
 	}
 	defer ds.Close()
 
@@ -1187,6 +1282,55 @@ func (h H5RefUint64) Write(data data.NDUint64) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (h H5RefUint64) Create(shape []int, fillValue uint64) error {
+	f, err := openWriteOrCreate(h.Filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue)
+	if err == nil {
+		ds.Close()
+	}
+	return err
+}
+
+func (h H5RefUint64) WriteSlice(data data.NDUint64, loc []int) error {
+	f, err := openWriteOrCreate(h.Filename, false)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return err
+	}
+	defer ds.Close()
+
+	filespace := ds.Space()
+	defer filespace.Close()
+
+	shp := conv.IntsToUints(data.Shape())
+	stride_count := conv.IntsToUints(slice.Ones(len(loc)))
+	err = filespace.SelectHyperslab(conv.IntsToUints(loc), stride_count, stride_count, shp)
+	if err != nil {
+		return err
+	}
+
+	memSpace, err := hdf5.CreateSimpleDataspace(shp, shp)
+	if err != nil {
+		return err
+	}
+	defer memSpace.Close()
+
+	impl := data.Unroll()
+	err = ds.WriteSubset(&impl, memSpace, filespace)
 
 	return nil
 }
@@ -1355,40 +1499,15 @@ func (h H5RefInt) loadSubset(ds *hdf5.Dataset) (data.NDInt, error) {
 }
 
 func (h H5RefInt) Write(data data.NDInt) error {
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDWR)
+	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
-		if _, err := os.Stat(h.Filename); os.IsNotExist(err) {
-			f, err = hdf5.CreateFile(h.Filename, hdf5.F_ACC_TRUNC)
-			if err != nil {
-				return err
-			}
-		}
+		return err
 	}
 	defer f.Close()
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err == nil {
-		// Ensure dataspace is the write size...
-		// OR. just complain for now...
-
-	} else {
-		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
-		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
-		if err != nil {
-			return err
-		}
-
-		dims := conv.IntsToUints(data.Shape())
-		space, err := hdf5.CreateSimpleDataspace(dims, nil)
-		if err != nil {
-			return err
-		}
-		defer space.Close()
-
-		ds, err = f.CreateDataset(h.Dataset, dtype, space)
-		if err != nil {
-			return err
-		}
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)))
+	if err != nil {
+		return err
 	}
 	defer ds.Close()
 
@@ -1397,6 +1516,55 @@ func (h H5RefInt) Write(data data.NDInt) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (h H5RefInt) Create(shape []int, fillValue int) error {
+	f, err := openWriteOrCreate(h.Filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue)
+	if err == nil {
+		ds.Close()
+	}
+	return err
+}
+
+func (h H5RefInt) WriteSlice(data data.NDInt, loc []int) error {
+	f, err := openWriteOrCreate(h.Filename, false)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return err
+	}
+	defer ds.Close()
+
+	filespace := ds.Space()
+	defer filespace.Close()
+
+	shp := conv.IntsToUints(data.Shape())
+	stride_count := conv.IntsToUints(slice.Ones(len(loc)))
+	err = filespace.SelectHyperslab(conv.IntsToUints(loc), stride_count, stride_count, shp)
+	if err != nil {
+		return err
+	}
+
+	memSpace, err := hdf5.CreateSimpleDataspace(shp, shp)
+	if err != nil {
+		return err
+	}
+	defer memSpace.Close()
+
+	impl := data.Unroll()
+	err = ds.WriteSubset(&impl, memSpace, filespace)
 
 	return nil
 }
@@ -1565,40 +1733,15 @@ func (h H5RefUint) loadSubset(ds *hdf5.Dataset) (data.NDUint, error) {
 }
 
 func (h H5RefUint) Write(data data.NDUint) error {
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDWR)
+	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
-		if _, err := os.Stat(h.Filename); os.IsNotExist(err) {
-			f, err = hdf5.CreateFile(h.Filename, hdf5.F_ACC_TRUNC)
-			if err != nil {
-				return err
-			}
-		}
+		return err
 	}
 	defer f.Close()
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err == nil {
-		// Ensure dataspace is the write size...
-		// OR. just complain for now...
-
-	} else {
-		dtype, err := hdf5.NewDataTypeFromType(reflect.TypeOf(data.Get(data.NewIndex(0))))
-		//		dtype, err := hdf5.NewDatatypeFromValue(0.0)
-		if err != nil {
-			return err
-		}
-
-		dims := conv.IntsToUints(data.Shape())
-		space, err := hdf5.CreateSimpleDataspace(dims, nil)
-		if err != nil {
-			return err
-		}
-		defer space.Close()
-
-		ds, err = f.CreateDataset(h.Dataset, dtype, space)
-		if err != nil {
-			return err
-		}
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)))
+	if err != nil {
+		return err
 	}
 	defer ds.Close()
 
@@ -1607,6 +1750,55 @@ func (h H5RefUint) Write(data data.NDUint) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (h H5RefUint) Create(shape []int, fillValue uint) error {
+	f, err := openWriteOrCreate(h.Filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue)
+	if err == nil {
+		ds.Close()
+	}
+	return err
+}
+
+func (h H5RefUint) WriteSlice(data data.NDUint, loc []int) error {
+	f, err := openWriteOrCreate(h.Filename, false)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return err
+	}
+	defer ds.Close()
+
+	filespace := ds.Space()
+	defer filespace.Close()
+
+	shp := conv.IntsToUints(data.Shape())
+	stride_count := conv.IntsToUints(slice.Ones(len(loc)))
+	err = filespace.SelectHyperslab(conv.IntsToUints(loc), stride_count, stride_count, shp)
+	if err != nil {
+		return err
+	}
+
+	memSpace, err := hdf5.CreateSimpleDataspace(shp, shp)
+	if err != nil {
+		return err
+	}
+	defer memSpace.Close()
+
+	impl := data.Unroll()
+	err = ds.WriteSubset(&impl, memSpace, filespace)
 
 	return nil
 }
