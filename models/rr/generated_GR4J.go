@@ -162,9 +162,7 @@ func (m *GR4J) Run(inputs data.ND3Float64, states data.ND2Float64, outputs data.
     // fmt.Println("Tmp2",tmp2.Shape())
     
     initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
-//    fmt.Println("IS Shape",initialStates.Shape())
-//    fmt.Println("IS",initialStates)
-//    
+    
 
     
     s,n1,n2,q1,q9 := extractGR4JStates(initialStates)

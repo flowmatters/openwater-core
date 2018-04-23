@@ -130,8 +130,6 @@ func (m *EmcDwc) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
     // fmt.Println("States",states.Shape())
     // fmt.Println("Tmp2",tmp2.Shape())
     
-//    fmt.Println("No states")
-    
 
     
     
