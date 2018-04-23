@@ -3,6 +3,7 @@ package data
 import (
 	"testing"
 
+	"github.com/flowmatters/openwater-core/util/slice"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +16,7 @@ func TestOffset(t *testing.T) {
 	lenK := 4
 	arr := newArrayfloat64([]int{lenI, lenJ, lenK})
 	expOffset := []int{8, 4, 1}
-	if !equal(expOffset, arr.Offset) {
+	if !slice.Equal(expOffset, arr.Offset) {
 		t.Errorf("Incorrect Offset. Expected %v, got %v", expOffset, arr.Offset)
 	}
 }
@@ -68,7 +69,7 @@ func TestSliceAndAccess(t *testing.T) {
 	//arrNative := arrSlice.(*ndFloat64)
 
 	expShape := []int{2, 1, 2}
-	if !equal(expShape, arrSlice.Shape()) {
+	if !slice.Equal(expShape, arrSlice.Shape()) {
 		t.Errorf("Slice shape should be %v. Got %v", expShape, arrSlice.Shape())
 	}
 
@@ -231,7 +232,7 @@ func TestARange(t *testing.T) {
 	arr := ARangeFloat64(12.0).MustReshape([]int{3, 4}).(ND2Float64)
 
 	expShape := []int{3, 4}
-	assert.True(equal(expShape, arr.Shape()), "Slice shape should be %v. Got %v", expShape, arr.Shape())
+	assert.True(slice.Equal(expShape, arr.Shape()), "Slice shape should be %v. Got %v", expShape, arr.Shape())
 	assert.Equal(0.0, arr.Get2(0, 0))
 	assert.Equal(3.0, arr.Get2(0, 3))
 	assert.Equal(4.0, arr.Get2(1, 0))

@@ -7,6 +7,8 @@ package data
 import (
 	//	"fmt"
 	"errors"
+
+	"github.com/flowmatters/openwater-core/util/slice"
 )
 
 type ndfloat64 struct {
@@ -132,7 +134,7 @@ func (nd *ndfloat64) Reshape(newShape []int) (NDFloat64, error) {
 		result.Impl = nd.Unroll()
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
@@ -214,7 +216,7 @@ func newArrayfloat64(dims []int) *ndfloat64 {
 	result.Impl = make([]float64, size)
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -365,7 +367,7 @@ func (nd *ndfloat32) Reshape(newShape []int) (NDFloat32, error) {
 		result.Impl = nd.Unroll()
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
@@ -447,7 +449,7 @@ func newArrayfloat32(dims []int) *ndfloat32 {
 	result.Impl = make([]float32, size)
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -598,7 +600,7 @@ func (nd *ndint32) Reshape(newShape []int) (NDInt32, error) {
 		result.Impl = nd.Unroll()
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
@@ -680,7 +682,7 @@ func newArrayint32(dims []int) *ndint32 {
 	result.Impl = make([]int32, size)
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -831,7 +833,7 @@ func (nd *nduint32) Reshape(newShape []int) (NDUint32, error) {
 		result.Impl = nd.Unroll()
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
@@ -913,7 +915,7 @@ func newArrayuint32(dims []int) *nduint32 {
 	result.Impl = make([]uint32, size)
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -1064,7 +1066,7 @@ func (nd *ndint64) Reshape(newShape []int) (NDInt64, error) {
 		result.Impl = nd.Unroll()
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
@@ -1146,7 +1148,7 @@ func newArrayint64(dims []int) *ndint64 {
 	result.Impl = make([]int64, size)
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -1297,7 +1299,7 @@ func (nd *nduint64) Reshape(newShape []int) (NDUint64, error) {
 		result.Impl = nd.Unroll()
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
@@ -1379,7 +1381,7 @@ func newArrayuint64(dims []int) *nduint64 {
 	result.Impl = make([]uint64, size)
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -1530,7 +1532,7 @@ func (nd *ndint) Reshape(newShape []int) (NDInt, error) {
 		result.Impl = nd.Unroll()
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
@@ -1612,7 +1614,7 @@ func newArrayint(dims []int) *ndint {
 	result.Impl = make([]int, size)
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -1763,7 +1765,7 @@ func (nd *nduint) Reshape(newShape []int) (NDUint, error) {
 		result.Impl = nd.Unroll()
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
@@ -1845,7 +1847,7 @@ func newArrayuint(dims []int) *nduint {
 	result.Impl = make([]uint, size)
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result

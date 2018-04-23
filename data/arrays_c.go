@@ -6,8 +6,10 @@ import (
 	"errors"
 	"reflect"
 	"unsafe"
+
+	"github.com/flowmatters/openwater-core/util/slice"
+	"github.com/joelrahman/genny/generic"
 )
-import "github.com/joelrahman/genny/generic"
 
 type CArrayType generic.CNumber
 
@@ -130,7 +132,7 @@ func (nd *ndArrayTypeC) Reshape(newShape []int) (NDArrayType, error) {
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
@@ -213,7 +215,7 @@ func newArrayTypeCArray(impl *[1 << 30]CArrayType, dims []int) *ndArrayTypeC {
 	result.Impl = impl
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result

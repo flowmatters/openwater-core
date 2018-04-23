@@ -1,6 +1,9 @@
 package data
 
-import "github.com/joelrahman/genny/generic"
+import (
+	"github.com/flowmatters/openwater-core/util/slice"
+	"github.com/joelrahman/genny/generic"
+)
 
 //go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64,int,uint"
 
@@ -71,7 +74,7 @@ func (nd *ndArrayTypeCommon) NDims() int {
 }
 
 func (nd *ndArrayTypeCommon) NewIndex(val int) []int {
-	return uniform(nd.NDims(), val)
+	return slice.Uniform(nd.NDims(), val)
 }
 
 func (nd *ndArrayTypeCommon) Index(loc []int) int {

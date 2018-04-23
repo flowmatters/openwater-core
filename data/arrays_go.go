@@ -5,6 +5,8 @@ package data
 import (
 	//	"fmt"
 	"errors"
+
+	"github.com/flowmatters/openwater-core/util/slice"
 )
 
 type ndArrayType struct {
@@ -130,7 +132,7 @@ func (nd *ndArrayType) Reshape(newShape []int) (NDArrayType, error) {
 		result.Impl = nd.Unroll()
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
 		return &result, nil
@@ -212,7 +214,7 @@ func newArrayArrayType(dims []int) *ndArrayType {
 	result.Impl = make([]ArrayType, size)
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result

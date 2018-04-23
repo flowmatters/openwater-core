@@ -10,6 +10,8 @@ import (
 	"errors"
 	"reflect"
 	"unsafe"
+
+	"github.com/flowmatters/openwater-core/util/slice"
 )
 
 type ndfloat64C struct {
@@ -131,7 +133,7 @@ func (nd *ndfloat64C) Reshape(newShape []int) (NDFloat64, error) {
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
@@ -214,7 +216,7 @@ func newfloat64CArray(impl *[1 << 30]C.double, dims []int) *ndfloat64C {
 	result.Impl = impl
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -350,7 +352,7 @@ func (nd *ndfloat32C) Reshape(newShape []int) (NDFloat32, error) {
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
@@ -433,7 +435,7 @@ func newfloat32CArray(impl *[1 << 30]C.float, dims []int) *ndfloat32C {
 	result.Impl = impl
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -569,7 +571,7 @@ func (nd *ndint32C) Reshape(newShape []int) (NDInt32, error) {
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
@@ -652,7 +654,7 @@ func newint32CArray(impl *[1 << 30]C.int, dims []int) *ndint32C {
 	result.Impl = impl
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -788,7 +790,7 @@ func (nd *nduint32C) Reshape(newShape []int) (NDUint32, error) {
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
@@ -871,7 +873,7 @@ func newuint32CArray(impl *[1 << 30]C.uint, dims []int) *nduint32C {
 	result.Impl = impl
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -1007,7 +1009,7 @@ func (nd *ndint64C) Reshape(newShape []int) (NDInt64, error) {
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
@@ -1090,7 +1092,7 @@ func newint64CArray(impl *[1 << 30]C.long, dims []int) *ndint64C {
 	result.Impl = impl
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -1226,7 +1228,7 @@ func (nd *nduint64C) Reshape(newShape []int) (NDUint64, error) {
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
@@ -1309,7 +1311,7 @@ func newuint64CArray(impl *[1 << 30]C.ulong, dims []int) *nduint64C {
 	result.Impl = impl
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -1445,7 +1447,7 @@ func (nd *ndintC) Reshape(newShape []int) (NDInt, error) {
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
@@ -1528,7 +1530,7 @@ func newintCArray(impl *[1 << 30]C.int, dims []int) *ndintC {
 	result.Impl = impl
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result
@@ -1664,7 +1666,7 @@ func (nd *nduintC) Reshape(newShape []int) (NDUint, error) {
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
-		result.Step = ones(len(newShape))
+		result.Step = slice.Ones(len(newShape))
 
 		result.Offset = offsets(newShape)
 		result.OffsetStep = multiply(result.Step, result.Offset)
@@ -1747,7 +1749,7 @@ func newuintCArray(impl *[1 << 30]C.uint, dims []int) *nduintC {
 	result.Impl = impl
 	result.OriginalDims = dims
 	result.Dims = dims
-	result.Step = ones(len(dims))
+	result.Step = slice.Ones(len(dims))
 	result.Offset = offsets(dims)
 	result.OffsetStep = multiply(result.Step, result.Offset)
 	return &result

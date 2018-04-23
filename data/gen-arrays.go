@@ -4,6 +4,10 @@
 
 package data
 
+import (
+	"github.com/flowmatters/openwater-core/util/slice"
+)
+
 // type NDArray interface {
 // }
 
@@ -69,7 +73,7 @@ func (nd *ndfloat64Common) NDims() int {
 }
 
 func (nd *ndfloat64Common) NewIndex(val int) []int {
-	return uniform(nd.NDims(), val)
+	return slice.Uniform(nd.NDims(), val)
 }
 
 func (nd *ndfloat64Common) Index(loc []int) int {
@@ -204,7 +208,7 @@ func (nd *ndfloat32Common) NDims() int {
 }
 
 func (nd *ndfloat32Common) NewIndex(val int) []int {
-	return uniform(nd.NDims(), val)
+	return slice.Uniform(nd.NDims(), val)
 }
 
 func (nd *ndfloat32Common) Index(loc []int) int {
@@ -339,7 +343,7 @@ func (nd *ndint32Common) NDims() int {
 }
 
 func (nd *ndint32Common) NewIndex(val int) []int {
-	return uniform(nd.NDims(), val)
+	return slice.Uniform(nd.NDims(), val)
 }
 
 func (nd *ndint32Common) Index(loc []int) int {
@@ -474,7 +478,7 @@ func (nd *nduint32Common) NDims() int {
 }
 
 func (nd *nduint32Common) NewIndex(val int) []int {
-	return uniform(nd.NDims(), val)
+	return slice.Uniform(nd.NDims(), val)
 }
 
 func (nd *nduint32Common) Index(loc []int) int {
@@ -609,7 +613,7 @@ func (nd *ndint64Common) NDims() int {
 }
 
 func (nd *ndint64Common) NewIndex(val int) []int {
-	return uniform(nd.NDims(), val)
+	return slice.Uniform(nd.NDims(), val)
 }
 
 func (nd *ndint64Common) Index(loc []int) int {
@@ -744,7 +748,7 @@ func (nd *nduint64Common) NDims() int {
 }
 
 func (nd *nduint64Common) NewIndex(val int) []int {
-	return uniform(nd.NDims(), val)
+	return slice.Uniform(nd.NDims(), val)
 }
 
 func (nd *nduint64Common) Index(loc []int) int {
@@ -879,7 +883,7 @@ func (nd *ndintCommon) NDims() int {
 }
 
 func (nd *ndintCommon) NewIndex(val int) []int {
-	return uniform(nd.NDims(), val)
+	return slice.Uniform(nd.NDims(), val)
 }
 
 func (nd *ndintCommon) Index(loc []int) int {
@@ -1014,7 +1018,7 @@ func (nd *nduintCommon) NDims() int {
 }
 
 func (nd *nduintCommon) NewIndex(val int) []int {
-	return uniform(nd.NDims(), val)
+	return slice.Uniform(nd.NDims(), val)
 }
 
 func (nd *nduintCommon) Index(loc []int) int {
