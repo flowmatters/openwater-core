@@ -257,7 +257,7 @@ func TestWriteTwice(t *testing.T) {
 func TestWrite3DInt32Whole(t *testing.T) {
 	assert := assert.New(t)
 	test_fn := "_test_write_whole.h5"
-	ds := "int32_3d"
+	ds := "NESTED/int32_3d"
 
 	ref := H5RefInt32{Filename: test_fn, Dataset: ds}
 
