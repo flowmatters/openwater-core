@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"runtime/pprof"
 
@@ -15,6 +16,7 @@ import (
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+var overwrite = flag.Bool("overwrite", false, "overwrite existing output files")
 
 const (
 	LINK_SRC_GENERATION  = 0
@@ -28,6 +30,19 @@ const (
 	LINK_DEST_GEN_NODE   = 8
 	LINK_DEST_VAR        = 9
 )
+
+// errorString is a trivial implementation of error.
+type errorString struct {
+	s string
+}
+
+func (e *errorString) Error() string {
+	return e.s
+}
+
+func prefix(msg string, e error) error {
+	return &errorString{msg + e.Error()}
+}
 
 type modelGeneration struct {
 	Model      sim.TimeSteppingModel
@@ -45,10 +60,14 @@ func (g *modelGeneration) Run() {
 }
 
 type modelReference struct {
-	Filename    string
-	ModelName   string
-	Batches     []int32
-	Generations []*modelGeneration
+	Filename           string
+	OutputFilename     string
+	WriteInputs        bool
+	WriteOutputs       bool
+	ModelName          string
+	Batches            []int32
+	Generations        []*modelGeneration
+	outputsInitialised bool
 }
 
 func initModel(fn, model string) (*modelReference, error) {
@@ -118,9 +137,80 @@ func (mr *modelReference) PurgeGeneration(i int) {
 	mr.Generations[i] = nil
 }
 
-func loadGeneration(modelType string) {
-	// Needs to be a member of the type...
-	// For given model, load inputs, parameters, initial states for a given generation
+func (mr *modelReference) TotalRuns() int {
+	return int(mr.Batches[len(mr.Batches)-1])
+}
+
+func (mr *modelReference) initialiseDataset(label string, refShape []int) error {
+	ref := io.H5RefFloat64{}
+	ref.Filename = mr.OutputFilename
+	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
+	count := mr.TotalRuns()
+	return ref.Create([]int{count, refShape[1], refShape[2]}, math.NaN())
+}
+
+func (mr *modelReference) InitialiseOutputs(refGeneration int) error {
+	gen, err := mr.GetGeneration(refGeneration)
+	if err != nil {
+		return prefix("Couldn't get generation: ", err)
+	}
+
+	if mr.WriteOutputs {
+		err = mr.initialiseDataset("outputs", gen.Outputs.Shape())
+		if err != nil {
+			return prefix("Couldn't init dataset for outputs: ", err)
+		}
+	}
+
+	if mr.WriteInputs {
+		err = mr.initialiseDataset("inputs", gen.Inputs.Shape())
+		if err != nil {
+			return prefix("Couldn't init dataset for inputs: ", err)
+		}
+	}
+
+	mr.outputsInitialised = true
+	return nil
+}
+
+func (mr *modelReference) writeData(label string, data data.ND3Float64, loc int32) error {
+	ref := io.H5RefFloat64{}
+	ref.Filename = mr.OutputFilename
+	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
+	return ref.WriteSlice(data, []int{int(loc), 0, 0})
+}
+
+func (mr *modelReference) WriteData(generation int) error {
+	gen, err := mr.GetGeneration(generation)
+	if err != nil {
+		return prefix("Cannot open generation: ", err)
+	}
+
+	if !mr.outputsInitialised {
+		if gen.Outputs.Len(0) > 0 {
+			err = mr.InitialiseOutputs(generation)
+			if err != nil {
+				return prefix("Couldn't initialise outputs: ", err)
+			}
+		}
+		return nil
+	}
+
+	if mr.WriteInputs {
+		err = mr.writeData("inputs", gen.Inputs, mr.Batches[generation])
+		if err != nil {
+			return prefix("Writing inputs ", err)
+		}
+	}
+
+	if mr.WriteOutputs {
+		err = mr.writeData("outputs", gen.Outputs, mr.Batches[generation])
+		if err != nil {
+			return prefix("Writing outputs ", err)
+		}
+	}
+
+	return nil
 }
 
 func main() {
@@ -137,6 +227,20 @@ func main() {
 
 	args := flag.Args()
 	fn := args[0]
+	var outputFn string = ""
+	if len(args) > 1 {
+		outputFn = args[1]
+
+		if _, err := os.Stat(outputFn); err == nil {
+			if *overwrite {
+				os.Remove(outputFn)
+			} else {
+				fmt.Printf("Output file (%s) exists and overwrite not set. Delete file or use -overwrite\n", outputFn)
+				os.Exit(1)
+			}
+		}
+	}
+
 	modelsRef := io.H5RefFloat64{Filename: fn, Dataset: "/META/models"}
 	dimsRef := io.H5RefFloat64{Filename: fn, Dataset: "/DIMENSIONS"}
 	//	procRef := io.H5Ref{Filename: fn, Dataset: "/PROCESSES"}
@@ -172,6 +276,16 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+
+		if outputFn != "" {
+			ref.OutputFilename = outputFn
+			ref.WriteOutputs = true
+
+			if ref.Batches[0] == 0 {
+				ref.WriteInputs = true
+			}
+		}
+
 		fmt.Println("Batches for ", ref.ModelName, ref.Batches)
 		fmt.Println("Generations for ", ref.ModelName, ref.Generations)
 		models[modelName] = ref
@@ -200,6 +314,18 @@ func main() {
 		}
 
 		fmt.Printf("= %d runs\n", genTotal)
+
+		if outputFn != "" {
+			fmt.Println("Writing results...")
+			for _, modelName := range modelNames {
+				modelRef := models[modelName]
+				err = modelRef.WriteData(i)
+				if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
+			}
+		}
 
 		currentLink := nextLink
 		for {
@@ -245,5 +371,5 @@ func main() {
 		fmt.Println()
 	}
 
-	fmt.Println("Add stats")
+	//	fmt.Println("Add stats")
 }
