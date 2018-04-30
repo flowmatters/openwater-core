@@ -192,19 +192,25 @@ func (mr *modelReference) WriteData(generation int) error {
 			if err != nil {
 				return prefix("Couldn't initialise outputs: ", err)
 			}
+		} else {
+			return nil
 		}
-		return nil
+	}
+
+	var loc int32 = 0
+	if generation > 0 {
+		loc = mr.Batches[generation-1]
 	}
 
 	if mr.WriteInputs {
-		err = mr.writeData("inputs", gen.Inputs, mr.Batches[generation])
+		err = mr.writeData("inputs", gen.Inputs, loc)
 		if err != nil {
 			return prefix("Writing inputs ", err)
 		}
 	}
 
 	if mr.WriteOutputs {
-		err = mr.writeData("outputs", gen.Outputs, mr.Batches[generation])
+		err = mr.writeData("outputs", gen.Outputs, loc)
 		if err != nil {
 			return prefix("Writing outputs ", err)
 		}
@@ -357,10 +363,16 @@ func main() {
 
 			nTimesteps := srcModel.Outputs.Len(sim.DIMO_TIMESTEP)
 			srcVar := link.Get1(LINK_SRC_VAR)
+			if srcVar < 0 {
+				continue
+			}
 			srcIdx := link.Get1(LINK_SRC_GEN_NODE)
 			srcData := srcModel.Outputs.Slice([]int{int(srcIdx), int(srcVar), 0}, []int{1, 1, nTimesteps}, []int{1, 1, 1})
 
 			destVar := link.Get1(LINK_DEST_VAR)
+			if destVar < 0 {
+				continue
+			}
 			destIdx := link.Get1(LINK_DEST_GEN_NODE)
 			destData := destModel.Inputs.Slice([]int{int(destIdx), int(destVar), 0}, []int{1, 1, nTimesteps}, []int{1, 1, 1})
 
