@@ -27,19 +27,17 @@ type Simhyd struct {
 }
 
 func (m *Simhyd) ApplyParameters(parameters data.ND2Float64) {
-  // fmt.Println(parameters)
-  // fmt.Println(parameters.Shape())
   nSets := parameters.Len(sim.DIMP_CELL)
-  // fmt.Println(nSets)
-  m.baseflowCoefficient = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.imperviousThreshold = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.infiltrationCoefficient = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.infiltrationShape = parameters.Slice([]int{ 3, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.interflowCoefficient = parameters.Slice([]int{ 4, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.perviousFraction = parameters.Slice([]int{ 5, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.rainfallInterceptionStoreCapacity = parameters.Slice([]int{ 6, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.rechargeCoefficient = parameters.Slice([]int{ 7, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.soilMoistureStoreCapacity = parameters.Slice([]int{ 8, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
+  newShape := []int{nSets}
+  m.baseflowCoefficient = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.imperviousThreshold = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.infiltrationCoefficient = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.infiltrationShape = parameters.Slice([]int{ 3, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.interflowCoefficient = parameters.Slice([]int{ 4, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.perviousFraction = parameters.Slice([]int{ 5, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.rainfallInterceptionStoreCapacity = parameters.Slice([]int{ 6, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.rechargeCoefficient = parameters.Slice([]int{ 7, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.soilMoistureStoreCapacity = parameters.Slice([]int{ 8, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   
 }
 

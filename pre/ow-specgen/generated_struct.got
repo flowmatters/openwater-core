@@ -20,12 +20,10 @@ type {{.Name}} struct {
 }
 
 func (m *{{.Name}}) ApplyParameters(parameters data.ND2Float64) {
-  // fmt.Println(parameters)
-  // fmt.Println(parameters.Shape())
   nSets := parameters.Len(sim.DIMP_CELL)
-  // fmt.Println(nSets)
+  newShape := []int{nSets}
   {{range $i, $v := .ParameterSpecs -}}
-  m.{{$v.Name}} = parameters.Slice([]int{ {{$i}}, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
+  m.{{$v.Name}} = parameters.Slice([]int{ {{$i}}, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   {{end}}
 }
 {{end}}
@@ -75,7 +73,6 @@ func (m *{{.Name}}) InitialiseStates(n int) data.ND2Float64 {
     if result==nil {
       result = data.NewArray2DFloat64(n,states.Len(1))
     }
-//    fmt.Println(states.Shape(),result.Shape())
     result.ApplySlice([]int{i,0},[]int{1,1},states)
 	}
  

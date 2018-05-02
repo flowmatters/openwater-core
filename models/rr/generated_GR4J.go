@@ -22,14 +22,12 @@ type GR4J struct {
 }
 
 func (m *GR4J) ApplyParameters(parameters data.ND2Float64) {
-  // fmt.Println(parameters)
-  // fmt.Println(parameters.Shape())
   nSets := parameters.Len(sim.DIMP_CELL)
-  // fmt.Println(nSets)
-  m.X1 = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.X2 = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.X3 = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.X4 = parameters.Slice([]int{ 3, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
+  newShape := []int{nSets}
+  m.X1 = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.X2 = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.X3 = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.X4 = parameters.Slice([]int{ 3, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   
 }
 
@@ -93,7 +91,6 @@ func (m *GR4J) InitialiseStates(n int) data.ND2Float64 {
     if result==nil {
       result = data.NewArray2DFloat64(n,states.Len(1))
     }
-//    fmt.Println(states.Shape(),result.Shape())
     result.ApplySlice([]int{i,0},[]int{1,1},states)
 	}
  

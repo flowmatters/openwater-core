@@ -20,12 +20,10 @@ type EmcDwc struct {
 }
 
 func (m *EmcDwc) ApplyParameters(parameters data.ND2Float64) {
-  // fmt.Println(parameters)
-  // fmt.Println(parameters.Shape())
   nSets := parameters.Len(sim.DIMP_CELL)
-  // fmt.Println(nSets)
-  m.EMC = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
-  m.DWC = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).(data.ND1Float64)
+  newShape := []int{nSets}
+  m.EMC = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.DWC = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   
 }
 
