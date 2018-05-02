@@ -36,6 +36,7 @@ func muskingum(inflows, laterals data.ND1Float64,
 	s, prevInflow, prevOutflow float64,
 	k, x, deltaT float64,
 	outflows data.ND1Float64) (float64, float64, float64) {
+	idx := []int{0}
 	nDays := inflows.Len1()
 
 	kx2 := 2 * k * x
@@ -45,11 +46,12 @@ func muskingum(inflows, laterals data.ND1Float64,
 	a3 := (2*k*(1-x) - deltaT) / denom
 
 	for i := 0; i < nDays; i++ {
-		inflow := inflows.Get1(i)
-		lateral := laterals.Get1(i)
+		idx[0] = i
+		inflow := inflows.Get(idx)
+		lateral := laterals.Get(idx)
 
 		outflow := a1*(inflow+lateral) + a2*prevInflow + a3*prevOutflow
-		outflows.Set1(i, outflow)
+		outflows.Set(idx, outflow)
 
 		prevOutflow = outflow
 		prevInflow = inflow
