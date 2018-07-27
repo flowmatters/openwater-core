@@ -272,5 +272,17 @@ func TestCArraySlice(t *testing.T) {
 	assert.Equal(11.0, sliced2.Get([]int{1, 0, 0}))
 	assert.Equal(51.0, sliced2.Get([]int{5, 0, 0}))
 	assert.Equal(91.0, sliced2.Get([]int{9, 0, 0}))
+}
 
+func TestCArraySliceAndReshape(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{9, 1}
+
+	cArray := makefloat64CArrayForTest(shape)
+
+	sliced := cArray.Slice([]int{8, 0}, []int{1, 1}, nil)
+	assert.Equal(8.0, sliced.Get([]int{0, 0}))
+
+	reshaped := sliced.MustReshape([]int{1}).(ND1Float64)
+	assert.Equal(8.0, reshaped.Get([]int{0}))
 }

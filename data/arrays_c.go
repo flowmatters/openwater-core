@@ -128,7 +128,7 @@ func (nd *ndArrayTypeC) Reshape(newShape []int) (NDArrayType, error) {
 	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
 
 	if nd.Contiguous() || !reshapeToSeries {
-		result.Start = 0
+		result.Start = nd.Start
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape

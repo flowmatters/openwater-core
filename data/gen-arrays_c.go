@@ -129,7 +129,7 @@ func (nd *ndfloat64C) Reshape(newShape []int) (NDFloat64, error) {
 	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
 
 	if nd.Contiguous() || !reshapeToSeries {
-		result.Start = 0
+		result.Start = nd.Start
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
@@ -348,7 +348,7 @@ func (nd *ndfloat32C) Reshape(newShape []int) (NDFloat32, error) {
 	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
 
 	if nd.Contiguous() || !reshapeToSeries {
-		result.Start = 0
+		result.Start = nd.Start
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
@@ -567,7 +567,7 @@ func (nd *ndint32C) Reshape(newShape []int) (NDInt32, error) {
 	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
 
 	if nd.Contiguous() || !reshapeToSeries {
-		result.Start = 0
+		result.Start = nd.Start
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
@@ -786,7 +786,7 @@ func (nd *nduint32C) Reshape(newShape []int) (NDUint32, error) {
 	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
 
 	if nd.Contiguous() || !reshapeToSeries {
-		result.Start = 0
+		result.Start = nd.Start
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
@@ -1005,7 +1005,7 @@ func (nd *ndint64C) Reshape(newShape []int) (NDInt64, error) {
 	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
 
 	if nd.Contiguous() || !reshapeToSeries {
-		result.Start = 0
+		result.Start = nd.Start
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
@@ -1224,7 +1224,7 @@ func (nd *nduint64C) Reshape(newShape []int) (NDUint64, error) {
 	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
 
 	if nd.Contiguous() || !reshapeToSeries {
-		result.Start = 0
+		result.Start = nd.Start
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
@@ -1443,7 +1443,7 @@ func (nd *ndintC) Reshape(newShape []int) (NDInt, error) {
 	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
 
 	if nd.Contiguous() || !reshapeToSeries {
-		result.Start = 0
+		result.Start = nd.Start
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
@@ -1662,7 +1662,7 @@ func (nd *nduintC) Reshape(newShape []int) (NDUint, error) {
 	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
 
 	if nd.Contiguous() || !reshapeToSeries {
-		result.Start = 0
+		result.Start = nd.Start
 		result.Impl = nd.Impl
 		result.OriginalDims = newShape
 		result.Dims = newShape
