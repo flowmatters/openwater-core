@@ -56,7 +56,7 @@ func (m *GR4J)  Description() sim.ModelDescription{
   "runoff",}
 
   result.States = []string{
-  "s","n1","n2","q1","q9",}
+  "s","r","n1","n2","q1","q9",}
 
 	return result
 }
@@ -162,7 +162,7 @@ func (m *GR4J) Run(inputs data.ND3Float64, states data.ND2Float64, outputs data.
     
 
     
-    s,n1,n2,q1,q9 := extractGR4JStates(initialStates)
+    s,r,n1,n2,q1,q9 := extractGR4JStates(initialStates)
     
 
 //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
@@ -186,11 +186,11 @@ func (m *GR4J) Run(inputs data.ND3Float64, states data.ND2Float64, outputs data.
     
     
 
-		s,n1,n2,q1,q9= gr4j(rainfall,pet,s,n1,n2,q1,q9,x1,x2,x3,x4,runoff)
+		s,r,n1,n2,q1,q9= gr4j(rainfall,pet,s,r,n1,n2,q1,q9,x1,x2,x3,x4,runoff)
 
     
     // TODO Retrieve states
-		states.ApplySlice([]int{i,0},[]int{0,1},packGR4JStates(s,n1,n2,q1,q9))
+		states.ApplySlice([]int{i,0},[]int{0,1},packGR4JStates(s,r,n1,n2,q1,q9))
     
 
 //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 1)
