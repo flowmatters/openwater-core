@@ -85,6 +85,10 @@ func (nd *ndArrayType) ApplySlice(loc []int, step []int, vals NDArrayType) {
 	// How to speed up
 }
 
+func (nd *ndArrayType) CopyFrom(other NDArrayType) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
+}
+
 func (nd *ndArrayType) Unroll() []ArrayType {
 	if nd.Contiguous() {
 		s := nd.Start

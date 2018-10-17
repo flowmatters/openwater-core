@@ -274,6 +274,21 @@ func TestCArraySlice(t *testing.T) {
 	assert.Equal(91.0, sliced2.Get([]int{9, 0, 0}))
 }
 
+func TestCArraySliceUpdatesOriginal(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{10, 5, 2}
+
+	cArray := makefloat64CArrayForTest(shape)
+
+	sliced := cArray.Slice([]int{9, 3, 0}, []int{1, 2, 2}, nil)
+
+	sliced.Set([]int{0, 0, 0}, 500.0)
+	assert.Equal(500.0, cArray.Get([]int{9, 3, 0}))
+
+	sliced.Set([]int{0, 1, 1}, 1000.0)
+	assert.Equal(1000.0, cArray.Get([]int{9, 4, 1}))
+}
+
 func TestCArraySliceAndReshape(t *testing.T) {
 	assert := assert.New(t)
 	shape := []int{9, 1}
@@ -285,4 +300,62 @@ func TestCArraySliceAndReshape(t *testing.T) {
 
 	reshaped := sliced.MustReshape([]int{1}).(ND1Float64)
 	assert.Equal(8.0, reshaped.Get([]int{0}))
+}
+
+func testCopyFrom(t *testing.T, from, to ND2Float64) {
+	assert := assert.New(t)
+	rows := from.Len(0)
+	cols := from.Len(1)
+
+	i := 0
+
+	for r := 0; r < rows; r++ {
+		for c := 0; c < cols; c++ {
+			to.Set2(r, c, 0.0)
+			from.Set2(r, c, float64(i))
+			i++
+		}
+	}
+
+	to.CopyFrom(from)
+	i = 0
+
+	for r := 0; r < rows; r++ {
+		for c := 0; c < cols; c++ {
+			assert.Equalf(float64(i), to.Get2(r, c), "Error at [%d,%d] in [%d,%d] array", r, c, rows, cols)
+			i++
+		}
+	}
+
+}
+func TestCopyNativeToCArray(t *testing.T) {
+	rows := 9
+	cols := 2
+	shape := []int{rows, cols}
+
+	dest := makefloat64CArrayForTest(shape)
+	src := NewArray2DFloat64(rows, cols)
+
+	testCopyFrom(t, src, dest)
+}
+
+func TestCopyCArrayToNative(t *testing.T) {
+	rows := 9
+	cols := 2
+	shape := []int{rows, cols}
+
+	dest := NewArray2DFloat64(rows, cols)
+	src := makefloat64CArrayForTest(shape)
+
+	testCopyFrom(t, src, dest)
+}
+
+func TestCopyNativeToNative(t *testing.T) {
+	rows := 9
+	cols := 2
+
+	dest := NewArray2DFloat64(rows, cols)
+	src := NewArray2DFloat64(rows, cols)
+
+	testCopyFrom(t, src, dest)
 }

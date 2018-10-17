@@ -71,10 +71,6 @@ func (nd *ndArrayTypeC) Apply(loc []int, dim int, step int, vals []ArrayType) {
 func (nd *ndArrayTypeC) ApplySlice(loc []int, step []int, vals NDArrayType) {
 	shape := vals.Shape()
 	slice := nd.Slice(loc, shape, step)
-	if slice.Contiguous() {
-		copy(slice.Unroll(), vals.Unroll())
-		return
-	}
 
 	idx := slice.NewIndex(0)
 	size := product(shape)
@@ -83,6 +79,10 @@ func (nd *ndArrayTypeC) ApplySlice(loc []int, step []int, vals NDArrayType) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *ndArrayTypeC) CopyFrom(other NDArrayType) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *ndArrayTypeC) Unroll() []ArrayType {

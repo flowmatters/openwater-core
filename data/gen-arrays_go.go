@@ -87,6 +87,10 @@ func (nd *ndfloat64) ApplySlice(loc []int, step []int, vals NDFloat64) {
 	// How to speed up
 }
 
+func (nd *ndfloat64) CopyFrom(other NDFloat64) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
+}
+
 func (nd *ndfloat64) Unroll() []float64 {
 	if nd.Contiguous() {
 		s := nd.Start
@@ -318,6 +322,10 @@ func (nd *ndfloat32) ApplySlice(loc []int, step []int, vals NDFloat32) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *ndfloat32) CopyFrom(other NDFloat32) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *ndfloat32) Unroll() []float32 {
@@ -553,6 +561,10 @@ func (nd *ndint32) ApplySlice(loc []int, step []int, vals NDInt32) {
 	// How to speed up
 }
 
+func (nd *ndint32) CopyFrom(other NDInt32) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
+}
+
 func (nd *ndint32) Unroll() []int32 {
 	if nd.Contiguous() {
 		s := nd.Start
@@ -784,6 +796,10 @@ func (nd *nduint32) ApplySlice(loc []int, step []int, vals NDUint32) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *nduint32) CopyFrom(other NDUint32) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *nduint32) Unroll() []uint32 {
@@ -1019,6 +1035,10 @@ func (nd *ndint64) ApplySlice(loc []int, step []int, vals NDInt64) {
 	// How to speed up
 }
 
+func (nd *ndint64) CopyFrom(other NDInt64) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
+}
+
 func (nd *ndint64) Unroll() []int64 {
 	if nd.Contiguous() {
 		s := nd.Start
@@ -1250,6 +1270,10 @@ func (nd *nduint64) ApplySlice(loc []int, step []int, vals NDUint64) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *nduint64) CopyFrom(other NDUint64) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *nduint64) Unroll() []uint64 {
@@ -1485,6 +1509,10 @@ func (nd *ndint) ApplySlice(loc []int, step []int, vals NDInt) {
 	// How to speed up
 }
 
+func (nd *ndint) CopyFrom(other NDInt) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
+}
+
 func (nd *ndint) Unroll() []int {
 	if nd.Contiguous() {
 		s := nd.Start
@@ -1716,6 +1744,10 @@ func (nd *nduint) ApplySlice(loc []int, step []int, vals NDUint) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *nduint) CopyFrom(other NDUint) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *nduint) Unroll() []uint {

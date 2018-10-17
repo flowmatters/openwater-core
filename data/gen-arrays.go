@@ -22,6 +22,7 @@ type NDFloat64 interface {
 	Slice(loc []int, dims []int, step []int) NDFloat64
 	Apply(loc []int, dim int, step int, vals []float64)
 	ApplySlice(loc []int, step []int, vals NDFloat64)
+	CopyFrom(other NDFloat64)
 	Contiguous() bool
 	Unroll() []float64
 	Reshape(newShape []int) (NDFloat64, error)
@@ -157,6 +158,7 @@ type NDFloat32 interface {
 	Slice(loc []int, dims []int, step []int) NDFloat32
 	Apply(loc []int, dim int, step int, vals []float32)
 	ApplySlice(loc []int, step []int, vals NDFloat32)
+	CopyFrom(other NDFloat32)
 	Contiguous() bool
 	Unroll() []float32
 	Reshape(newShape []int) (NDFloat32, error)
@@ -292,6 +294,7 @@ type NDInt32 interface {
 	Slice(loc []int, dims []int, step []int) NDInt32
 	Apply(loc []int, dim int, step int, vals []int32)
 	ApplySlice(loc []int, step []int, vals NDInt32)
+	CopyFrom(other NDInt32)
 	Contiguous() bool
 	Unroll() []int32
 	Reshape(newShape []int) (NDInt32, error)
@@ -427,6 +430,7 @@ type NDUint32 interface {
 	Slice(loc []int, dims []int, step []int) NDUint32
 	Apply(loc []int, dim int, step int, vals []uint32)
 	ApplySlice(loc []int, step []int, vals NDUint32)
+	CopyFrom(other NDUint32)
 	Contiguous() bool
 	Unroll() []uint32
 	Reshape(newShape []int) (NDUint32, error)
@@ -562,6 +566,7 @@ type NDInt64 interface {
 	Slice(loc []int, dims []int, step []int) NDInt64
 	Apply(loc []int, dim int, step int, vals []int64)
 	ApplySlice(loc []int, step []int, vals NDInt64)
+	CopyFrom(other NDInt64)
 	Contiguous() bool
 	Unroll() []int64
 	Reshape(newShape []int) (NDInt64, error)
@@ -697,6 +702,7 @@ type NDUint64 interface {
 	Slice(loc []int, dims []int, step []int) NDUint64
 	Apply(loc []int, dim int, step int, vals []uint64)
 	ApplySlice(loc []int, step []int, vals NDUint64)
+	CopyFrom(other NDUint64)
 	Contiguous() bool
 	Unroll() []uint64
 	Reshape(newShape []int) (NDUint64, error)
@@ -832,6 +838,7 @@ type NDInt interface {
 	Slice(loc []int, dims []int, step []int) NDInt
 	Apply(loc []int, dim int, step int, vals []int)
 	ApplySlice(loc []int, step []int, vals NDInt)
+	CopyFrom(other NDInt)
 	Contiguous() bool
 	Unroll() []int
 	Reshape(newShape []int) (NDInt, error)
@@ -967,6 +974,7 @@ type NDUint interface {
 	Slice(loc []int, dims []int, step []int) NDUint
 	Apply(loc []int, dim int, step int, vals []uint)
 	ApplySlice(loc []int, step []int, vals NDUint)
+	CopyFrom(other NDUint)
 	Contiguous() bool
 	Unroll() []uint
 	Reshape(newShape []int) (NDUint, error)

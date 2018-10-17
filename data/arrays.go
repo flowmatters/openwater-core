@@ -23,6 +23,7 @@ type NDArrayType interface {
 	Slice(loc []int, dims []int, step []int) NDArrayType
 	Apply(loc []int, dim int, step int, vals []ArrayType)
 	ApplySlice(loc []int, step []int, vals NDArrayType)
+	CopyFrom(other NDArrayType)
 	Contiguous() bool
 	Unroll() []ArrayType
 	Reshape(newShape []int) (NDArrayType, error)

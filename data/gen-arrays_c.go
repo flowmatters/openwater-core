@@ -72,10 +72,6 @@ func (nd *ndfloat64C) Apply(loc []int, dim int, step int, vals []float64) {
 func (nd *ndfloat64C) ApplySlice(loc []int, step []int, vals NDFloat64) {
 	shape := vals.Shape()
 	slice := nd.Slice(loc, shape, step)
-	if slice.Contiguous() {
-		copy(slice.Unroll(), vals.Unroll())
-		return
-	}
 
 	idx := slice.NewIndex(0)
 	size := product(shape)
@@ -84,6 +80,10 @@ func (nd *ndfloat64C) ApplySlice(loc []int, step []int, vals NDFloat64) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *ndfloat64C) CopyFrom(other NDFloat64) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *ndfloat64C) Unroll() []float64 {
@@ -291,10 +291,6 @@ func (nd *ndfloat32C) Apply(loc []int, dim int, step int, vals []float32) {
 func (nd *ndfloat32C) ApplySlice(loc []int, step []int, vals NDFloat32) {
 	shape := vals.Shape()
 	slice := nd.Slice(loc, shape, step)
-	if slice.Contiguous() {
-		copy(slice.Unroll(), vals.Unroll())
-		return
-	}
 
 	idx := slice.NewIndex(0)
 	size := product(shape)
@@ -303,6 +299,10 @@ func (nd *ndfloat32C) ApplySlice(loc []int, step []int, vals NDFloat32) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *ndfloat32C) CopyFrom(other NDFloat32) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *ndfloat32C) Unroll() []float32 {
@@ -510,10 +510,6 @@ func (nd *ndint32C) Apply(loc []int, dim int, step int, vals []int32) {
 func (nd *ndint32C) ApplySlice(loc []int, step []int, vals NDInt32) {
 	shape := vals.Shape()
 	slice := nd.Slice(loc, shape, step)
-	if slice.Contiguous() {
-		copy(slice.Unroll(), vals.Unroll())
-		return
-	}
 
 	idx := slice.NewIndex(0)
 	size := product(shape)
@@ -522,6 +518,10 @@ func (nd *ndint32C) ApplySlice(loc []int, step []int, vals NDInt32) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *ndint32C) CopyFrom(other NDInt32) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *ndint32C) Unroll() []int32 {
@@ -729,10 +729,6 @@ func (nd *nduint32C) Apply(loc []int, dim int, step int, vals []uint32) {
 func (nd *nduint32C) ApplySlice(loc []int, step []int, vals NDUint32) {
 	shape := vals.Shape()
 	slice := nd.Slice(loc, shape, step)
-	if slice.Contiguous() {
-		copy(slice.Unroll(), vals.Unroll())
-		return
-	}
 
 	idx := slice.NewIndex(0)
 	size := product(shape)
@@ -741,6 +737,10 @@ func (nd *nduint32C) ApplySlice(loc []int, step []int, vals NDUint32) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *nduint32C) CopyFrom(other NDUint32) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *nduint32C) Unroll() []uint32 {
@@ -948,10 +948,6 @@ func (nd *ndint64C) Apply(loc []int, dim int, step int, vals []int64) {
 func (nd *ndint64C) ApplySlice(loc []int, step []int, vals NDInt64) {
 	shape := vals.Shape()
 	slice := nd.Slice(loc, shape, step)
-	if slice.Contiguous() {
-		copy(slice.Unroll(), vals.Unroll())
-		return
-	}
 
 	idx := slice.NewIndex(0)
 	size := product(shape)
@@ -960,6 +956,10 @@ func (nd *ndint64C) ApplySlice(loc []int, step []int, vals NDInt64) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *ndint64C) CopyFrom(other NDInt64) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *ndint64C) Unroll() []int64 {
@@ -1167,10 +1167,6 @@ func (nd *nduint64C) Apply(loc []int, dim int, step int, vals []uint64) {
 func (nd *nduint64C) ApplySlice(loc []int, step []int, vals NDUint64) {
 	shape := vals.Shape()
 	slice := nd.Slice(loc, shape, step)
-	if slice.Contiguous() {
-		copy(slice.Unroll(), vals.Unroll())
-		return
-	}
 
 	idx := slice.NewIndex(0)
 	size := product(shape)
@@ -1179,6 +1175,10 @@ func (nd *nduint64C) ApplySlice(loc []int, step []int, vals NDUint64) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *nduint64C) CopyFrom(other NDUint64) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *nduint64C) Unroll() []uint64 {
@@ -1386,10 +1386,6 @@ func (nd *ndintC) Apply(loc []int, dim int, step int, vals []int) {
 func (nd *ndintC) ApplySlice(loc []int, step []int, vals NDInt) {
 	shape := vals.Shape()
 	slice := nd.Slice(loc, shape, step)
-	if slice.Contiguous() {
-		copy(slice.Unroll(), vals.Unroll())
-		return
-	}
 
 	idx := slice.NewIndex(0)
 	size := product(shape)
@@ -1398,6 +1394,10 @@ func (nd *ndintC) ApplySlice(loc []int, step []int, vals NDInt) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *ndintC) CopyFrom(other NDInt) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *ndintC) Unroll() []int {
@@ -1605,10 +1605,6 @@ func (nd *nduintC) Apply(loc []int, dim int, step int, vals []uint) {
 func (nd *nduintC) ApplySlice(loc []int, step []int, vals NDUint) {
 	shape := vals.Shape()
 	slice := nd.Slice(loc, shape, step)
-	if slice.Contiguous() {
-		copy(slice.Unroll(), vals.Unroll())
-		return
-	}
 
 	idx := slice.NewIndex(0)
 	size := product(shape)
@@ -1617,6 +1613,10 @@ func (nd *nduintC) ApplySlice(loc []int, step []int, vals NDUint) {
 		increment(idx, shape)
 	}
 	// How to speed up
+}
+
+func (nd *nduintC) CopyFrom(other NDUint) {
+	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
 func (nd *nduintC) Unroll() []uint {
