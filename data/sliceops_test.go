@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/flowmatters/openwater-core/util/slice"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestProduct(t *testing.T) {
@@ -53,4 +54,40 @@ func TestDecrement(t *testing.T) {
 	if !slice.Equal(res, exp) {
 		t.Errorf("decr(%v) should be %v, but was %v", test, exp, res)
 	}
+}
+
+func TestIncrement(t *testing.T) {
+	assert := assert.New(t)
+
+	shape := []int{9, 2}
+
+	vec := []int{0, 0}
+	increment(vec, shape)
+	assert.Equal([]int{0, 1}, vec)
+
+	vec = []int{3, 1}
+	increment(vec, shape)
+	assert.Equal([]int{4, 0}, vec)
+
+	vec = []int{5, 1}
+	increment(vec, shape)
+	assert.Equal([]int{6, 0}, vec)
+
+	shape = []int{5, 3, 4}
+
+	vec = []int{0, 0, 0}
+	increment(vec, shape)
+	assert.Equal([]int{0, 0, 1}, vec)
+
+	vec = []int{3, 1, 1}
+	increment(vec, shape)
+	assert.Equal([]int{3, 1, 2}, vec)
+
+	vec = []int{3, 1, 3}
+	increment(vec, shape)
+	assert.Equal([]int{3, 2, 0}, vec)
+
+	vec = []int{3, 2, 3}
+	increment(vec, shape)
+	assert.Equal([]int{4, 0, 0}, vec)
 }

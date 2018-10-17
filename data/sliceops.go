@@ -65,7 +65,7 @@ func increment(vector, wrt []int) {
 	for i := (dims - 1); i >= 0; i-- {
 		vector[i]++
 		if vector[i] >= wrt[i] {
-			vector[i]--
+			vector[i] = 0
 		} else {
 			return
 		}
