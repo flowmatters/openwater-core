@@ -55,4 +55,10 @@ func RunSingleModel(
 
 	// fmt.Println("Params")
 	// fmt.Println(pArray.Get2(0, 0))
+
+	// if initStates Copy data back into provided states array...
+	if initStates && (states != nil) {
+		sOrig := data.NewFloat64CArray(unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2Float64)
+		sOrig.CopyFrom(sArray)
+	}
 }
