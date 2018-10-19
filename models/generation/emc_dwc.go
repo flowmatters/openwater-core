@@ -1,7 +1,7 @@
 package generation
 
 import (
-	"github.com/flowmatters/openwater-core/conv"
+	"github.com/flowmatters/openwater-core/conv/units"
 	"github.com/flowmatters/openwater-core/data"
 )
 
@@ -38,8 +38,8 @@ func emcDWC(quickflow, slowflow data.ND1Float64, emc, dwc float64, quickLoad, sl
 		qf := quickflow.Get(idx)
 		sf := slowflow.Get(idx)
 
-		ql := qf * emc * conv.MG_PER_LITER_TO_KG_PER_M3
-		sl := sf * dwc * conv.MG_PER_LITER_TO_KG_PER_M3
+		ql := qf * emc * units.MG_PER_LITRE_TO_KG_PER_M3
+		sl := sf * dwc * units.MG_PER_LITRE_TO_KG_PER_M3
 		total := ql + sl
 
 		quickLoad.Set(idx, ql)

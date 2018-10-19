@@ -1,7 +1,7 @@
 package conversion
 
 import (
-	"github.com/flowmatters/openwater-core/conv"
+	"github.com/flowmatters/openwater-core/conv/units"
 	"github.com/flowmatters/openwater-core/data"
 )
 
@@ -30,6 +30,13 @@ DepthToRate:
 func depthToRate(inputs data.ND1Float64,
 	deltaT, area float64,
 	outflows data.ND1Float64) {
-	conversion := conv.MILLIMETRES_TO_METRES * area / deltaT
-	data.ScaleFloat64Array(outflows, inputs, conversion)
+
+	conversion := units.MILLIMETRES_TO_METRES * area / deltaT
+	nDays := inputs.Len1()
+	idx := []int{0}
+
+	for i := 0; i < nDays; i++ {
+		idx[0] = i
+		outflows.Set(idx, inputs.Get(idx)*conversion)
+	}
 }
