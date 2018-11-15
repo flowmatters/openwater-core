@@ -20,8 +20,10 @@ type {{.Name}} struct {
 }
 
 func (m *{{.Name}}) ApplyParameters(parameters data.ND2Float64) {
+  {{if .ParameterSpecs}}
   nSets := parameters.Len(sim.DIMP_CELL)
   newShape := []int{nSets}
+  {{end}}
   {{range $i, $v := .ParameterSpecs -}}
   m.{{$v.Name}} = parameters.Slice([]int{ {{$i}}, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   {{end}}
