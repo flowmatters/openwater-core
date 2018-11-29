@@ -1,0 +1,6 @@
+package units
+
+const (
+	PERCENT_TO_PROPORTION = 0.01
+	PROPORTION_TO_PERCENT = 100.0
+)
