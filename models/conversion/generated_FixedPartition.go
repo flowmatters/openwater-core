@@ -19,10 +19,10 @@ type FixedPartition struct {
 }
 
 func (m *FixedPartition) ApplyParameters(parameters data.ND2Float64) {
-  
+
   nSets := parameters.Len(sim.DIMP_CELL)
   newShape := []int{nSets}
-  
+
   m.fraction = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   
 }

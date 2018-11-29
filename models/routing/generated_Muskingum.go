@@ -21,8 +21,10 @@ type Muskingum struct {
 }
 
 func (m *Muskingum) ApplyParameters(parameters data.ND2Float64) {
+
   nSets := parameters.Len(sim.DIMP_CELL)
   newShape := []int{nSets}
+
   m.K = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   m.X = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   m.DeltaT = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)

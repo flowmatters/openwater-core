@@ -18,7 +18,7 @@ type PartitionDemand struct {
 }
 
 func (m *PartitionDemand) ApplyParameters(parameters data.ND2Float64) {
-  
+
   
 }
 

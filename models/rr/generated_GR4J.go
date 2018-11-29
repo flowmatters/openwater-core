@@ -22,8 +22,10 @@ type GR4J struct {
 }
 
 func (m *GR4J) ApplyParameters(parameters data.ND2Float64) {
+
   nSets := parameters.Len(sim.DIMP_CELL)
   newShape := []int{nSets}
+
   m.X1 = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   m.X2 = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   m.X3 = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)

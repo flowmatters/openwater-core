@@ -27,8 +27,10 @@ type Simhyd struct {
 }
 
 func (m *Simhyd) ApplyParameters(parameters data.ND2Float64) {
+
   nSets := parameters.Len(sim.DIMP_CELL)
   newShape := []int{nSets}
+
   m.baseflowCoefficient = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   m.imperviousThreshold = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   m.infiltrationCoefficient = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)

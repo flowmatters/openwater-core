@@ -18,7 +18,7 @@ type Gate struct {
 }
 
 func (m *Gate) ApplyParameters(parameters data.ND2Float64) {
-  
+
   
 }
 

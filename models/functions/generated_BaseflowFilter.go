@@ -18,7 +18,7 @@ type BaseflowFilter struct {
 }
 
 func (m *BaseflowFilter) ApplyParameters(parameters data.ND2Float64) {
-  
+
   
 }
 

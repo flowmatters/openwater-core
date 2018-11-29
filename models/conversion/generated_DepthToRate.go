@@ -20,8 +20,10 @@ type DepthToRate struct {
 }
 
 func (m *DepthToRate) ApplyParameters(parameters data.ND2Float64) {
+
   nSets := parameters.Len(sim.DIMP_CELL)
   newShape := []int{nSets}
+
   m.DeltaT = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   m.area = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   
