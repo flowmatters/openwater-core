@@ -43,7 +43,7 @@ func (m *{{.Name}})  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   {{range $v := .ParameterSpecs }}
-  sim.DescribeParameter("{{$v.Name}}",{{$v.Default}},"{{$v.Description}}"),
+  sim.DescribeParameter("{{$v.Name}}",{{$v.Default}},"{{$v.Description}}",[]float64{ {{index $v.Range 0}}, {{index $v.Range 1}} },"{{$v.Units}}"),
   {{- end -}} }
 
   result.Inputs = []string{

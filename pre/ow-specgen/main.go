@@ -1,52 +1,57 @@
 package main
 
 import (
-	"strings"
-	"path/filepath"
-	"regexp"
-	"io/ioutil"
-	"fmt"
-  "gopkg.in/yaml.v2"
 	"flag"
+	"fmt"
+	"io/ioutil"
 	"os"
-	_	"path/filepath"
+	"path/filepath"
+	_ "path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
 	"text/template"
+
+	"gopkg.in/yaml.v2"
 )
 
 const templatePath = "src/github.com/flowmatters/openwater-core/pre/ow-specgen/*.got"
+const floatTemplate = "[+-]?([0-9]*[.])?[0-9]+"
+const parameterTemplate = `(\[(?P<Min>%s),(?P<Max>%s)\]((?P<Units>[\s]+))?)?\s*(?P<Description>[^,]*)(,\s*default=(?P<Default>%s))?`
 
 type ModelSpecs map[string]ModelSpec
 type VariableSpec struct {
-	Name string
-	Units string
-	Position int
-	Default float64
+	Name        string
+	Units       string
+	Position    int
+	Default     float64
 	Description string
+	Range       []float64
 }
 
 type ModelSpec struct {
-	Filename string
-	Name string
-	Package string
-	Inputs yaml.MapSlice
-	States yaml.MapSlice
-	Parameters yaml.MapSlice
+	Filename       string
+	Name           string
+	Package        string
+	Inputs         yaml.MapSlice
+	States         yaml.MapSlice
+	Parameters     yaml.MapSlice
 	ParameterSpecs []VariableSpec
-	Outputs yaml.MapSlice
+	Outputs        yaml.MapSlice
 	Implementation yaml.MapSlice
-	Init yaml.MapSlice
-	ExtractStates yaml.MapSlice
-	Flags struct {
-		GenerateStruct bool
-		GenerateVector bool
-		GenerateInit bool
+	Init           yaml.MapSlice
+	ExtractStates  yaml.MapSlice
+	Flags          struct {
+		GenerateStruct        bool
+		GenerateVector        bool
+		GenerateInit          bool
 		GenerateExtractStates bool
-		ZeroStates bool
-		PassOutputsAsParams bool
+		ZeroStates            bool
+		PassOutputsAsParams   bool
 	}
-	SingleFunc string
-	InitFunc string
-	PackStatsFunc string
+	SingleFunc        string
+	InitFunc          string
+	PackStatsFunc     string
 	ExtractStatesFunc string
 }
 
@@ -65,22 +70,49 @@ func processPath(path string) {
 	}
 }
 
-func processDirectory(path string){
+func processDirectory(path string) {
 
 }
 
 func transform(spec ModelSpec) ModelSpec {
-	spec.ParameterSpecs = make([]VariableSpec,len(spec.Parameters))
-	for i,v := range spec.Parameters {
-		spec.ParameterSpecs[i] = VariableSpec{v.Key.(string),"",i,0,""}
+	spec.ParameterSpecs = make([]VariableSpec, len(spec.Parameters))
+	for i, v := range spec.Parameters {
+		txt := fmt.Sprint(v.Value)
+		if txt == `<nil>` {
+			txt = ""
+		}
+
+		_ = regexp.MustCompile(floatTemplate)
+		r := regexp.MustCompile(fmt.Sprintf(parameterTemplate, floatTemplate, floatTemplate, floatTemplate))
+		matches := r.FindStringSubmatch(txt)
+
+		units := matches[7]
+		description := matches[8]
+		defaultVal, err := strconv.ParseFloat(matches[10], 64)
+		if err != nil {
+			defaultVal = 0.0
+		}
+		minVal, err := strconv.ParseFloat(matches[2], 64)
+		if err != nil {
+			minVal = 0.0
+		}
+		maxVal, err := strconv.ParseFloat(matches[4], 64)
+		if err != nil {
+			maxVal = 0.0
+		}
+		paramRange := make([]float64, 2)
+		paramRange[0] = minVal
+		paramRange[1] = maxVal
+
+		spec.ParameterSpecs[i] = VariableSpec{v.Key.(string), units, i, defaultVal, description, paramRange}
 	}
 	return spec
 }
 
 func processFile(fn string) {
-//	directory := filepath.Dir(fn)
+	//	directory := filepath.Dir(fn)
 
-	contents,err := ioutil.ReadFile(fn)
+	contents, err := ioutil.ReadFile(fn)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -89,7 +121,7 @@ func processFile(fn string) {
 	packageRe := regexp.MustCompile("^\\s*package\\s+(\\w+)")
 	packageMatch := packageRe.FindSubmatch(contents)
 	if packageMatch == nil {
-		fmt.Printf("No package declaration in %s\n",fn)
+		fmt.Printf("No package declaration in %s\n", fn)
 		return
 	}
 	packageName := packageMatch[1]
@@ -98,16 +130,16 @@ func processFile(fn string) {
 
 	specContents := re.FindSubmatch(contents)
 	if specContents == nil {
-//		fmt.Printf("No OW-SPEC in %s\n",fn)
+		//		fmt.Printf("No OW-SPEC in %s\n",fn)
 		return
 	}
 
 	tabRe := regexp.MustCompile("\t")
 	spec := specContents[2]
-	spec = tabRe.ReplaceAll(spec,[]byte("  "))
+	spec = tabRe.ReplaceAll(spec, []byte("  "))
 
 	desc := make(ModelSpecs) // := make(map[interface{}]interface{})
-	err = yaml.Unmarshal(spec,&desc)
+	err = yaml.Unmarshal(spec, &desc)
 	if err != nil {
 		fmt.Println(err)
 		// for i := range specContents {
@@ -117,12 +149,12 @@ func processFile(fn string) {
 		return
 	}
 
-	for name,description := range desc{
-		if description.Package=="" {
+	for name, description := range desc {
+		if description.Package == "" {
 			description.Package = string(packageName)
 		}
 
-		if description.Name=="" {
+		if description.Name == "" {
 			description.Name = name
 		}
 
@@ -135,27 +167,27 @@ func processFile(fn string) {
 	}
 }
 
-func generateWrapper(desc ModelSpec){
-	tmpl,err := template.New("").Funcs(template.FuncMap{
+func generateWrapper(desc ModelSpec) {
+	tmpl, err := template.New("").Funcs(template.FuncMap{
 		"inc": func(n int) int {
-				return n + 1
+			return n + 1
 		},
-		"lower":strings.ToLower}).ParseGlob(templatePath)
+		"lower": strings.ToLower}).ParseGlob(templatePath)
 
-		if err != nil {
+	if err != nil {
 		fmt.Println(err)
 		fmt.Println("Could not parse templates. Exiting")
 		os.Exit(1)
 	}
-//	fmt.Println(tmpl.DefinedTemplates())
+	//	fmt.Println(tmpl.DefinedTemplates())
 	tmpl = tmpl.Funcs(template.FuncMap{
 		"inc": func(n int) int {
-				return n + 1
+			return n + 1
 		}})
 
 	dir := filepath.Dir(desc.Filename)
-	destFn := filepath.Join(dir,fmt.Sprintf("generated_%s.go",desc.Name))
-	fmt.Printf("Writing to %s\n",destFn)
+	destFn := filepath.Join(dir, fmt.Sprintf("generated_%s.go", desc.Name))
+	fmt.Printf("Writing to %s\n", destFn)
 	dest, err := os.Create(destFn)
 	if err != nil {
 		fmt.Println(err)
@@ -163,50 +195,50 @@ func generateWrapper(desc ModelSpec){
 	}
 	defer dest.Close()
 
-	if len(desc.Implementation)>0 {
+	if len(desc.Implementation) > 0 {
 		desc.Flags.GenerateStruct = true
 
-		for _,e := range(desc.Implementation){
-			if e.Key=="type" && e.Value=="scalar" {
+		for _, e := range desc.Implementation {
+			if e.Key == "type" && e.Value == "scalar" {
 				desc.Flags.GenerateVector = true
 			}
 
-			if e.Key=="function"{
+			if e.Key == "function" {
 				desc.SingleFunc = e.Value.(string)
 			}
 
-			if e.Key=="outputs"{
-				desc.Flags.PassOutputsAsParams = e.Value.(string)=="params"
+			if e.Key == "outputs" {
+				desc.Flags.PassOutputsAsParams = e.Value.(string) == "params"
 			}
 		}
 	}
 
-	for _,e := range(desc.Init) {
-		if e.Key=="type" && e.Value=="scalar" {
+	for _, e := range desc.Init {
+		if e.Key == "type" && e.Value == "scalar" {
 			desc.Flags.GenerateInit = true
 		}
 
-		if e.Key=="zero" && e.Value==true {
+		if e.Key == "zero" && e.Value == true {
 			desc.Flags.ZeroStates = true
 		}
 
-		if e.Key=="function"{
+		if e.Key == "function" {
 			desc.InitFunc = e.Value.(string)
 		}
 	}
 
 	desc.Flags.GenerateExtractStates = true
-	for _,e := range(desc.ExtractStates) {
-		if e.Key=="function"{
+	for _, e := range desc.ExtractStates {
+		if e.Key == "function" {
 			desc.Flags.GenerateExtractStates = false
 			desc.ExtractStatesFunc = e.Value.(string)
 		}
-		if e.Key=="packfunc" {
+		if e.Key == "packfunc" {
 			desc.PackStatsFunc = e.Value.(string)
 		}
 	}
 
-	err = tmpl.ExecuteTemplate(dest,"generated_struct.got",desc)
+	err = tmpl.ExecuteTemplate(dest, "generated_struct.got", desc)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -216,12 +248,12 @@ func generateWrapper(desc ModelSpec){
 
 	// if generateStruct {
 	// 	implementation, _ := implementationField.(map[interface{}]interface{})
-		
+
 	// 		if implementation==nil {
 	// 			fmt.Println("invalid type")
 	// 			return
 	// 		}
-		
+
 	// 		function, _ := implementation["function"].(string)
 	// 		funcType, _ := implementation["type"].(string)
 	// 		lang, _ := implementation["lang"].(string)
@@ -240,11 +272,11 @@ func generateWrapper(desc ModelSpec){
 	// Write out
 }
 
-func main(){
+func main() {
 	flag.Parse()
 	paths := flag.Args()
 
-	for _,path := range(paths) {
+	for _, path := range paths {
 		processPath(path)
 	}
 }
