@@ -41,7 +41,7 @@ func (m *RunoffCoefficient)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("coeff",0,""),}
+  sim.DescribeParameter("coeff",0,"",[]float64{ 0, 0 },""),}
 
   result.Inputs = []string{
   "rainfall",}

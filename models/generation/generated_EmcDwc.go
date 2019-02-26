@@ -43,8 +43,8 @@ func (m *EmcDwc)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("EMC",0,""),
-  sim.DescribeParameter("DWC",0,""),}
+  sim.DescribeParameter("EMC",0,"mg.L^-1 Event Mean Concentration",[]float64{ 0.1, 10000 },""),
+  sim.DescribeParameter("DWC",0,"mg.L^-1 Dry Weather Concentration",[]float64{ 0.1, 10000 },""),}
 
   result.Inputs = []string{
   "quickflow","baseflow",}

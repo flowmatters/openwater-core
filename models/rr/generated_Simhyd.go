@@ -57,15 +57,15 @@ func (m *Simhyd)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("baseflowCoefficient",0,""),
-  sim.DescribeParameter("imperviousThreshold",0,""),
-  sim.DescribeParameter("infiltrationCoefficient",0,""),
-  sim.DescribeParameter("infiltrationShape",0,""),
-  sim.DescribeParameter("interflowCoefficient",0,""),
-  sim.DescribeParameter("perviousFraction",0,""),
-  sim.DescribeParameter("rainfallInterceptionStoreCapacity",0,""),
-  sim.DescribeParameter("rechargeCoefficient",0,""),
-  sim.DescribeParameter("soilMoistureStoreCapacity",0,""),}
+  sim.DescribeParameter("baseflowCoefficient",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("imperviousThreshold",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("infiltrationCoefficient",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("infiltrationShape",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("interflowCoefficient",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("perviousFraction",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("rainfallInterceptionStoreCapacity",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("rechargeCoefficient",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("soilMoistureStoreCapacity",0,"",[]float64{ 0, 0 },""),}
 
   result.Inputs = []string{
   "rainfall","pet",}

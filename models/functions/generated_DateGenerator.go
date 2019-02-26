@@ -45,9 +45,9 @@ func (m *DateGenerator)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("startDate",0,""),
-  sim.DescribeParameter("startMonth",0,""),
-  sim.DescribeParameter("startYear",0,""),}
+  sim.DescribeParameter("startDate",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("startMonth",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("startYear",0,"",[]float64{ 0, 0 },""),}
 
   result.Inputs = []string{
   "tick",}

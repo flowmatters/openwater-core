@@ -47,10 +47,10 @@ func (m *GR4J)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("X1",0,""),
-  sim.DescribeParameter("X2",0,""),
-  sim.DescribeParameter("X3",0,""),
-  sim.DescribeParameter("X4",0,""),}
+  sim.DescribeParameter("X1",0,"mm Capacity of the production soil (SMA) store",[]float64{ 1, 1500 },""),
+  sim.DescribeParameter("X2",0,"mm Water exchange coefficient",[]float64{ -10, 5 },""),
+  sim.DescribeParameter("X3",0,"mm Capacity of the routing store",[]float64{ 1, 500 },""),
+  sim.DescribeParameter("X4",0,"days Time parameter for unit hydrographs",[]float64{ 0.5, 4 },""),}
 
   result.Inputs = []string{
   "rainfall","pet",}

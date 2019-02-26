@@ -43,8 +43,8 @@ func (m *DepthToRate)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("DeltaT",0,""),
-  sim.DescribeParameter("area",0,""),}
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),
+  sim.DescribeParameter("area",0,"m^2",[]float64{ 0, 0 },""),}
 
   result.Inputs = []string{
   "input",}

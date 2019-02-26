@@ -45,9 +45,9 @@ func (m *Muskingum)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("K",0,""),
-  sim.DescribeParameter("X",0,""),
-  sim.DescribeParameter("DeltaT",0,""),}
+  sim.DescribeParameter("K",0,"s Constant",[]float64{ 0, 200000 },""),
+  sim.DescribeParameter("X",0,"Weighting",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),}
 
   result.Inputs = []string{
   "inflow","lateral",}

@@ -41,7 +41,7 @@ func (m *FixedPartition)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("fraction",0,""),}
+  sim.DescribeParameter("fraction",0,"",[]float64{ 0, 0 },""),}
 
   result.Inputs = []string{
   "input",}
