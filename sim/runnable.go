@@ -68,16 +68,21 @@ func DescribeParameters(names []string) []ParameterDescription {
 	return result
 }
 
-func DescribeParameter(name string, defaultValue float64, description string) ParameterDescription {
+func DescribeParameter(name string, defaultValue float64, description string,
+	paramRange []float64, units string) ParameterDescription {
 	var result ParameterDescription
 	result.Name = name
 	result.Default = defaultValue
 	result.Description = description
+	result.Range[0] = paramRange[0]
+	result.Range[1] = paramRange[1]
+	result.Units = units
 	return result
 }
 
 func NewParameter(name string) ParameterDescription {
-	return DescribeParameter(name, 0, "")
+	dummyRange := make([]float64, 2)
+	return DescribeParameter(name, 0, "", dummyRange, "")
 }
 
 func InitialiseOutputs(model TimeSteppingModel, nTimeSteps int, nCells int) data.ND3Float64 {
