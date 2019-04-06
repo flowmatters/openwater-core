@@ -111,13 +111,13 @@ func sacramento(rainfall, pet data.ND1Float64,
 	pbase := (alzfsm*lzsk + alzfpm*lzpk) // * (1 + side)
 
 	for timestep := 0; timestep < nDays; timestep++ {
-		prevUprTensionWater := uprTensionWater
-		prevUprFreeWater := uprFreeWater
-		prevLwrTensionWater := lwrTensionWater
-		prevLwrPrimaryFreeWater := lwrPrimaryFreeWater
-		prevLwrSuppFreeWater := lwrSupplFreeWater
-		prevAddImpStore := additionalImperviousStore
-		prevHydrographStore := sumSlice(qq)
+		// prevUprTensionWater := uprTensionWater
+		// prevUprFreeWater := uprFreeWater
+		// prevLwrTensionWater := lwrTensionWater
+		// prevLwrPrimaryFreeWater := lwrPrimaryFreeWater
+		// prevLwrSuppFreeWater := lwrSupplFreeWater
+		// prevAddImpStore := additionalImperviousStore
+		// prevHydrographStore := sumSlice(qq)
 		evapt := pet.Get1(timestep)
 		pliq := rainfall.Get1(timestep)
 
@@ -458,19 +458,24 @@ func sacramento(rainfall, pet data.ND1Float64,
 		baseflow.Set1(timestep, bf)
 		runoff.Set1(timestep, qf)
 
-		hydrographStore := sumSlice(qq)
+		//hydrographStore := sumSlice(qq)
 
-		deltaS := ((uprTensionWater-prevUprTensionWater)+
-			(uprFreeWater-prevUprFreeWater)+
-			(lwrTensionWater-prevLwrTensionWater)+
-			(lwrPrimaryFreeWater-prevLwrPrimaryFreeWater)+
-			(lwrSupplFreeWater-prevLwrSuppFreeWater)+
-			(additionalImperviousStore-prevAddImpStore))*(1.0-pctim) +
-			(hydrographStore - prevHydrographStore)
-		aet := e1 + e2 + e3 + e4 + e5
+		// deltaS := ((uprTensionWater-prevUprTensionWater)+
+		// 	(uprFreeWater-prevUprFreeWater)+
+		// 	(lwrTensionWater-prevLwrTensionWater)+
+		// 	(lwrPrimaryFreeWater-prevLwrPrimaryFreeWater)+
+		// 	(lwrSupplFreeWater-prevLwrSuppFreeWater)+
+		// 	(additionalImperviousStore-prevAddImpStore))*(1.0-pctim) +
+		// 	(hydrographStore - prevHydrographStore)
+		//aet := e1 + e2 + e3 + e4 + e5
 
-		baseFlowLoss := ((alzfsc - lwrSupplFreeWater) + (alzfpc - lwrPrimaryFreeWater) + (flobf - flwbf)) * (1.0 - pctim)
-		massBalance := pliq - aet - qf - deltaS - baseFlowLoss - math.Min(ssout, flwbf+flwsf)
+		//baseFlowLoss := ((alzfsc - lwrSupplFreeWater) + (alzfpc - lwrPrimaryFreeWater) + (flobf - flwbf)) * (1.0 - pctim)
+		//massBalance := pliq - aet - qf - deltaS - baseFlowLoss - math.Min(ssout, flwbf+flwsf)
+		// if math.Abs(massBalance) > 1e-10 {
+		// 	if !mbError {
+		// 		mbError = true
+		// 	}
+		// }
 	}
 
 	return uprTensionWater, uprFreeWater, lwrTensionWater,
