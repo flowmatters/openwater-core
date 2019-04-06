@@ -83,33 +83,33 @@ func (m *Sacramento)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("lzpk",0,""),
-  sim.DescribeParameter("lzsk",0,""),
-  sim.DescribeParameter("uzk",0,""),
-  sim.DescribeParameter("uztwm",0,""),
-  sim.DescribeParameter("uzfwm",0,""),
-  sim.DescribeParameter("lztwm",0,""),
-  sim.DescribeParameter("lzfsm",0,""),
-  sim.DescribeParameter("lzfpm",0,""),
-  sim.DescribeParameter("pfree",0,""),
-  sim.DescribeParameter("rexp",0,""),
-  sim.DescribeParameter("zperc",0,""),
-  sim.DescribeParameter("side",0,""),
-  sim.DescribeParameter("ssout",0,""),
-  sim.DescribeParameter("pctim",0,""),
-  sim.DescribeParameter("adimp",0,""),
-  sim.DescribeParameter("sarva",0,""),
-  sim.DescribeParameter("rserv",0,""),
-  sim.DescribeParameter("uh1",0,""),
-  sim.DescribeParameter("uh2",0,""),
-  sim.DescribeParameter("uh3",0,""),
-  sim.DescribeParameter("uh4",0,""),
-  sim.DescribeParameter("uh5",0,""),}
+  sim.DescribeParameter("lzpk",0.01,"Lower zone Primary Free water base flow ratio",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("lzsk",0.05,"Lower zone Supplementary Free water base flow ratio",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("uzk",0.3,"Upper zone free water interflow fraction",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("uztwm",50,"mm Upper zone tension water maximum",[]float64{ 0.1, 125 },""),
+  sim.DescribeParameter("uzfwm",40,"mm Upper zone free water maximum",[]float64{ 0, 75 },""),
+  sim.DescribeParameter("lztwm",130,"mm Lower zone tension water maximum",[]float64{ 0, 300 },""),
+  sim.DescribeParameter("lzfsm",25,"mm Lower zone free water supplemental maximum",[]float64{ 0, 300 },""),
+  sim.DescribeParameter("lzfpm",60,"mm Lower zone free water primary maximum",[]float64{ 0, 600 },""),
+  sim.DescribeParameter("pfree",0.06,"Minimum proportion of percolation from upper zone to lower zone directly available for recharing lower zone free water stores.",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("rexp",1,"Exponent of rate of change of percolation rate with changing LZ storage",[]float64{ 0, 3 }," "),
+  sim.DescribeParameter("zperc",40,"Proportional increase in Pbase defining maximum percolation rate",[]float64{ 0, 80 }," "),
+  sim.DescribeParameter("side",0,"Ratio of non-channel baseflow to channel baseflow",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("ssout",0,"[0",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("pctim",0.01,"fraction of catchment that is permanently and directly connected impervious",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("adimp",0,"additional fraction of catchment that can act impervious under saturated soil conditions.",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("sarva",0,"fraction of basin normally covered by streams",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("rserv",0.3,"Fraction lower zone free water that is not available for transpiration",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("uh1",0.8,"Unit hydrograph - proportion runoff that is instantaneous",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("uh2",0.1,"Unit hydrograph - proportion lagged by one timestep",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("uh3",0.05,"Unit hydrograph - proportion lagged by two timesteps",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("uh4",0.03,"Unit hydrograph - proportion lagged by three timesteps",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("uh5",0.02,"Unit hydrograph - proportion lagged by four timesteps",[]float64{ 0, 1 }," "),}
 
   result.Inputs = []string{
   "rainfall","pet",}
   result.Outputs = []string{
-  "runoff","imperviousRunoff","surfaceRunoff","interflow","baseflow",}
+  "runoff","imperviousRunoff","surfaceRunoff","baseflow",}
 
   result.States = []string{
   "UprTensionWater","UprFreeWater","LwrTensionWater","LwrPrimaryFreeWater","LwrSupplFreeWater","AdditionalImperviousStore",}
@@ -181,160 +181,165 @@ func (m *Sacramento) Run(inputs data.ND3Float64, states data.ND2Float64, outputs
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 5, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 4, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
+  doneChan := make(chan int)
   // fmt.Println("Running Sacramento for ",numCells,"cells")
-  for i := 0; i < numCells; i++ {
-    outputPosSlice[sim.DIMO_CELL] = i
-    statesPosSlice[sim.DIMS_CELL] = i
-    inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
+  for j := 0; j < numCells; j++ {
+    go func(i int){
+      outputPosSlice[sim.DIMO_CELL] = i
+      statesPosSlice[sim.DIMS_CELL] = i
+      inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-    
-    // fmt.Println("lzpk=",m.lzpk)
-		lzpk := m.lzpk.Get1(i%m.lzpk.Len1())
-    
-    // fmt.Println("lzsk=",m.lzsk)
-		lzsk := m.lzsk.Get1(i%m.lzsk.Len1())
-    
-    // fmt.Println("uzk=",m.uzk)
-		uzk := m.uzk.Get1(i%m.uzk.Len1())
-    
-    // fmt.Println("uztwm=",m.uztwm)
-		uztwm := m.uztwm.Get1(i%m.uztwm.Len1())
-    
-    // fmt.Println("uzfwm=",m.uzfwm)
-		uzfwm := m.uzfwm.Get1(i%m.uzfwm.Len1())
-    
-    // fmt.Println("lztwm=",m.lztwm)
-		lztwm := m.lztwm.Get1(i%m.lztwm.Len1())
-    
-    // fmt.Println("lzfsm=",m.lzfsm)
-		lzfsm := m.lzfsm.Get1(i%m.lzfsm.Len1())
-    
-    // fmt.Println("lzfpm=",m.lzfpm)
-		lzfpm := m.lzfpm.Get1(i%m.lzfpm.Len1())
-    
-    // fmt.Println("pfree=",m.pfree)
-		pfree := m.pfree.Get1(i%m.pfree.Len1())
-    
-    // fmt.Println("rexp=",m.rexp)
-		rexp := m.rexp.Get1(i%m.rexp.Len1())
-    
-    // fmt.Println("zperc=",m.zperc)
-		zperc := m.zperc.Get1(i%m.zperc.Len1())
-    
-    // fmt.Println("side=",m.side)
-		side := m.side.Get1(i%m.side.Len1())
-    
-    // fmt.Println("ssout=",m.ssout)
-		ssout := m.ssout.Get1(i%m.ssout.Len1())
-    
-    // fmt.Println("pctim=",m.pctim)
-		pctim := m.pctim.Get1(i%m.pctim.Len1())
-    
-    // fmt.Println("adimp=",m.adimp)
-		adimp := m.adimp.Get1(i%m.adimp.Len1())
-    
-    // fmt.Println("sarva=",m.sarva)
-		sarva := m.sarva.Get1(i%m.sarva.Len1())
-    
-    // fmt.Println("rserv=",m.rserv)
-		rserv := m.rserv.Get1(i%m.rserv.Len1())
-    
-    // fmt.Println("uh1=",m.uh1)
-		uh1 := m.uh1.Get1(i%m.uh1.Len1())
-    
-    // fmt.Println("uh2=",m.uh2)
-		uh2 := m.uh2.Get1(i%m.uh2.Len1())
-    
-    // fmt.Println("uh3=",m.uh3)
-		uh3 := m.uh3.Get1(i%m.uh3.Len1())
-    
-    // fmt.Println("uh4=",m.uh4)
-		uh4 := m.uh4.Get1(i%m.uh4.Len1())
-    
-    // fmt.Println("uh5=",m.uh5)
-		uh5 := m.uh5.Get1(i%m.uh5.Len1())
-    
+      
+      // fmt.Println("lzpk=",m.lzpk)
+      lzpk := m.lzpk.Get1(i%m.lzpk.Len1())
+      
+      // fmt.Println("lzsk=",m.lzsk)
+      lzsk := m.lzsk.Get1(i%m.lzsk.Len1())
+      
+      // fmt.Println("uzk=",m.uzk)
+      uzk := m.uzk.Get1(i%m.uzk.Len1())
+      
+      // fmt.Println("uztwm=",m.uztwm)
+      uztwm := m.uztwm.Get1(i%m.uztwm.Len1())
+      
+      // fmt.Println("uzfwm=",m.uzfwm)
+      uzfwm := m.uzfwm.Get1(i%m.uzfwm.Len1())
+      
+      // fmt.Println("lztwm=",m.lztwm)
+      lztwm := m.lztwm.Get1(i%m.lztwm.Len1())
+      
+      // fmt.Println("lzfsm=",m.lzfsm)
+      lzfsm := m.lzfsm.Get1(i%m.lzfsm.Len1())
+      
+      // fmt.Println("lzfpm=",m.lzfpm)
+      lzfpm := m.lzfpm.Get1(i%m.lzfpm.Len1())
+      
+      // fmt.Println("pfree=",m.pfree)
+      pfree := m.pfree.Get1(i%m.pfree.Len1())
+      
+      // fmt.Println("rexp=",m.rexp)
+      rexp := m.rexp.Get1(i%m.rexp.Len1())
+      
+      // fmt.Println("zperc=",m.zperc)
+      zperc := m.zperc.Get1(i%m.zperc.Len1())
+      
+      // fmt.Println("side=",m.side)
+      side := m.side.Get1(i%m.side.Len1())
+      
+      // fmt.Println("ssout=",m.ssout)
+      ssout := m.ssout.Get1(i%m.ssout.Len1())
+      
+      // fmt.Println("pctim=",m.pctim)
+      pctim := m.pctim.Get1(i%m.pctim.Len1())
+      
+      // fmt.Println("adimp=",m.adimp)
+      adimp := m.adimp.Get1(i%m.adimp.Len1())
+      
+      // fmt.Println("sarva=",m.sarva)
+      sarva := m.sarva.Get1(i%m.sarva.Len1())
+      
+      // fmt.Println("rserv=",m.rserv)
+      rserv := m.rserv.Get1(i%m.rserv.Len1())
+      
+      // fmt.Println("uh1=",m.uh1)
+      uh1 := m.uh1.Get1(i%m.uh1.Len1())
+      
+      // fmt.Println("uh2=",m.uh2)
+      uh2 := m.uh2.Get1(i%m.uh2.Len1())
+      
+      // fmt.Println("uh3=",m.uh3)
+      uh3 := m.uh3.Get1(i%m.uh3.Len1())
+      
+      // fmt.Println("uh4=",m.uh4)
+      uh4 := m.uh4.Get1(i%m.uh4.Len1())
+      
+      // fmt.Println("uh5=",m.uh5)
+      uh5 := m.uh5.Get1(i%m.uh5.Len1())
+      
 
-    // fmt.Println("i",i)
-    // fmt.Println("States",states.Shape())
-    // fmt.Println("Tmp2",tmp2.Shape())
-    
-    initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
-    
+      // fmt.Println("i",i)
+      // fmt.Println("States",states.Shape())
+      // fmt.Println("Tmp2",tmp2.Shape())
+      
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
+      
 
-    
-    
-    uprtensionwater := initialStates.Get1(0)
-    
-    uprfreewater := initialStates.Get1(1)
-    
-    lwrtensionwater := initialStates.Get1(2)
-    
-    lwrprimaryfreewater := initialStates.Get1(3)
-    
-    lwrsupplfreewater := initialStates.Get1(4)
-    
-    additionalimperviousstore := initialStates.Get1(5)
-    
-    
+      
+      
+      uprtensionwater := initialStates.Get1(0)
+      
+      uprfreewater := initialStates.Get1(1)
+      
+      lwrtensionwater := initialStates.Get1(2)
+      
+      lwrprimaryfreewater := initialStates.Get1(3)
+      
+      lwrsupplfreewater := initialStates.Get1(4)
+      
+      additionalimperviousstore := initialStates.Get1(5)
+      
+      
 
-//    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
+  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
-		cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-//    fmt.Println("cellInputs Shape",cellInputs.Shape())
-    
-//    fmt.Println("{rainfall mm}",tmpTS.Shape())
-		rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    
-//    fmt.Println("{pet mm}",tmpTS.Shape())
-		pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    
+      cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
+  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
+      
+  //    fmt.Println("{rainfall mm}",tmpTS.Shape())
+      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{pet mm}",tmpTS.Shape())
+      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
 
-    
+      
 
-    
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 0
-    runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 1
-    imperviousrunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 2
-    surfacerunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 3
-    interflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 4
-    baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    
+      
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 0
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 1
+      imperviousrunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 2
+      surfacerunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 3
+      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      
 
-		uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore= sacramento(rainfall,pet,uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore,lzpk,lzsk,uzk,uztwm,uzfwm,lztwm,lzfsm,lzfpm,pfree,rexp,zperc,side,ssout,pctim,adimp,sarva,rserv,uh1,uh2,uh3,uh4,uh5,runoff,imperviousrunoff,surfacerunoff,interflow,baseflow)
+      uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore= sacramento(rainfall,pet,uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore,lzpk,lzsk,uzk,uztwm,uzfwm,lztwm,lzfsm,lzfpm,pfree,rexp,zperc,side,ssout,pctim,adimp,sarva,rserv,uh1,uh2,uh3,uh4,uh5,runoff,imperviousrunoff,surfacerunoff,baseflow)
 
-    
-    
-    initialStates.Set1(0, uprtensionwater)
-    
-    initialStates.Set1(1, uprfreewater)
-    
-    initialStates.Set1(2, lwrtensionwater)
-    
-    initialStates.Set1(3, lwrprimaryfreewater)
-    
-    initialStates.Set1(4, lwrsupplfreewater)
-    
-    initialStates.Set1(5, additionalimperviousstore)
-    
-    
+      
+      
+      initialStates.Set1(0, uprtensionwater)
+      
+      initialStates.Set1(1, uprfreewater)
+      
+      initialStates.Set1(2, lwrtensionwater)
+      
+      initialStates.Set1(3, lwrprimaryfreewater)
+      
+      initialStates.Set1(4, lwrsupplfreewater)
+      
+      initialStates.Set1(5, additionalimperviousstore)
+      
+      
 
-//		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 5)
-    
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
+      
+
+      doneChan <- i
+    }(j)
 	}
 
+  for j := 0; j < numCells; j++ {
+    <- doneChan
+  }
 //	return result
 }
