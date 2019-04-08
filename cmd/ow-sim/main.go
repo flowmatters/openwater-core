@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"runtime/pprof"
+	"time"
 
 	"github.com/flowmatters/openwater-core/data"
 
@@ -54,6 +55,10 @@ type modelGeneration struct {
 }
 
 func (g *modelGeneration) Run() {
+	if g.Count == 0 {
+		return
+	}
+
 	g.Model.ApplyParameters(g.Parameters)
 	g.Outputs = sim.InitialiseOutputs(g.Model, g.Inputs.Len(2), g.Inputs.Len(0))
 	g.Model.Run(g.Inputs, g.States, g.Outputs)
@@ -186,6 +191,10 @@ func (mr *modelReference) WriteData(generation int) error {
 		return prefix("Cannot open generation: ", err)
 	}
 
+	if gen.Count == 0 {
+		return nil
+	}
+
 	if !mr.outputsInitialised {
 		if gen.Outputs.Len(0) > 0 {
 			err = mr.InitialiseOutputs(generation)
@@ -272,9 +281,16 @@ func main() {
 	linkSliceStep := []int{1, 1}
 	nLinks := links.Len(0)
 	nextLink := 0
+	simStart := time.Now()
+
+	totalTimeSimulation := 0.0
+	totalTimeFinalWrite := 0.0
+	totalTimeLinks := 0.0
 
 	var genCount int
 	models := make(map[string]*modelReference)
+	writingDone := make(chan int)
+
 	for _, modelName := range modelNames {
 		ref, err := initModel(fn, modelName)
 		if err != nil {
@@ -302,6 +318,9 @@ func main() {
 	for i := 0; i < genCount; i++ {
 		genTotal := 0
 		fmt.Printf("==== Generation %d ====\n", i)
+		simulationDone := make(chan string)
+		genStart := time.Now()
+
 		for _, modelName := range modelNames {
 			gen, err := models[modelName].GetGeneration(i)
 			if err != nil {
@@ -312,26 +331,62 @@ func main() {
 				fmt.Printf("* %d x %s\n", gen.Count, modelName)
 			}
 			genTotal += gen.Count
-			gen.Run()
-			outputs := gen.Outputs
-			if outputs == nil {
-				fmt.Printf("No outputs from %s in generation %d\n", modelName, i)
-			}
+			go func(g *modelGeneration, name string) {
+				if g.Count > 0 {
+					g.Run()
+					outputs := g.Outputs
+					if outputs == nil {
+						fmt.Printf("No outputs from %s in generation %d\n", modelName, i)
+					}
+				}
+
+				simulationDone <- name
+			}(gen, modelName)
 		}
 
-		fmt.Printf("= %d runs\n", genTotal)
+		for i, _ := range modelNames {
+			mn := <-simulationDone
+			fmt.Printf("%d: %s finished\n", i, mn)
+		}
+
+		genSimulationEnd := time.Now()
+		genSimulationElapsed := genSimulationEnd.Sub(genStart)
+		totalTimeSimulation += genSimulationElapsed.Seconds()
+
+		fmt.Printf("= %d runs in %f seconds\n", genTotal, genSimulationElapsed.Seconds())
 
 		if outputFn != "" {
-			fmt.Println("Writing results...")
-			for _, modelName := range modelNames {
-				modelRef := models[modelName]
-				err = modelRef.WriteData(i)
-				if err != nil {
-					fmt.Println(err)
-					os.Exit(1)
+			go func(g int) {
+				if g > 0 {
+					prevG := -1
+					for {
+						prevG = <-writingDone
+						if prevG == (g - 1) {
+							break
+						}
+						fmt.Printf("Waiting for generation %d, got generation %d, sleeping\n", g, prevG)
+						writingDone <- prevG
+						time.Sleep(time.Duration(1000 * 1000 * 500)) // Half a second
+					}
 				}
-			}
+
+				genWriteStart := time.Now()
+				fmt.Printf("Writing results for generation %d...\n", g)
+				for _, modelName := range modelNames {
+					modelRef := models[modelName]
+					err := modelRef.WriteData(g)
+					if err != nil {
+						fmt.Println(err)
+						os.Exit(1)
+					}
+				}
+				genWriteEnd := time.Now()
+				genWriteElapsed := genWriteEnd.Sub(genWriteStart)
+				fmt.Printf("Results for generation %d written in %f seconds\n", g, genWriteElapsed.Seconds())
+				writingDone <- g
+			}(i)
 		}
+		// fmt.Printf("Results written in %f seconds\n", genWriteElapsed.Seconds())
 
 		currentLink := nextLink
 		for {
@@ -379,9 +434,38 @@ func main() {
 			data.AddToFloat64Array(destData, srcData)
 			nextLink++
 		}
-		fmt.Printf("%d links (%d to %d)\n", nextLink-currentLink, currentLink, nextLink)
+		genLinkEnd := time.Now()
+		genLinkElapsed := genLinkEnd.Sub(genSimulationEnd)
+		totalTimeLinks += genLinkElapsed.Seconds()
+
+		fmt.Printf("%d links (%d to %d), processed in %f seconds\n", nextLink-currentLink, currentLink, nextLink, genLinkElapsed.Seconds())
+		genElapsed := genLinkEnd.Sub(genStart)
+		fmt.Printf("Generation completed in %f seconds\n", genElapsed.Seconds())
 		fmt.Println()
 	}
+
+	fmt.Println("Simulation finished. Waiting for results to be written")
+	generationsEnd := time.Now()
+
+	for {
+		genFinished := <-writingDone
+		if genFinished == (genCount - 1) {
+			fmt.Printf("Generation %d finished writing\n", genFinished)
+			break
+		}
+		fmt.Printf("Waiting for final generation (%d), got generation %d, sleeping\n", genCount-1, genFinished)
+		writingDone <- genFinished
+		time.Sleep(time.Duration(500 * 1000 * 1000))
+	}
+
+	simEnd := time.Now()
+	finalWriteElapsed := simEnd.Sub(generationsEnd)
+	totalTimeFinalWrite = finalWriteElapsed.Seconds()
+	simElapsed := simEnd.Sub(simStart)
+	fmt.Printf("Simulation completed in %f seconds\n", simElapsed.Seconds())
+	fmt.Printf("Total Simulation Time: %f\n", totalTimeSimulation)
+	fmt.Printf("Total Link Time: %f\n", totalTimeLinks)
+	fmt.Printf("Total Final Write Time: %f\n", totalTimeFinalWrite)
 
 	//	fmt.Println("Add stats")
 }
