@@ -7,3 +7,10 @@ go:
 before_install:
   - sudo apt-get update
   - sudo apt-get install libhdf5-serial-dev
+
+script:
+  - ls
+  - go test -v ./...
+  - ls
+  - python3 --version
+  - pip3 --version
