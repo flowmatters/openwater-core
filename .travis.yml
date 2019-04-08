@@ -16,4 +16,6 @@ script:
   - go test -v ./...
   - ./build/build.sh
   - ./build/run_test.sh
-  - ls
+  - ls -a
+
+
