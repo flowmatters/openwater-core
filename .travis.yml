@@ -1,4 +1,4 @@
-language: go
+language: generic
 sudo: required
 
 go:
@@ -6,11 +6,12 @@ go:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -y libhdf5-serial-dev python3-venv
+  - sudo apt-get install -y libhdf5-serial-dev
+# python3-venv
 
 script:
-  - ls
-  - go test -v ./...
-  - ls
   - python3 --version
   - ./build/bootstrap-test-env.sh
+  - ls -a
+  - go test -v ./...
+  - ls -a
