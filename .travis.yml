@@ -1,4 +1,4 @@
-language: generic
+language: go
 sudo: required
 python:
   - 3.6
@@ -10,9 +10,6 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install -y libhdf5-serial-dev
 # python3-venv
-
-install:
-  - travis_install_go_dependencies $TRAVIS_GO_VERSION
 
 script:
   - python3 --version
