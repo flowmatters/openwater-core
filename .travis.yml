@@ -1,8 +1,6 @@
 dist: xenial
 language: go
 sudo: required
-python:
-  - 3.6
 
 go:
   - 1.x
@@ -17,5 +15,5 @@ script:
   - ls -a
   - go test -v ./...
   - ./build/build.sh
-  - OW_BIN=${PWD} python -m openwater.tests.system_test
+  - ./build/run_test.sh
   - ls
