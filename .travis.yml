@@ -13,4 +13,4 @@ script:
   - go test -v ./...
   - ls
   - python3 --version
-  - pip3 --version
+  - ./build/bootstrap-test-env.sh
