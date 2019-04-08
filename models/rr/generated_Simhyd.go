@@ -121,16 +121,16 @@ func (m *Simhyd) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
 
-  outputPosSlice := outputs.NewIndex(0)
+//  outputPosSlice := outputs.NewIndex(0)
   outputStepSlice := outputs.NewIndex(1)
   outputSizeSlice := outputs.NewIndex(1)
   outputSizeSlice[sim.DIMO_TIMESTEP] = inputLen
 
-  statesPosSlice := states.NewIndex(0)
+//  statesPosSlice := states.NewIndex(0)
   statesSizeSlice := states.NewIndex(1)
   statesSizeSlice[sim.DIMS_STATE] = numStates
 
-  inputsPosSlice := inputs.NewIndex(0)
+//  inputsPosSlice := inputs.NewIndex(0)
   inputsSizeSlice := inputs.NewIndex(1)
   inputsSizeSlice[sim.DIMI_INPUT] = inputDims[sim.DIMI_INPUT]
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
@@ -139,103 +139,116 @@ func (m *Simhyd) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
 //	result.Outputs = data.NewArray3DFloat64( 4, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
+  doneChan := make(chan int)
   // fmt.Println("Running Simhyd for ",numCells,"cells")
-  for i := 0; i < numCells; i++ {
-    outputPosSlice[sim.DIMO_CELL] = i
-    statesPosSlice[sim.DIMS_CELL] = i
-    inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
+//  for i := 0; i < numCells; i++ {
+  for j := 0; j < numCells; j++ {
+    go func(i int){
+      outputPosSlice := outputs.NewIndex(0)
+      statesPosSlice := states.NewIndex(0)
+      inputsPosSlice := inputs.NewIndex(0)
 
-    
-    // fmt.Println("baseflowCoefficient=",m.baseflowCoefficient)
-		baseflowcoefficient := m.baseflowCoefficient.Get1(i%m.baseflowCoefficient.Len1())
-    
-    // fmt.Println("imperviousThreshold=",m.imperviousThreshold)
-		imperviousthreshold := m.imperviousThreshold.Get1(i%m.imperviousThreshold.Len1())
-    
-    // fmt.Println("infiltrationCoefficient=",m.infiltrationCoefficient)
-		infiltrationcoefficient := m.infiltrationCoefficient.Get1(i%m.infiltrationCoefficient.Len1())
-    
-    // fmt.Println("infiltrationShape=",m.infiltrationShape)
-		infiltrationshape := m.infiltrationShape.Get1(i%m.infiltrationShape.Len1())
-    
-    // fmt.Println("interflowCoefficient=",m.interflowCoefficient)
-		interflowcoefficient := m.interflowCoefficient.Get1(i%m.interflowCoefficient.Len1())
-    
-    // fmt.Println("perviousFraction=",m.perviousFraction)
-		perviousfraction := m.perviousFraction.Get1(i%m.perviousFraction.Len1())
-    
-    // fmt.Println("rainfallInterceptionStoreCapacity=",m.rainfallInterceptionStoreCapacity)
-		rainfallinterceptionstorecapacity := m.rainfallInterceptionStoreCapacity.Get1(i%m.rainfallInterceptionStoreCapacity.Len1())
-    
-    // fmt.Println("rechargeCoefficient=",m.rechargeCoefficient)
-		rechargecoefficient := m.rechargeCoefficient.Get1(i%m.rechargeCoefficient.Len1())
-    
-    // fmt.Println("soilMoistureStoreCapacity=",m.soilMoistureStoreCapacity)
-		soilmoisturestorecapacity := m.soilMoistureStoreCapacity.Get1(i%m.soilMoistureStoreCapacity.Len1())
-    
+      outputPosSlice[sim.DIMO_CELL] = i
+      statesPosSlice[sim.DIMS_CELL] = i
+      inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-    // fmt.Println("i",i)
-    // fmt.Println("States",states.Shape())
-    // fmt.Println("Tmp2",tmp2.Shape())
-    
-    initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
-    
+      
+      // fmt.Println("baseflowCoefficient=",m.baseflowCoefficient)
+      baseflowcoefficient := m.baseflowCoefficient.Get1(i%m.baseflowCoefficient.Len1())
+      
+      // fmt.Println("imperviousThreshold=",m.imperviousThreshold)
+      imperviousthreshold := m.imperviousThreshold.Get1(i%m.imperviousThreshold.Len1())
+      
+      // fmt.Println("infiltrationCoefficient=",m.infiltrationCoefficient)
+      infiltrationcoefficient := m.infiltrationCoefficient.Get1(i%m.infiltrationCoefficient.Len1())
+      
+      // fmt.Println("infiltrationShape=",m.infiltrationShape)
+      infiltrationshape := m.infiltrationShape.Get1(i%m.infiltrationShape.Len1())
+      
+      // fmt.Println("interflowCoefficient=",m.interflowCoefficient)
+      interflowcoefficient := m.interflowCoefficient.Get1(i%m.interflowCoefficient.Len1())
+      
+      // fmt.Println("perviousFraction=",m.perviousFraction)
+      perviousfraction := m.perviousFraction.Get1(i%m.perviousFraction.Len1())
+      
+      // fmt.Println("rainfallInterceptionStoreCapacity=",m.rainfallInterceptionStoreCapacity)
+      rainfallinterceptionstorecapacity := m.rainfallInterceptionStoreCapacity.Get1(i%m.rainfallInterceptionStoreCapacity.Len1())
+      
+      // fmt.Println("rechargeCoefficient=",m.rechargeCoefficient)
+      rechargecoefficient := m.rechargeCoefficient.Get1(i%m.rechargeCoefficient.Len1())
+      
+      // fmt.Println("soilMoistureStoreCapacity=",m.soilMoistureStoreCapacity)
+      soilmoisturestorecapacity := m.soilMoistureStoreCapacity.Get1(i%m.soilMoistureStoreCapacity.Len1())
+      
 
-    
-    
-    soilmoisturestore := initialStates.Get1(0)
-    
-    groundwater := initialStates.Get1(1)
-    
-    totalstore := initialStates.Get1(2)
-    
-    
+      // fmt.Println("i",i)
+      // fmt.Println("States",states.Shape())
+      // fmt.Println("Tmp2",tmp2.Shape())
+      
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
+      
 
-//    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
+      
+      
+      soilmoisturestore := initialStates.Get1(0)
+      
+      groundwater := initialStates.Get1(1)
+      
+      totalstore := initialStates.Get1(2)
+      
+      
 
-		cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-//    fmt.Println("cellInputs Shape",cellInputs.Shape())
-    
-//    fmt.Println("{rainfall mm}",tmpTS.Shape())
-		rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    
-//    fmt.Println("{pet mm}",tmpTS.Shape())
-		pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    
+  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
-    
+      cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
+  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
+      
+  //    fmt.Println("{rainfall mm}",tmpTS.Shape())
+      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{pet mm}",tmpTS.Shape())
+      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
 
-    
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 0
-    runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 1
-    quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 2
-    baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 3
-    store := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    
+      
 
-		soilmoisturestore,groundwater,totalstore= simhyd(rainfall,pet,soilmoisturestore,groundwater,totalstore,baseflowcoefficient,imperviousthreshold,infiltrationcoefficient,infiltrationshape,interflowcoefficient,perviousfraction,rainfallinterceptionstorecapacity,rechargecoefficient,soilmoisturestorecapacity,runoff,quickflow,baseflow,store)
+      
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 0
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 1
+      quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 2
+      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 3
+      store := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      
 
-    
-    
-    initialStates.Set1(0, soilmoisturestore)
-    
-    initialStates.Set1(1, groundwater)
-    
-    initialStates.Set1(2, totalstore)
-    
-    
+      soilmoisturestore,groundwater,totalstore= simhyd(rainfall,pet,soilmoisturestore,groundwater,totalstore,baseflowcoefficient,imperviousthreshold,infiltrationcoefficient,infiltrationshape,interflowcoefficient,perviousfraction,rainfallinterceptionstorecapacity,rechargecoefficient,soilmoisturestorecapacity,runoff,quickflow,baseflow,store)
 
-//		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
-    
+      
+      
+      initialStates.Set1(0, soilmoisturestore)
+      
+      initialStates.Set1(1, groundwater)
+      
+      initialStates.Set1(2, totalstore)
+      
+      
+
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
+      
+
+      doneChan <- i
+    }(j)
 	}
 
+  for j := 0; j < numCells; j++ {
+    <- doneChan
+  }
 //	return result
 }

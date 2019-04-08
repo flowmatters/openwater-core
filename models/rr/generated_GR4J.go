@@ -118,16 +118,16 @@ func (m *GR4J) Run(inputs data.ND3Float64, states data.ND2Float64, outputs data.
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
 
-  outputPosSlice := outputs.NewIndex(0)
+//  outputPosSlice := outputs.NewIndex(0)
   outputStepSlice := outputs.NewIndex(1)
   outputSizeSlice := outputs.NewIndex(1)
   outputSizeSlice[sim.DIMO_TIMESTEP] = inputLen
 
-  statesPosSlice := states.NewIndex(0)
+//  statesPosSlice := states.NewIndex(0)
   statesSizeSlice := states.NewIndex(1)
   statesSizeSlice[sim.DIMS_STATE] = numStates
 
-  inputsPosSlice := inputs.NewIndex(0)
+//  inputsPosSlice := inputs.NewIndex(0)
   inputsSizeSlice := inputs.NewIndex(1)
   inputsSizeSlice[sim.DIMI_INPUT] = inputDims[sim.DIMI_INPUT]
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
@@ -136,68 +136,81 @@ func (m *GR4J) Run(inputs data.ND3Float64, states data.ND2Float64, outputs data.
 //	result.Outputs = data.NewArray3DFloat64( 1, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
+  doneChan := make(chan int)
   // fmt.Println("Running GR4J for ",numCells,"cells")
-  for i := 0; i < numCells; i++ {
-    outputPosSlice[sim.DIMO_CELL] = i
-    statesPosSlice[sim.DIMS_CELL] = i
-    inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
+//  for i := 0; i < numCells; i++ {
+  for j := 0; j < numCells; j++ {
+    go func(i int){
+      outputPosSlice := outputs.NewIndex(0)
+      statesPosSlice := states.NewIndex(0)
+      inputsPosSlice := inputs.NewIndex(0)
 
-    
-    // fmt.Println("X1=",m.X1)
-		x1 := m.X1.Get1(i%m.X1.Len1())
-    
-    // fmt.Println("X2=",m.X2)
-		x2 := m.X2.Get1(i%m.X2.Len1())
-    
-    // fmt.Println("X3=",m.X3)
-		x3 := m.X3.Get1(i%m.X3.Len1())
-    
-    // fmt.Println("X4=",m.X4)
-		x4 := m.X4.Get1(i%m.X4.Len1())
-    
+      outputPosSlice[sim.DIMO_CELL] = i
+      statesPosSlice[sim.DIMS_CELL] = i
+      inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-    // fmt.Println("i",i)
-    // fmt.Println("States",states.Shape())
-    // fmt.Println("Tmp2",tmp2.Shape())
-    
-    initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
-    
+      
+      // fmt.Println("X1=",m.X1)
+      x1 := m.X1.Get1(i%m.X1.Len1())
+      
+      // fmt.Println("X2=",m.X2)
+      x2 := m.X2.Get1(i%m.X2.Len1())
+      
+      // fmt.Println("X3=",m.X3)
+      x3 := m.X3.Get1(i%m.X3.Len1())
+      
+      // fmt.Println("X4=",m.X4)
+      x4 := m.X4.Get1(i%m.X4.Len1())
+      
 
-    
-    s,r,n1,n2,q1,q9 := extractGR4JStates(initialStates)
-    
+      // fmt.Println("i",i)
+      // fmt.Println("States",states.Shape())
+      // fmt.Println("Tmp2",tmp2.Shape())
+      
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
+      
 
-//    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
+      
+      s,r,n1,n2,q1,q9 := extractGR4JStates(initialStates)
+      
 
-		cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-//    fmt.Println("cellInputs Shape",cellInputs.Shape())
-    
-//    fmt.Println("{rainfall mm}",tmpTS.Shape())
-		rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    
-//    fmt.Println("{pet mm}",tmpTS.Shape())
-		pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    
+  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
-    
+      cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
+  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
+      
+  //    fmt.Println("{rainfall mm}",tmpTS.Shape())
+      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{pet mm}",tmpTS.Shape())
+      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
 
-    
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 0
-    runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    
+      
 
-		s,r,n1,n2,q1,q9= gr4j(rainfall,pet,s,r,n1,n2,q1,q9,x1,x2,x3,x4,runoff)
+      
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 0
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      
 
-    
-    // TODO Retrieve states
-		states.ApplySlice([]int{i,0},[]int{0,1},packGR4JStates(s,r,n1,n2,q1,q9))
-    
+      s,r,n1,n2,q1,q9= gr4j(rainfall,pet,s,r,n1,n2,q1,q9,x1,x2,x3,x4,runoff)
 
-//		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 1)
-    
+      
+      // TODO Retrieve states
+      states.ApplySlice([]int{i,0},[]int{0,1},packGR4JStates(s,r,n1,n2,q1,q9))
+      
+
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 1)
+      
+
+      doneChan <- i
+    }(j)
 	}
 
+  for j := 0; j < numCells; j++ {
+    <- doneChan
+  }
 //	return result
 }

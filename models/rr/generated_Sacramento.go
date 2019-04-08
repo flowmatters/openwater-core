@@ -166,16 +166,16 @@ func (m *Sacramento) Run(inputs data.ND3Float64, states data.ND2Float64, outputs
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
 
-  outputPosSlice := outputs.NewIndex(0)
+//  outputPosSlice := outputs.NewIndex(0)
   outputStepSlice := outputs.NewIndex(1)
   outputSizeSlice := outputs.NewIndex(1)
   outputSizeSlice[sim.DIMO_TIMESTEP] = inputLen
 
-  statesPosSlice := states.NewIndex(0)
+//  statesPosSlice := states.NewIndex(0)
   statesSizeSlice := states.NewIndex(1)
   statesSizeSlice[sim.DIMS_STATE] = numStates
 
-  inputsPosSlice := inputs.NewIndex(0)
+//  inputsPosSlice := inputs.NewIndex(0)
   inputsSizeSlice := inputs.NewIndex(1)
   inputsSizeSlice[sim.DIMI_INPUT] = inputDims[sim.DIMI_INPUT]
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
@@ -186,8 +186,13 @@ func (m *Sacramento) Run(inputs data.ND3Float64, states data.ND2Float64, outputs
 
   doneChan := make(chan int)
   // fmt.Println("Running Sacramento for ",numCells,"cells")
+//  for i := 0; i < numCells; i++ {
   for j := 0; j < numCells; j++ {
     go func(i int){
+      outputPosSlice := outputs.NewIndex(0)
+      statesPosSlice := states.NewIndex(0)
+      inputsPosSlice := inputs.NewIndex(0)
+
       outputPosSlice[sim.DIMO_CELL] = i
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences

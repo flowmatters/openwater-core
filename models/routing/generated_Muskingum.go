@@ -103,16 +103,16 @@ func (m *Muskingum) Run(inputs data.ND3Float64, states data.ND2Float64, outputs 
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
 
-  outputPosSlice := outputs.NewIndex(0)
+//  outputPosSlice := outputs.NewIndex(0)
   outputStepSlice := outputs.NewIndex(1)
   outputSizeSlice := outputs.NewIndex(1)
   outputSizeSlice[sim.DIMO_TIMESTEP] = inputLen
 
-  statesPosSlice := states.NewIndex(0)
+//  statesPosSlice := states.NewIndex(0)
   statesSizeSlice := states.NewIndex(1)
   statesSizeSlice[sim.DIMS_STATE] = numStates
 
-  inputsPosSlice := inputs.NewIndex(0)
+//  inputsPosSlice := inputs.NewIndex(0)
   inputsSizeSlice := inputs.NewIndex(1)
   inputsSizeSlice[sim.DIMI_INPUT] = inputDims[sim.DIMI_INPUT]
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
@@ -121,76 +121,89 @@ func (m *Muskingum) Run(inputs data.ND3Float64, states data.ND2Float64, outputs 
 //	result.Outputs = data.NewArray3DFloat64( 1, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
+  doneChan := make(chan int)
   // fmt.Println("Running Muskingum for ",numCells,"cells")
-  for i := 0; i < numCells; i++ {
-    outputPosSlice[sim.DIMO_CELL] = i
-    statesPosSlice[sim.DIMS_CELL] = i
-    inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
+//  for i := 0; i < numCells; i++ {
+  for j := 0; j < numCells; j++ {
+    go func(i int){
+      outputPosSlice := outputs.NewIndex(0)
+      statesPosSlice := states.NewIndex(0)
+      inputsPosSlice := inputs.NewIndex(0)
 
-    
-    // fmt.Println("K=",m.K)
-		k := m.K.Get1(i%m.K.Len1())
-    
-    // fmt.Println("X=",m.X)
-		x := m.X.Get1(i%m.X.Len1())
-    
-    // fmt.Println("DeltaT=",m.DeltaT)
-		deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
-    
+      outputPosSlice[sim.DIMO_CELL] = i
+      statesPosSlice[sim.DIMS_CELL] = i
+      inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-    // fmt.Println("i",i)
-    // fmt.Println("States",states.Shape())
-    // fmt.Println("Tmp2",tmp2.Shape())
-    
-    initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
-    
+      
+      // fmt.Println("K=",m.K)
+      k := m.K.Get1(i%m.K.Len1())
+      
+      // fmt.Println("X=",m.X)
+      x := m.X.Get1(i%m.X.Len1())
+      
+      // fmt.Println("DeltaT=",m.DeltaT)
+      deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
+      
 
-    
-    
-    s := initialStates.Get1(0)
-    
-    previnflow := initialStates.Get1(1)
-    
-    prevoutflow := initialStates.Get1(2)
-    
-    
+      // fmt.Println("i",i)
+      // fmt.Println("States",states.Shape())
+      // fmt.Println("Tmp2",tmp2.Shape())
+      
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
+      
 
-//    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
+      
+      
+      s := initialStates.Get1(0)
+      
+      previnflow := initialStates.Get1(1)
+      
+      prevoutflow := initialStates.Get1(2)
+      
+      
 
-		cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-//    fmt.Println("cellInputs Shape",cellInputs.Shape())
-    
-//    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
-		inflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    
-//    fmt.Println("{lateral m^3.s^-1}",tmpTS.Shape())
-		lateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    
+  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
-    
+      cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
+  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
+      
+  //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
+      inflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{lateral m^3.s^-1}",tmpTS.Shape())
+      lateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
 
-    
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 0
-    outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    
+      
 
-		s,previnflow,prevoutflow= muskingum(inflow,lateral,s,previnflow,prevoutflow,k,x,deltat,outflow)
+      
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 0
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      
 
-    
-    
-    initialStates.Set1(0, s)
-    
-    initialStates.Set1(1, previnflow)
-    
-    initialStates.Set1(2, prevoutflow)
-    
-    
+      s,previnflow,prevoutflow= muskingum(inflow,lateral,s,previnflow,prevoutflow,k,x,deltat,outflow)
 
-//		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 1)
-    
+      
+      
+      initialStates.Set1(0, s)
+      
+      initialStates.Set1(1, previnflow)
+      
+      initialStates.Set1(2, prevoutflow)
+      
+      
+
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 1)
+      
+
+      doneChan <- i
+    }(j)
 	}
 
+  for j := 0; j < numCells; j++ {
+    <- doneChan
+  }
 //	return result
 }

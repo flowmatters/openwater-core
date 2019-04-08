@@ -119,16 +119,16 @@ func (m *{{.Name}}) Run(inputs data.ND3Float64, states data.ND2Float64, outputs 
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
 
-  outputPosSlice := outputs.NewIndex(0)
+//  outputPosSlice := outputs.NewIndex(0)
   outputStepSlice := outputs.NewIndex(1)
   outputSizeSlice := outputs.NewIndex(1)
   outputSizeSlice[sim.DIMO_TIMESTEP] = inputLen
 
-  statesPosSlice := states.NewIndex(0)
+//  statesPosSlice := states.NewIndex(0)
   statesSizeSlice := states.NewIndex(1)
   statesSizeSlice[sim.DIMS_STATE] = numStates
 
-  inputsPosSlice := inputs.NewIndex(0)
+//  inputsPosSlice := inputs.NewIndex(0)
   inputsSizeSlice := inputs.NewIndex(1)
   inputsSizeSlice[sim.DIMI_INPUT] = inputDims[sim.DIMI_INPUT]
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
@@ -137,83 +137,96 @@ func (m *{{.Name}}) Run(inputs data.ND3Float64, states data.ND2Float64, outputs 
 //	result.Outputs = data.NewArray3DFloat64( {{len .Outputs}}, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
+  doneChan := make(chan int)
   // fmt.Println("Running {{.Name}} for ",numCells,"cells")
-  for i := 0; i < numCells; i++ {
-    outputPosSlice[sim.DIMO_CELL] = i
-    statesPosSlice[sim.DIMS_CELL] = i
-    inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
+//  for i := 0; i < numCells; i++ {
+  for j := 0; j < numCells; j++ {
+    go func(i int){
+      outputPosSlice := outputs.NewIndex(0)
+      statesPosSlice := states.NewIndex(0)
+      inputsPosSlice := inputs.NewIndex(0)
 
-    {{range $i, $v := .Parameters}}
-    // fmt.Println("{{$v.Key}}=",m.{{$v.Key}})
-		{{lower $v.Key}} := m.{{$v.Key}}.Get1(i%m.{{$v.Key}}.Len1())
-    {{end}}
+      outputPosSlice[sim.DIMO_CELL] = i
+      statesPosSlice[sim.DIMS_CELL] = i
+      inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-    // fmt.Println("i",i)
-    // fmt.Println("States",states.Shape())
-    // fmt.Println("Tmp2",tmp2.Shape())
-    {{if len .States}}
-    initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
-    {{end}}
+      {{range $i, $v := .Parameters}}
+      // fmt.Println("{{$v.Key}}=",m.{{$v.Key}})
+      {{lower $v.Key}} := m.{{$v.Key}}.Get1(i%m.{{$v.Key}}.Len1())
+      {{end}}
 
-    {{if .Flags.GenerateExtractStates}}
-    {{range $i, $v := .States}}
-    {{lower $v.Key}} := initialStates.Get1({{$i}})
-    {{end}}
-    {{else}}
-    {{range $i, $v := .States}}{{if $i}},{{end}}{{lower $v.Key}}{{end}} := {{.ExtractStatesFunc}}(initialStates)
-    {{end}}
+      // fmt.Println("i",i)
+      // fmt.Println("States",states.Shape())
+      // fmt.Println("Tmp2",tmp2.Shape())
+      {{if len .States}}
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1Float64)
+      {{end}}
 
-//    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
+      {{if .Flags.GenerateExtractStates}}
+      {{range $i, $v := .States}}
+      {{lower $v.Key}} := initialStates.Get1({{$i}})
+      {{end}}
+      {{else}}
+      {{range $i, $v := .States}}{{if $i}},{{end}}{{lower $v.Key}}{{end}} := {{.ExtractStatesFunc}}(initialStates)
+      {{end}}
 
-		cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-//    fmt.Println("cellInputs Shape",cellInputs.Shape())
-    {{range $i, $v := .Inputs}}
-//    fmt.Println("{{$v}}",tmpTS.Shape())
-		{{lower $v.Key}} := cellInputs.Slice([]int{ {{$i}},0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    {{end}}
+  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
-    {{ $oAsP := .Flags.PassOutputsAsParams}}
+      cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
+  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
+      {{range $i, $v := .Inputs}}
+  //    fmt.Println("{{$v}}",tmpTS.Shape())
+      {{lower $v.Key}} := cellInputs.Slice([]int{ {{$i}},0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      {{end}}
 
-    {{if $oAsP}}
-    {{range $i, $v := .Outputs}}
-    outputPosSlice[sim.DIMO_OUTPUT] = {{$i}}
-    {{lower $v.Key}} := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    {{end}}
-    {{end}}
+      {{ $oAsP := .Flags.PassOutputsAsParams}}
 
-		{{if not $oAsP}}
-    {{range $i, $v := .Outputs}}{{if $i}},{{end}}{{lower $v.Key}}{{end}}
-    {{- end}}
-    {{- range $i, $v := .States}}{{if or $i (not $oAsP)}},{{end}}{{lower $v.Key}}{{end}}{{ if $oAsP }}{{if len .States}}={{end}}{{else}}:={{end}} {{.SingleFunc}}(
-      {{- range .Inputs}}{{lower .Key}},{{end -}}
-      {{- range .States}}{{lower .Key}},{{end -}}
-      {{- range .Parameters}}{{lower .Key}},{{end -}}
-      {{- if $oAsP}}
-      {{- range $i, $v := .Outputs}}{{if $i}},{{end}}{{lower $v.Key}}{{end}}
-      {{- end}})
+      {{if $oAsP}}
+      {{range $i, $v := .Outputs}}
+      outputPosSlice[sim.DIMO_OUTPUT] = {{$i}}
+      {{lower $v.Key}} := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      {{end}}
+      {{end}}
 
-    {{if .Flags.GenerateExtractStates}}
-    {{range $i, $v := .States}}
-    initialStates.Set1({{$i}}, {{lower $v.Key}})
-    {{end}}
-    {{else}}
-    // TODO Retrieve states
-		states.ApplySlice([]int{i,0},[]int{0,1},{{.PackStatsFunc}}({{range $i, $v := .States}}{{if $i}},{{end}}{{lower $v.Key}}{{end}}))
-    {{end}}
+      {{if not $oAsP}}
+      {{range $i, $v := .Outputs}}{{if $i}},{{end}}{{lower $v.Key}}{{end}}
+      {{- end}}
+      {{- range $i, $v := .States}}{{if or $i (not $oAsP)}},{{end}}{{lower $v.Key}}{{end}}{{ if $oAsP }}{{if len .States}}={{end}}{{else}}:={{end}} {{.SingleFunc}}(
+        {{- range .Inputs}}{{lower .Key}},{{end -}}
+        {{- range .States}}{{lower .Key}},{{end -}}
+        {{- range .Parameters}}{{lower .Key}},{{end -}}
+        {{- if $oAsP}}
+        {{- range $i, $v := .Outputs}}{{if $i}},{{end}}{{lower $v.Key}}{{end}}
+        {{- end}})
 
-//		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, {{len .Outputs}})
-    {{if not $oAsP}}
-    {{range $i,$v := .Outputs -}}
-    {{lower $v.Key}}Reshaped := {{lower $v.Key}}.MustReshape([]int{1,{{lower $v.Key}}.Len1(),1})
-//    fmt.Println(result.Outputs.Shape(),{{lower $v.Key}}Reshaped.Shape())
-    outputPosSlice[sim.DIMO_OUTPUT] = {{$i}}
-    outputs.ApplySlice(outputPosSlice,outputStepSlice,
-                              {{lower $v.Key}}Reshaped)
-    {{end}}
+      {{if .Flags.GenerateExtractStates}}
+      {{range $i, $v := .States}}
+      initialStates.Set1({{$i}}, {{lower $v.Key}})
+      {{end}}
+      {{else}}
+      // TODO Retrieve states
+      states.ApplySlice([]int{i,0},[]int{0,1},{{.PackStatsFunc}}({{range $i, $v := .States}}{{if $i}},{{end}}{{lower $v.Key}}{{end}}))
+      {{end}}
 
-    {{end}}
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, {{len .Outputs}})
+      {{if not $oAsP}}
+      {{range $i,$v := .Outputs -}}
+      {{lower $v.Key}}Reshaped := {{lower $v.Key}}.MustReshape([]int{1,{{lower $v.Key}}.Len1(),1})
+  //    fmt.Println(result.Outputs.Shape(),{{lower $v.Key}}Reshaped.Shape())
+      outputPosSlice[sim.DIMO_OUTPUT] = {{$i}}
+      outputs.ApplySlice(outputPosSlice,outputStepSlice,
+                                {{lower $v.Key}}Reshaped)
+      {{end}}
+
+      {{end}}
+
+      doneChan <- i
+    }(j)
 	}
 
+  for j := 0; j < numCells; j++ {
+    <- doneChan
+  }
 //	return result
 }
 {{end}}

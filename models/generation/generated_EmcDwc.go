@@ -94,16 +94,16 @@ func (m *EmcDwc) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
 
-  outputPosSlice := outputs.NewIndex(0)
+//  outputPosSlice := outputs.NewIndex(0)
   outputStepSlice := outputs.NewIndex(1)
   outputSizeSlice := outputs.NewIndex(1)
   outputSizeSlice[sim.DIMO_TIMESTEP] = inputLen
 
-  statesPosSlice := states.NewIndex(0)
+//  statesPosSlice := states.NewIndex(0)
   statesSizeSlice := states.NewIndex(1)
   statesSizeSlice[sim.DIMS_STATE] = numStates
 
-  inputsPosSlice := inputs.NewIndex(0)
+//  inputsPosSlice := inputs.NewIndex(0)
   inputsSizeSlice := inputs.NewIndex(1)
   inputsSizeSlice[sim.DIMI_INPUT] = inputDims[sim.DIMI_INPUT]
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
@@ -112,65 +112,78 @@ func (m *EmcDwc) Run(inputs data.ND3Float64, states data.ND2Float64, outputs dat
 //	result.Outputs = data.NewArray3DFloat64( 3, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
+  doneChan := make(chan int)
   // fmt.Println("Running EmcDwc for ",numCells,"cells")
-  for i := 0; i < numCells; i++ {
-    outputPosSlice[sim.DIMO_CELL] = i
-    statesPosSlice[sim.DIMS_CELL] = i
-    inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
+//  for i := 0; i < numCells; i++ {
+  for j := 0; j < numCells; j++ {
+    go func(i int){
+      outputPosSlice := outputs.NewIndex(0)
+      statesPosSlice := states.NewIndex(0)
+      inputsPosSlice := inputs.NewIndex(0)
 
-    
-    // fmt.Println("EMC=",m.EMC)
-		emc := m.EMC.Get1(i%m.EMC.Len1())
-    
-    // fmt.Println("DWC=",m.DWC)
-		dwc := m.DWC.Get1(i%m.DWC.Len1())
-    
+      outputPosSlice[sim.DIMO_CELL] = i
+      statesPosSlice[sim.DIMS_CELL] = i
+      inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-    // fmt.Println("i",i)
-    // fmt.Println("States",states.Shape())
-    // fmt.Println("Tmp2",tmp2.Shape())
-    
+      
+      // fmt.Println("EMC=",m.EMC)
+      emc := m.EMC.Get1(i%m.EMC.Len1())
+      
+      // fmt.Println("DWC=",m.DWC)
+      dwc := m.DWC.Get1(i%m.DWC.Len1())
+      
 
-    
-    
-    
+      // fmt.Println("i",i)
+      // fmt.Println("States",states.Shape())
+      // fmt.Println("Tmp2",tmp2.Shape())
+      
 
-//    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
+      
+      
+      
 
-		cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-//    fmt.Println("cellInputs Shape",cellInputs.Shape())
-    
-//    fmt.Println("{quickflow m^3.s^-1}",tmpTS.Shape())
-		quickflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    
-//    fmt.Println("{baseflow m^3.s^-1}",tmpTS.Shape())
-		baseflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-    
+  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
-    
+      cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
+  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
+      
+  //    fmt.Println("{quickflow m^3.s^-1}",tmpTS.Shape())
+      quickflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{baseflow m^3.s^-1}",tmpTS.Shape())
+      baseflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
 
-    
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 0
-    quickload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 1
-    slowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    outputPosSlice[sim.DIMO_OUTPUT] = 2
-    totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
-    
-    
+      
 
-		 emcDWC(quickflow,baseflow,emc,dwc,quickload,slowload,totalload)
+      
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 0
+      quickload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 1
+      slowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 2
+      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      
 
-    
-    
-    
+       emcDWC(quickflow,baseflow,emc,dwc,quickload,slowload,totalload)
 
-//		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 3)
-    
+      
+      
+      
+
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 3)
+      
+
+      doneChan <- i
+    }(j)
 	}
 
+  for j := 0; j < numCells; j++ {
+    <- doneChan
+  }
 //	return result
 }
