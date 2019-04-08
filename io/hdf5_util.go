@@ -5,12 +5,15 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/flowmatters/openwater-core/conv"
 	"github.com/flowmatters/openwater-core/util/m"
 	"github.com/flowmatters/openwater-core/util/slice"
 	"gonum.org/v1/hdf5"
 )
+
+var mu sync.RWMutex
 
 // errorString is a trivial implementation of error.
 type errorString struct {
