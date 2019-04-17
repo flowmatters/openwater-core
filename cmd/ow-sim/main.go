@@ -16,8 +16,16 @@ import (
 	"github.com/flowmatters/openwater-core/sim"
 )
 
+var verbose bool
+
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 var overwrite = flag.Bool("overwrite", false, "overwrite existing output files")
+
+func init() {
+	const usage = "show progress of simulation generations"
+	flag.BoolVar(&verbose, "verbose", false, usage)
+	flag.BoolVar(&verbose, "v", false, usage+" (shorthand)")
+}
 
 const (
 	LINK_SRC_GENERATION  = 0
@@ -228,6 +236,18 @@ func (mr *modelReference) WriteData(generation int) error {
 	return nil
 }
 
+func verbosePrintln(a ...interface{}) {
+	if verbose {
+		fmt.Println(a...)
+	}
+}
+
+func verbosePrintf(s string, a ...interface{}) {
+	if verbose {
+		fmt.Printf(s, a...)
+	}
+}
+
 func main() {
 	flag.Parse()
 
@@ -265,14 +285,14 @@ func main() {
 		fmt.Println("Couldn't read model metadata")
 		os.Exit(1)
 	}
-	fmt.Println("Models", modelNames)
+	verbosePrintln("Models", modelNames)
 
 	dims, err := dimsRef.GetDatasets()
 	if err != nil {
 		fmt.Println("Couldn't read model dimensions")
 		os.Exit(1)
 	}
-	fmt.Println("Dimensions", dims)
+	verbosePrintln("Dimensions", dims)
 
 	linksRef := io.H5RefUint32{Filename: fn, Dataset: "/LINKS"}
 	linksND, err := linksRef.Load()
@@ -308,8 +328,8 @@ func main() {
 			}
 		}
 
-		fmt.Println("Batches for ", ref.ModelName, ref.Batches)
-		fmt.Println("Generations for ", ref.ModelName, ref.Generations)
+		verbosePrintln("Batches for ", ref.ModelName, ref.Batches)
+		verbosePrintln("Generations for ", ref.ModelName, ref.Generations)
 		models[modelName] = ref
 		genCount = len(ref.Generations)
 	}
@@ -328,7 +348,7 @@ func main() {
 				os.Exit(1)
 			}
 			if gen.Count > 0 {
-				fmt.Printf("* %d x %s\n", gen.Count, modelName)
+				verbosePrintf("* %d x %s\n", gen.Count, modelName)
 			}
 			genTotal += gen.Count
 			go func(g *modelGeneration, name string) {
@@ -336,7 +356,7 @@ func main() {
 					g.Run()
 					outputs := g.Outputs
 					if outputs == nil {
-						fmt.Printf("No outputs from %s in generation %d\n", modelName, i)
+						fmt.Printf("No outputs from %s in generation %d\n", name, i)
 					}
 				}
 
@@ -346,14 +366,14 @@ func main() {
 
 		for i, _ := range modelNames {
 			mn := <-simulationDone
-			fmt.Printf("%d: %s finished\n", i, mn)
+			verbosePrintf("%d: %s finished\n", i, mn)
 		}
 
 		genSimulationEnd := time.Now()
 		genSimulationElapsed := genSimulationEnd.Sub(genStart)
 		totalTimeSimulation += genSimulationElapsed.Seconds()
 
-		fmt.Printf("= %d runs in %f seconds\n", genTotal, genSimulationElapsed.Seconds())
+		verbosePrintf("= %d runs in %f seconds\n", genTotal, genSimulationElapsed.Seconds())
 
 		if outputFn != "" {
 			go func(g int) {
@@ -364,14 +384,14 @@ func main() {
 						if prevG == (g - 1) {
 							break
 						}
-						fmt.Printf("Waiting for generation %d, got generation %d, sleeping\n", g, prevG)
+						verbosePrintf("Waiting for generation %d, got generation %d, sleeping\n", g, prevG)
 						writingDone <- prevG
 						time.Sleep(time.Duration(1000 * 1000 * 500)) // Half a second
 					}
 				}
 
 				genWriteStart := time.Now()
-				fmt.Printf("Writing results for generation %d...\n", g)
+				verbosePrintf("Writing results for generation %d...\n", g)
 				for _, modelName := range modelNames {
 					modelRef := models[modelName]
 					err := modelRef.WriteData(g)
@@ -382,7 +402,7 @@ func main() {
 				}
 				genWriteEnd := time.Now()
 				genWriteElapsed := genWriteEnd.Sub(genWriteStart)
-				fmt.Printf("Results for generation %d written in %f seconds\n", g, genWriteElapsed.Seconds())
+				verbosePrintf("Results for generation %d written in %f seconds\n", g, genWriteElapsed.Seconds())
 				writingDone <- g
 			}(i)
 		}
@@ -438,22 +458,22 @@ func main() {
 		genLinkElapsed := genLinkEnd.Sub(genSimulationEnd)
 		totalTimeLinks += genLinkElapsed.Seconds()
 
-		fmt.Printf("%d links (%d to %d), processed in %f seconds\n", nextLink-currentLink, currentLink, nextLink, genLinkElapsed.Seconds())
+		verbosePrintf("%d links (%d to %d), processed in %f seconds\n", nextLink-currentLink, currentLink, nextLink, genLinkElapsed.Seconds())
 		genElapsed := genLinkEnd.Sub(genStart)
-		fmt.Printf("Generation completed in %f seconds\n", genElapsed.Seconds())
-		fmt.Println()
+		verbosePrintf("Generation completed in %f seconds\n", genElapsed.Seconds())
+		verbosePrintln()
 	}
 
-	fmt.Println("Simulation finished. Waiting for results to be written")
+	verbosePrintln("Simulation finished. Waiting for results to be written")
 	generationsEnd := time.Now()
 
 	for {
 		genFinished := <-writingDone
 		if genFinished == (genCount - 1) {
-			fmt.Printf("Generation %d finished writing\n", genFinished)
+			verbosePrintf("Generation %d finished writing\n", genFinished)
 			break
 		}
-		fmt.Printf("Waiting for final generation (%d), got generation %d, sleeping\n", genCount-1, genFinished)
+		verbosePrintf("Waiting for final generation (%d), got generation %d, sleeping\n", genCount-1, genFinished)
 		writingDone <- genFinished
 		time.Sleep(time.Duration(500 * 1000 * 1000))
 	}
