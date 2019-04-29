@@ -94,39 +94,6 @@ func storageRouting(inflows, laterals, rainfall, evap data.ND1Float64,
 		outflows.Set(idx, outflow)
 		storages.Set(idx, storage)
 	}
-	/*
-		//Step 5: Set the Outflow, Storage and downstream inflow arrays
-		if (!currentDivision.FlowsLocked)
-		{
-				currentDivision.Outflow = CalculateOutflowForDivision(currentDivision);
-		}
-		var newStorage = currentDivision.CalculateNewStorage();
-		var outflowVol = currentDivision.Outflow*timeStepInSeconds;
-		if(newStorage < outflowVol)
-		{
-				currentDivision.Outflow = CalculateOutflowForDivision(currentDivision);
-				outflowVol = currentDivision.Outflow * timeStepInSeconds;
-		}
-		currentDivision.Storage = newStorage - outflowVol;
-		currentDivision.CurrentDeadStorage = Math.Min(subreachds, currentDivision.Storage);
-
-		//Determine reach volume, total loss and total surface area
-		if (i < link.Divisions.Count - 1)
-		{
-
-				link.Divisions[i + 1].Inflow = currentDivision.Outflow;
-		}
-		else
-		{
-				//Step 6
-				_outflow = (double.IsNaN(currentDivision.Outflow)?0:currentDivision.Outflow) + link.LateralInflowAppliedDownstream;
-				var sTotal = 0.0;
-				link.Divisions.ForEach(x => sTotal+= x.Storage);
-				Storage = sTotal;
-
-		}
-		currentDivision.PreviousQIndex = currentDivision.QIndex;
-	*/
 
 	return 0.0, 0.0, 0.0
 }
