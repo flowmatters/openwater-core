@@ -7,7 +7,7 @@ import (
 	"io"
 
 	"github.com/flowmatters/openwater-core/data"
-	owio "github.com/flowmatters/openwater-core/io"
+	owjs "github.com/flowmatters/openwater-core/io/json"
 )
 
 type (
@@ -163,11 +163,11 @@ func encodeResults(w io.Writer, runLogs []string, results RunResults) {
 	//  fmt.Println("O",results.Outputs.Shape(),"S",results.States.Shape())
 	//fmt.Println(results.Outputs.Shape())
 	if results.Outputs != nil {
-		overall.RunResults.Outputs = owio.JsonSafeArray(results.Outputs.MustReshape(results.Outputs.Shape()[1:]), 0)
+		overall.RunResults.Outputs = owjs.JsonSafeArray(results.Outputs.MustReshape(results.Outputs.Shape()[1:]), 0)
 	}
 
 	if results.States != nil {
-		overall.RunResults.States = owio.JsonSafeArray(results.States.MustReshape(results.States.Shape()[1:]), 0)
+		overall.RunResults.States = owjs.JsonSafeArray(results.States.MustReshape(results.States.Shape()[1:]), 0)
 	}
 
 	encoder := json.NewEncoder(w)

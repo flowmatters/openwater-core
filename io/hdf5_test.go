@@ -33,7 +33,6 @@ func test_filename() string {
 func TestReadStrings(t *testing.T) {
 	assert := assert.New(t)
 	fn := test_filename()
-
 	ref := H5RefFloat64{Filename: fn, Dataset: "simple/strings"}
 	theStrings, err := ref.LoadText()
 
