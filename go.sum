@@ -6,6 +6,8 @@ github.com/joelrahman/genny v0.0.0-20190824200022-5487f4656b65 h1:9rcuTN2o8X9F0g
 github.com/joelrahman/genny v0.0.0-20190824200022-5487f4656b65/go.mod h1:haLHhzU8Z7IZABiGAUctoIzLuh/6XjjMKtJ+zXVI2rE=
 github.com/joelrahman/genny v0.0.0-20190824203634-cd396cb79b8d h1:frHzDBXlKqVqv6J7zEroSdOoZ5S0yKi8vgHaVtz6HhA=
 github.com/joelrahman/genny v0.0.0-20190824203634-cd396cb79b8d/go.mod h1:haLHhzU8Z7IZABiGAUctoIzLuh/6XjjMKtJ+zXVI2rE=
+github.com/joelrahman/genny v0.0.0-20190824203905-8e44d6b92033 h1:wdiOxbeahbZU3FqVlEPehmj57t6SWNMA2fMH2WKriOw=
+github.com/joelrahman/genny v0.0.0-20190824203905-8e44d6b92033/go.mod h1:haLHhzU8Z7IZABiGAUctoIzLuh/6XjjMKtJ+zXVI2rE=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

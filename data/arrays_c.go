@@ -8,10 +8,10 @@ import (
 	"unsafe"
 
 	"github.com/flowmatters/openwater-core/util/slice"
-	"github.com/joelrahman/genny/generic"
+	"github.com/joelrahman/genny/generic/cgeneric"
 )
 
-type CArrayType generic.CNumber
+type CArrayType cgeneric.CNumber
 
 type ndArrayTypeC struct {
 	ndArrayTypeCommon
