@@ -10,8 +10,8 @@ import (
 func TestProduct(t *testing.T) {
 	input := []int{1, 2, 3, 4}
 
-	if product(input) != 24 {
-		t.Errorf("expect product(%q) == 24, was %d", input, product(input))
+	if Product(input) != 24 {
+		t.Errorf("expect product(%q) == 24, was %d", input, Product(input))
 	}
 }
 
@@ -39,7 +39,7 @@ func TestMultiply(t *testing.T) {
 	lhs := []int{1, 3, 5}
 	rhs := []int{2, 6, 10}
 	exp := []int{2, 18, 50}
-	res := multiply(lhs, rhs)
+	res := Multiply(lhs, rhs)
 
 	if !slice.Equal(res, exp) {
 		t.Errorf("multiply(%q,%q) should equal %q, but was %q", lhs, rhs, exp, res)
@@ -62,32 +62,32 @@ func TestIncrement(t *testing.T) {
 	shape := []int{9, 2}
 
 	vec := []int{0, 0}
-	increment(vec, shape)
+	Increment(vec, shape)
 	assert.Equal([]int{0, 1}, vec)
 
 	vec = []int{3, 1}
-	increment(vec, shape)
+	Increment(vec, shape)
 	assert.Equal([]int{4, 0}, vec)
 
 	vec = []int{5, 1}
-	increment(vec, shape)
+	Increment(vec, shape)
 	assert.Equal([]int{6, 0}, vec)
 
 	shape = []int{5, 3, 4}
 
 	vec = []int{0, 0, 0}
-	increment(vec, shape)
+	Increment(vec, shape)
 	assert.Equal([]int{0, 0, 1}, vec)
 
 	vec = []int{3, 1, 1}
-	increment(vec, shape)
+	Increment(vec, shape)
 	assert.Equal([]int{3, 1, 2}, vec)
 
 	vec = []int{3, 1, 3}
-	increment(vec, shape)
+	Increment(vec, shape)
 	assert.Equal([]int{3, 2, 0}, vec)
 
 	vec = []int{3, 2, 3}
-	increment(vec, shape)
+	Increment(vec, shape)
 	assert.Equal([]int{4, 0, 0}, vec)
 }

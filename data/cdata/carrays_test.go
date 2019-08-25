@@ -1,8 +1,9 @@
-package data
+package cdata
 
 import (
 	"testing"
 
+	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/util/slice"
 	"github.com/stretchr/testify/assert"
 )
@@ -10,22 +11,11 @@ import (
 //import "fmt"
 // import "fmt"
 
-func TestOffset(t *testing.T) {
+func testData3D() data.ND3Float64 {
 	lenI := 3
 	lenJ := 2
 	lenK := 4
-	arr := newArrayfloat64([]int{lenI, lenJ, lenK})
-	expOffset := []int{8, 4, 1}
-	if !slice.Equal(expOffset, arr.Offset) {
-		t.Errorf("Incorrect Offset. Expected %v, got %v", expOffset, arr.Offset)
-	}
-}
-
-func testData3D() ND3Float64 {
-	lenI := 3
-	lenJ := 2
-	lenK := 4
-	arr := NewArray3DFloat64(lenI, lenJ, lenK)
+	arr := data.NewArray3DFloat64(lenI, lenJ, lenK)
 
 	a := 0
 	for i := 0; i < lenI; i++ {
@@ -40,8 +30,8 @@ func testData3D() ND3Float64 {
 	return arr
 }
 
-func testData2D() ND2Float64 {
-	arr := NewArray2DFloat64(2, 4)
+func testData2D() data.ND2Float64 {
+	arr := data.NewArray2DFloat64(2, 4)
 	arr.Set2(0, 0, 0)
 	arr.Set2(0, 1, 1)
 	arr.Set2(0, 2, 35)
@@ -65,7 +55,7 @@ func TestNewAndAccess(t *testing.T) {
 
 func TestSliceAndAccess(t *testing.T) {
 	arr := testData3D()
-	arrSlice := arr.Slice([]int{1, 1, 1}, []int{2, 1, 2}, []int{1, 1, 1}).(ND3Float64)
+	arrSlice := arr.Slice([]int{1, 1, 1}, []int{2, 1, 2}, []int{1, 1, 1}).(data.ND3Float64)
 	//arrNative := arrSlice.(*ndFloat64)
 
 	expShape := []int{2, 1, 2}
@@ -92,7 +82,7 @@ func TestContiguous(t *testing.T) {
 }
 
 func TestContiguousBig(t *testing.T) {
-	arr := NewArray3DFloat64(20, 30, 10)
+	arr := data.NewArray3DFloat64(20, 30, 10)
 	contig1 := arr.Slice([]int{5, 0, 0}, []int{3, 30, 10}, []int{1, 1, 1})
 	disContig1 := arr.Slice([]int{5, 0, 0}, []int{3, 30, 10}, []int{1, 1, 2})
 	disContig2 := arr.Slice([]int{5, 0, 0}, []int{3, 30, 9}, []int{1, 1, 1})
@@ -116,14 +106,14 @@ func TestUnroll(t *testing.T) {
 
 }
 
-func testGet3(t *testing.T, arr ND3Float64, loc1 int, loc2 int, loc3 int, exp float64) {
+func testGet3(t *testing.T, arr data.ND3Float64, loc1, loc2, loc3 int, exp float64) {
 	res := arr.Get3(loc1, loc2, loc3)
 	if res != exp {
 		t.Errorf("arr[%d,%d,%d] expected %f, got %f", loc1, loc2, loc3, exp, res)
 	}
 }
 
-func testContig(t *testing.T, arr NDFloat64, expected bool) {
+func testContig(t *testing.T, arr data.NDFloat64, expected bool) {
 	res := arr.Contiguous()
 	if res != expected {
 		t.Errorf("Expected slice (%v).Contiguous()==%t but was %t", arr, expected, res)
@@ -148,8 +138,8 @@ func TestReshape(t *testing.T) {
 	sliced, err := arr.Slice([]int{0, 0}, []int{2, 1}, nil).Reshape([]int{2})
 
 	if assert.Nil(t, err) {
-		arr1D := sliced.(ND1Float64)
-		assert.Equal(t, 1, arr1D.NDims())
+		arr1D := sliced.(data.ND1Float64)
+		assert.Equal(t, int(1), arr1D.NDims())
 		assert.Equal(t, 0.0, arr1D.Get1(0))
 		assert.Equal(t, 5.0, arr1D.Get1(1))
 	}
@@ -160,8 +150,8 @@ func TestReshapeFast(t *testing.T) {
 	sliced, err := arr.Slice([]int{0, 0}, []int{1, 4}, nil).ReshapeFast([]int{4})
 
 	if assert.Nil(t, err) {
-		arr1D := sliced.(ND1Float64)
-		assert.Equal(t, 1, arr1D.NDims())
+		arr1D := sliced.(data.ND1Float64)
+		assert.Equal(t, int(1), arr1D.NDims())
 		assert.Equal(t, 0.0, arr1D.Get1(0))
 		assert.Equal(t, 1.0, arr1D.Get1(1))
 		assert.Equal(t, 35.0, arr1D.Get1(2))
@@ -171,13 +161,13 @@ func TestReshapeFast(t *testing.T) {
 
 func TestTreatAs1D(t *testing.T) {
 	arr := testData2D()
-	arr1D := arr.Slice([]int{0, 0}, []int{2, 1}, nil).(ND1Float64)
+	arr1D := arr.Slice([]int{0, 0}, []int{2, 1}, nil).(data.ND1Float64)
 
 	//	assert.Equal(t,1,arr1D.NDims())
 	assert.Equal(t, 0.0, arr1D.Get1(0))
 	assert.Equal(t, 5.0, arr1D.Get1(1))
 
-	alt1D := arr.Slice([]int{0, 0}, []int{1, 2}, nil).(ND1Float64)
+	alt1D := arr.Slice([]int{0, 0}, []int{1, 2}, nil).(data.ND1Float64)
 	assert.Equal(t, 0.0, alt1D.Get([]int{0, 0}))
 	assert.Equal(t, 1.0, alt1D.Get([]int{0, 1}))
 
@@ -189,7 +179,7 @@ func TestApplySlice(t *testing.T) {
 	assert := assert.New(t)
 
 	arr := testData2D()
-	subst1D := NewArray1DFloat64(2)
+	subst1D := data.NewArray1DFloat64(2)
 	subst1D.Set1(0, 21.0)
 	subst1D.Set1(1, 22.0)
 	subst2D, e := subst1D.Reshape([]int{1, 2})
@@ -229,7 +219,7 @@ func TestApply(t *testing.T) {
 func TestARange(t *testing.T) {
 	assert := assert.New(t)
 
-	arr := ARangeFloat64(12.0).MustReshape([]int{3, 4}).(ND2Float64)
+	arr := data.ARangeFloat64(12.0).MustReshape([]int{3, 4}).(data.ND2Float64)
 
 	expShape := []int{3, 4}
 	assert.True(slice.Equal(expShape, arr.Shape()), "Slice shape should be %v. Got %v", expShape, arr.Shape())
@@ -240,15 +230,78 @@ func TestARange(t *testing.T) {
 
 }
 
-func testCopyFrom(t *testing.T, from, to ND2Float64) {
+func TestCArrayBasic(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{10, 5, 2}
+
+	cArray := makefloat64CArrayForTest(shape)
+
+	assert.Equal(0.0, cArray.Get([]int{0, 0, 0}))
+	assert.Equal(1.0, cArray.Get([]int{0, 0, 1}))
+	assert.Equal(2.0, cArray.Get([]int{0, 1, 0}))
+	assert.Equal(10.0, cArray.Get([]int{1, 0, 0}))
+
+	assert.Equal(99.0, cArray.Get([]int{9, 4, 1}))
+}
+
+func TestCArraySlice(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{10, 5, 2}
+
+	cArray := makefloat64CArrayForTest(shape)
+
+	sliced := cArray.Slice([]int{9, 3, 0}, []int{1, 2, 2}, nil)
+
+	assert.Equal(96.0, sliced.Get([]int{0, 0, 0}))
+	assert.Equal(97.0, sliced.Get([]int{0, 0, 1}))
+	assert.Equal(98.0, sliced.Get([]int{0, 1, 0}))
+	assert.Equal(99.0, sliced.Get([]int{0, 1, 1}))
+
+	sliced2 := cArray.Slice([]int{0, 0, 1}, []int{10, 1, 1}, nil)
+	assert.Equal(1.0, sliced2.Get([]int{0, 0, 0}))
+	assert.Equal(11.0, sliced2.Get([]int{1, 0, 0}))
+	assert.Equal(51.0, sliced2.Get([]int{5, 0, 0}))
+	assert.Equal(91.0, sliced2.Get([]int{9, 0, 0}))
+}
+
+func TestCArraySliceUpdatesOriginal(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{10, 5, 2}
+
+	cArray := makefloat64CArrayForTest(shape)
+
+	sliced := cArray.Slice([]int{9, 3, 0}, []int{1, 2, 2}, nil)
+
+	sliced.Set([]int{0, 0, 0}, 500.0)
+	assert.Equal(500.0, cArray.Get([]int{9, 3, 0}))
+
+	sliced.Set([]int{0, 1, 1}, 1000.0)
+	assert.Equal(1000.0, cArray.Get([]int{9, 4, 1}))
+}
+
+func TestCArraySliceAndReshape(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{9, 1}
+
+	cArray := makefloat64CArrayForTest(shape)
+
+	sliced := cArray.Slice([]int{8, 0}, []int{1, 1}, nil)
+	assert.Equal(8.0, sliced.Get([]int{0, 0}))
+
+	reshaped := sliced.MustReshape([]int{1}).(data.ND1Float64)
+	assert.Equal(8.0, reshaped.Get([]int{0}))
+}
+
+func testCopyFrom(t *testing.T, from, to data.ND2Float64) {
 	assert := assert.New(t)
 	rows := from.Len(0)
 	cols := from.Len(1)
 
 	i := 0
 
-	for r := 0; r < rows; r++ {
-		for c := 0; c < cols; c++ {
+	var r, c int
+	for r = 0; r < rows; r++ {
+		for c = 0; c < cols; c++ {
 			to.Set2(r, c, 0.0)
 			from.Set2(r, c, float64(i))
 			i++
@@ -258,21 +311,42 @@ func testCopyFrom(t *testing.T, from, to ND2Float64) {
 	to.CopyFrom(from)
 	i = 0
 
-	for r := 0; r < rows; r++ {
-		for c := 0; c < cols; c++ {
+	for r = 0; r < rows; r++ {
+		for c = 0; c < cols; c++ {
 			assert.Equalf(float64(i), to.Get2(r, c), "Error at [%d,%d] in [%d,%d] array", r, c, rows, cols)
 			i++
 		}
 	}
 
 }
+func TestCopyNativeToCArray(t *testing.T) {
+	rows := int(9)
+	cols := int(2)
+	shape := []int{rows, cols}
+
+	dest := makefloat64CArrayForTest(shape)
+	src := data.NewArray2DFloat64(rows, cols)
+
+	testCopyFrom(t, src, dest)
+}
+
+func TestCopyCArrayToNative(t *testing.T) {
+	rows := int(9)
+	cols := int(2)
+	shape := []int{rows, cols}
+
+	dest := data.NewArray2DFloat64(rows, cols)
+	src := makefloat64CArrayForTest(shape)
+
+	testCopyFrom(t, src, dest)
+}
 
 func TestCopyNativeToNative(t *testing.T) {
-	rows := 9
-	cols := 2
+	rows := int(9)
+	cols := int(2)
 
-	dest := NewArray2DFloat64(rows, cols)
-	src := NewArray2DFloat64(rows, cols)
+	dest := data.NewArray2DFloat64(rows, cols)
+	src := data.NewArray2DFloat64(rows, cols)
 
 	testCopyFrom(t, src, dest)
 }

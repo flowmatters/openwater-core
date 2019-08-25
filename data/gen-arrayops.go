@@ -17,10 +17,10 @@ func ApplyFunc1Float64(dest, source NDFloat64, fn func(val float64) float64) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, fn(source.Get(idx)))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 
 }
@@ -43,10 +43,10 @@ func AddToFloat64Array(dest, source NDFloat64) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, dest.Get(idx)+source.Get(idx))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 }
 
@@ -63,10 +63,10 @@ func ApplyFunc1Float32(dest, source NDFloat32, fn func(val float32) float32) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, fn(source.Get(idx)))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 
 }
@@ -89,10 +89,10 @@ func AddToFloat32Array(dest, source NDFloat32) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, dest.Get(idx)+source.Get(idx))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 }
 
@@ -109,10 +109,10 @@ func ApplyFunc1Int32(dest, source NDInt32, fn func(val int32) int32) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, fn(source.Get(idx)))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 
 }
@@ -135,10 +135,10 @@ func AddToInt32Array(dest, source NDInt32) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, dest.Get(idx)+source.Get(idx))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 }
 
@@ -155,10 +155,10 @@ func ApplyFunc1Uint32(dest, source NDUint32, fn func(val uint32) uint32) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, fn(source.Get(idx)))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 
 }
@@ -181,10 +181,10 @@ func AddToUint32Array(dest, source NDUint32) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, dest.Get(idx)+source.Get(idx))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 }
 
@@ -201,10 +201,10 @@ func ApplyFunc1Int64(dest, source NDInt64, fn func(val int64) int64) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, fn(source.Get(idx)))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 
 }
@@ -227,10 +227,10 @@ func AddToInt64Array(dest, source NDInt64) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, dest.Get(idx)+source.Get(idx))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 }
 
@@ -247,10 +247,10 @@ func ApplyFunc1Uint64(dest, source NDUint64, fn func(val uint64) uint64) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, fn(source.Get(idx)))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 
 }
@@ -273,9 +273,9 @@ func AddToUint64Array(dest, source NDUint64) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, dest.Get(idx)+source.Get(idx))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 }

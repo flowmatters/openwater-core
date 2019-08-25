@@ -5,6 +5,7 @@ import (
 	"unsafe"
 
 	"github.com/flowmatters/openwater-core/data"
+	"github.com/flowmatters/openwater-core/data/cdata"
 	_ "github.com/flowmatters/openwater-core/models"
 	"github.com/flowmatters/openwater-core/sim"
 )
@@ -26,9 +27,9 @@ func RunSingleModel(
 	// fmt.Println(nParameters, nParameterSets)
 	// fmt.Println(nOutputCells, nOutputs, nOutputTimesteps)
 
-	iArray := data.NewFloat64CArray(unsafe.Pointer(inputs), []int{int(nInputSets), int(nInputs), int(nTimesteps)}).(data.ND3Float64)
-	pArray := data.NewFloat64CArray(unsafe.Pointer(params), []int{int(nParameters), int(nParameterSets)}).(data.ND2Float64)
-	oArray := data.NewFloat64CArray(unsafe.Pointer(outputs), []int{int(nOutputCells), int(nOutputs), int(nOutputTimesteps)}).(data.ND3Float64)
+	iArray := cdata.NewFloat64CArray(unsafe.Pointer(inputs), []int{int(nInputSets), int(nInputs), int(nTimesteps)}).(data.ND3Float64)
+	pArray := cdata.NewFloat64CArray(unsafe.Pointer(params), []int{int(nParameters), int(nParameterSets)}).(data.ND2Float64)
+	oArray := cdata.NewFloat64CArray(unsafe.Pointer(outputs), []int{int(nOutputCells), int(nOutputs), int(nOutputTimesteps)}).(data.ND3Float64)
 
 	model.ApplyParameters(pArray)
 	// coeffSlice := pArray.Slice([]int{0, 0}, []int{1, int(nParameterSets)}, nil).(data.ND1Float64)
@@ -40,7 +41,7 @@ func RunSingleModel(
 	if initStates {
 		sArray = model.InitialiseStates(int(nCells))
 	} else {
-		sArray = data.NewFloat64CArray(unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2Float64)
+		sArray = cdata.NewFloat64CArray(unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2Float64)
 	}
 	// fmt.Println("i", iArray.Shape())
 	// fmt.Println("p", pArray.Shape())
@@ -58,7 +59,7 @@ func RunSingleModel(
 
 	// if initStates Copy data back into provided states array...
 	if initStates && (states != nil) {
-		sOrig := data.NewFloat64CArray(unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2Float64)
+		sOrig := cdata.NewFloat64CArray(unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2Float64)
 		sOrig.CopyFrom(sArray)
 	}
 }

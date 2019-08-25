@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const TEST_PATH = "src/github.com/flowmatters/openwater-core/test/files"
+const TEST_PATH = "openwater-core/test/files"
 const TEST_FILE = "test_hdf5.h5"
 
 func findInSlice(strings []string, target string) int {

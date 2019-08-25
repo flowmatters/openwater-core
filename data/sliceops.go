@@ -1,7 +1,7 @@
 package data
 
-func product(ix []int) int {
-	result := 1
+func Product(ix []int) int {
+	result := int(1)
 	for _, v := range ix {
 		result *= v
 	}
@@ -10,7 +10,7 @@ func product(ix []int) int {
 
 func cumulProduct(ix []int) []int {
 	result := make([]int, len(ix))
-	product := 1
+	product := int(1)
 	for i, v := range ix {
 		product *= v
 		result[i] = product
@@ -19,14 +19,14 @@ func cumulProduct(ix []int) []int {
 }
 
 func dotProduct(lhs []int, rhs []int) int {
-	result := 0
+	result := int(0)
 	for i := 0; i < len(lhs); i++ {
 		result += lhs[i] * rhs[i]
 	}
 	return result
 }
 
-func multiply(lhs []int, rhs []int) []int {
+func Multiply(lhs []int, rhs []int) []int {
 	result := make([]int, len(lhs))
 	for i := 0; i < len(lhs); i++ {
 		result[i] = lhs[i] * rhs[i]
@@ -60,7 +60,7 @@ func mod(numerator int, denominators []int) []int {
 	return res
 }
 
-func increment(vector, wrt []int) {
+func Increment(vector, wrt []int) {
 	dims := len(wrt)
 	for i := (dims - 1); i >= 0; i-- {
 		vector[i]++
@@ -72,7 +72,7 @@ func increment(vector, wrt []int) {
 	}
 }
 
-func argmax(vector []int) int {
+func Argmax(vector []int) int {
 	res := 0
 	maxFound := vector[0]
 	for i, v := range vector[1:] {
@@ -81,10 +81,10 @@ func argmax(vector []int) int {
 			res = i
 		}
 	}
-	return res
+	return int(res)
 }
 
-func maximum(vector []int) int {
+func Maximum(vector []int) int {
 	res := vector[0]
 	for _, v := range vector[1:] {
 		res = max(res, v)

@@ -15,10 +15,10 @@ func ApplyFunc1ArrayType(dest, source NDArrayType, fn func(val ArrayType) ArrayT
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, fn(source.Get(idx)))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 
 }
@@ -41,9 +41,9 @@ func AddToArrayTypeArray(dest, source NDArrayType) {
 
 	idx := dest.NewIndex(0)
 	shape := dest.Shape()
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		dest.Set(idx, dest.Get(idx)+source.Get(idx))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 }

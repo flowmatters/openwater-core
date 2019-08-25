@@ -8,6 +8,10 @@ github.com/joelrahman/genny v0.0.0-20190824203634-cd396cb79b8d h1:frHzDBXlKqVqv6
 github.com/joelrahman/genny v0.0.0-20190824203634-cd396cb79b8d/go.mod h1:haLHhzU8Z7IZABiGAUctoIzLuh/6XjjMKtJ+zXVI2rE=
 github.com/joelrahman/genny v0.0.0-20190824203905-8e44d6b92033 h1:wdiOxbeahbZU3FqVlEPehmj57t6SWNMA2fMH2WKriOw=
 github.com/joelrahman/genny v0.0.0-20190824203905-8e44d6b92033/go.mod h1:haLHhzU8Z7IZABiGAUctoIzLuh/6XjjMKtJ+zXVI2rE=
+github.com/joelrahman/genny v0.0.0-20190825033713-2198659d4726 h1:vDjOC3Yfk2xWt6f8pD7cdo99PWI4VhMwMhzsjlYXNzo=
+github.com/joelrahman/genny v0.0.0-20190825033713-2198659d4726/go.mod h1:haLHhzU8Z7IZABiGAUctoIzLuh/6XjjMKtJ+zXVI2rE=
+github.com/joelrahman/genny v0.0.0-20190825034740-e87a679b6495 h1:XKV6uGn31I21MeRq7lVnh1gfTrcCBUgHR/UEBmdnIus=
+github.com/joelrahman/genny v0.0.0-20190825034740-e87a679b6495/go.mod h1:nOCAqPWH72DYD78l2wICmDERgbDN5jXfmXFgW0+kgew=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
@@ -20,6 +24,8 @@ golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/tools v0.0.0-20190823170909-c4a336ef6a2f h1:ESK9Jb5JOE+y4u+ozMQeXfMHwEHm6zVbaDQkeaj6wI4=
 golang.org/x/tools v0.0.0-20190823170909-c4a336ef6a2f/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
+golang.org/x/tools v0.0.0-20190824210100-c2567a220953 h1:xmXTxcqVZC27YDP1yLSnyQRYe/euRZc3eTSdSX9mITQ=
+golang.org/x/tools v0.0.0-20190824210100-c2567a220953/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 gonum.org/v1/hdf5 v0.0.0-20190516085527-847297cb569e h1:dht5fMnDR7CJ6X47NEq4UY22LokoIB/vElm/OrrnSqI=
 gonum.org/v1/hdf5 v0.0.0-20190516085527-847297cb569e/go.mod h1:g+PDU5ogjIKcc3Cg4ALAK7X4c8bBQvPzPKWNW5NB7I0=

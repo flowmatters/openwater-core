@@ -10,15 +10,15 @@ import (
 )
 
 type ndArrayType struct {
-	ndArrayTypeCommon
+	NdArrayTypeCommon
 	Impl []ArrayType
 }
 
-// func (nd *ndArrayType) getUnderlying(i int) float64 {
+// func (nd *ndArrayType) getUnderlying(i int64) float64 {
 // 	return nd.Impl[i]
 // }
 
-// func (nd *ndArrayType) setUnderlying(i int, v float64) {
+// func (nd *ndArrayType) setUnderlying(i int64, v float64) {
 // 	nd.Impl[i] = v
 // }
 
@@ -41,7 +41,7 @@ func (nd *ndArrayType) Set(loc []int, val ArrayType) {
 
 func (nd *ndArrayType) Slice(loc []int, dims []int, step []int) NDArrayType {
 	result := ndArrayType{}
-	nd.slice(&result.ndArrayTypeCommon, loc, dims, step)
+	nd.SliceInto(&result.NdArrayTypeCommon, loc, dims, step)
 	result.Impl = nd.Impl
 	return &result
 }
@@ -77,10 +77,10 @@ func (nd *ndArrayType) ApplySlice(loc []int, step []int, vals NDArrayType) {
 	}
 
 	idx := slice.NewIndex(0)
-	size := product(shape)
+	size := Product(shape)
 	for pos := 0; pos < size; pos++ {
 		slice.Set(idx, vals.Get(idx))
-		increment(idx, shape)
+		Increment(idx, shape)
 	}
 	// How to speed up
 }
@@ -98,13 +98,13 @@ func (nd *ndArrayType) Unroll() []ArrayType {
 
 	//	fmt.Println(nd)
 
-	length := product(nd.Shape())
+	length := Product(nd.Shape())
 	res := make([]ArrayType, length)
 
-	dimOffsets := offsets(nd.Dims)
+	dimOffsets := Offsets(nd.Dims)
 	//fmt.Println(dimOffsets)
 	for i := 0; i < length; i++ {
-		loc := idivMod(i, dimOffsets, nd.Dims)
+		loc := IDivMod(i, dimOffsets, nd.Dims)
 		//		fmt.Println(i, loc, nd.Index(loc))
 		//		fmt.Println(loc,i)
 		res[i] = nd.Get(loc)
@@ -122,14 +122,14 @@ func (nd *ndArrayType) ReshapeFast(newShape []int) (NDArrayType, error) {
 
 func (nd *ndArrayType) Reshape(newShape []int) (NDArrayType, error) {
 	result := ndArrayType{}
-	size := product(newShape)
-	currentSize := product(nd.Shape())
+	size := Product(newShape)
+	currentSize := Product(nd.Shape())
 
 	if size != currentSize {
 		return nil, errors.New("Size mismatch")
 	}
 
-	reshapeToSeries := (len(newShape) == 1) && (maximum(nd.Shape()) == len(newShape))
+	reshapeToSeries := (len(newShape) == 1) && (Maximum(nd.Shape()) == len(newShape))
 
 	if nd.Contiguous() || !reshapeToSeries {
 		result.Start = 0
@@ -137,12 +137,12 @@ func (nd *ndArrayType) Reshape(newShape []int) (NDArrayType, error) {
 		result.OriginalDims = newShape
 		result.Dims = newShape
 		result.Step = slice.Ones(len(newShape))
-		result.Offset = offsets(newShape)
-		result.OffsetStep = multiply(result.Step, result.Offset)
+		result.Offset = Offsets(newShape)
+		result.OffsetStep = Multiply(result.Step, result.Offset)
 		return &result, nil
 	}
 
-	seriesDim := argmax(nd.Shape())
+	seriesDim := Argmax(nd.Shape())
 	// Special case 1D
 	result.Start = nd.Start
 	//result.takeImplementation(nd)
@@ -151,7 +151,7 @@ func (nd *ndArrayType) Reshape(newShape []int) (NDArrayType, error) {
 	result.Dims = newShape
 	result.Step = []int{nd.Step[seriesDim]}
 	result.Offset = []int{nd.Offset[seriesDim]}
-	result.OffsetStep = multiply(result.Step, result.Offset)
+	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result, nil
 }
 
@@ -213,14 +213,14 @@ func NewArrayArrayType(dims []int) NDArrayType {
 
 func newArrayArrayType(dims []int) *ndArrayType {
 	result := ndArrayType{}
-	size := product(dims)
+	size := Product(dims)
 	result.Start = 0
 	result.Impl = make([]ArrayType, size)
 	result.OriginalDims = dims
 	result.Dims = dims
 	result.Step = slice.Ones(len(dims))
-	result.Offset = offsets(dims)
-	result.OffsetStep = multiply(result.Step, result.Offset)
+	result.Offset = Offsets(dims)
+	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result
 }
 

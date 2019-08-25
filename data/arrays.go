@@ -53,7 +53,7 @@ type ND3ArrayType interface {
 	Set3(loc1 int, loc2 int, loc3 int, val ArrayType)
 }
 
-type ndArrayTypeCommon struct {
+type NdArrayTypeCommon struct {
 	OriginalDims []int
 	Dims         []int
 	Start        int
@@ -62,23 +62,23 @@ type ndArrayTypeCommon struct {
 	OffsetStep   []int
 }
 
-func (nd *ndArrayTypeCommon) Len(ax int) int {
+func (nd *NdArrayTypeCommon) Len(ax int) int {
 	return nd.Dims[ax]
 }
 
-func (nd *ndArrayTypeCommon) Shape() []int {
+func (nd *NdArrayTypeCommon) Shape() []int {
 	return nd.Dims
 }
 
-func (nd *ndArrayTypeCommon) NDims() int {
+func (nd *NdArrayTypeCommon) NDims() int {
 	return len(nd.Dims)
 }
 
-func (nd *ndArrayTypeCommon) NewIndex(val int) []int {
+func (nd *NdArrayTypeCommon) NewIndex(val int) []int {
 	return slice.Uniform(nd.NDims(), val)
 }
 
-func (nd *ndArrayTypeCommon) Index(loc []int) int {
+func (nd *NdArrayTypeCommon) Index(loc []int) int {
 	result := nd.Start
 	for i := 0; i < len(loc); i++ {
 		result += loc[i] * nd.OffsetStep[i]
@@ -88,7 +88,7 @@ func (nd *ndArrayTypeCommon) Index(loc []int) int {
 	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
 }
 
-func (nd *ndArrayTypeCommon) Contiguous() bool {
+func (nd *NdArrayTypeCommon) Contiguous() bool {
 	// What about step!
 	var i int
 	contiguousOffset := 1
@@ -119,28 +119,28 @@ func (nd *ndArrayTypeCommon) Contiguous() bool {
 	return true
 }
 
-func (nd *ndArrayTypeCommon) Len1() int {
+func (nd *NdArrayTypeCommon) Len1() int {
 	return nd.Dims[0]
 }
 
-func (nd *ndArrayTypeCommon) Len2() int {
+func (nd *NdArrayTypeCommon) Len2() int {
 	return nd.Dims[1]
 }
 
-func (nd *ndArrayTypeCommon) Len3() int {
+func (nd *NdArrayTypeCommon) Len3() int {
 	return nd.Dims[2]
 }
 
-func (nd *ndArrayTypeCommon) slice(dest *ndArrayTypeCommon, loc []int, dims []int, step []int) {
+func (nd *NdArrayTypeCommon) SliceInto(dest *NdArrayTypeCommon, loc []int, dims []int, step []int) {
 	dest.OriginalDims = nd.OriginalDims
 	dest.Dims = dims
 	dest.Start = nd.Start + dotProduct(loc, nd.Offset)
-	dest.Offset = multiply(nd.Offset, nd.Step)
+	dest.Offset = Multiply(nd.Offset, nd.Step)
 
 	if step == nil {
 		dest.Step = nd.Step
 	} else {
-		dest.Step = multiply(nd.Step, step)
+		dest.Step = Multiply(nd.Step, step)
 	}
-	dest.OffsetStep = multiply(dest.Step, dest.Offset)
+	dest.OffsetStep = Multiply(dest.Step, dest.Offset)
 }
