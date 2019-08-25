@@ -1,10 +1,10 @@
 #!/bin/bash
 
 set -e
+echo build.sh $PWD
+export CMD_PATH=./cmd
 
-export CMD_PATH=github.com/flowmatters/openwater-core/cmd
-
-for item in `ls ${PREFIX}cmd`
+for item in `ls cmd`
 do
   echo $CMD_PATH/$item
   go build  $CMD_PATH/$item
@@ -12,5 +12,5 @@ do
 done
 
 echo libopenwater
-go build -buildmode=c-shared -o libopenwater.so github.com/flowmatters/openwater-core/libopenwater 
+go build -buildmode=c-shared -o libopenwater.so ./libopenwater 
 
