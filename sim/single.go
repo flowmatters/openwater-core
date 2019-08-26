@@ -34,8 +34,8 @@ type (
 	singleModelResults struct {
 		Log        []string
 		RunResults struct {
-			Outputs []interface{}
-			States  []interface{}
+			Outputs interface{}
+			States  interface{}
 		}
 	}
 )
@@ -112,16 +112,17 @@ func uniformParameters(params []float64, n int) data.ND2Float64 {
 	return res
 }
 
-func RunSingleModelJSON(r io.Reader, w io.Writer) {
+func RunSingleModelJSON(r io.Reader, w io.Writer, splitOutputs bool) {
 	var runLogs []string
 	var results = RunResults{}
+	var description ModelDescription
 
 	log := func(s string) {
 		runLogs = append(runLogs, s)
 	}
 
 	defer func() {
-		encodeResults(w, runLogs, results)
+		encodeResults(w, runLogs, results, description, splitOutputs)
 	}()
 
 	var modelDescription singleModel
@@ -133,6 +134,7 @@ func RunSingleModelJSON(r io.Reader, w io.Writer) {
 	}
 
 	err, model, inputs, states := modelDescription.Initialise()
+	description = model.Description()
 
 	if err != nil {
 		log(err.Error())
@@ -153,7 +155,8 @@ func RunSingleModelJSON(r io.Reader, w io.Writer) {
 	//  fmt.Println(runoff);
 }
 
-func encodeResults(w io.Writer, runLogs []string, results RunResults) {
+func encodeResults(w io.Writer, runLogs []string, results RunResults,
+	description ModelDescription, splitOutputs bool) {
 	//  outputs := jsonSafe3D(results.Outputs)
 	// results.Outputs := outputs
 	// results.States := jsonSafe2D(results.States)
@@ -163,11 +166,32 @@ func encodeResults(w io.Writer, runLogs []string, results RunResults) {
 	//  fmt.Println("O",results.Outputs.Shape(),"S",results.States.Shape())
 	//fmt.Println(results.Outputs.Shape())
 	if results.Outputs != nil {
-		overall.RunResults.Outputs = owjs.JsonSafeArray(results.Outputs.MustReshape(results.Outputs.Shape()[1:]), 0)
+		outputArray := results.Outputs.MustReshape(results.Outputs.Shape()[1:])
+		if splitOutputs {
+			outputMap := make(map[string]interface{})
+			length := outputArray.Len(1)
+			for i, output := range description.Outputs {
+				singleOutput := outputArray.Slice([]int{i, 0}, []int{1, length}, []int{1, 1}).MustReshape([]int{length})
+				outputMap[output] = owjs.JsonSafeArray(singleOutput, 0)
+			}
+			overall.RunResults.Outputs = outputMap
+		} else {
+			overall.RunResults.Outputs = owjs.JsonSafeArray(outputArray, 0)
+		}
 	}
 
 	if results.States != nil {
-		overall.RunResults.States = owjs.JsonSafeArray(results.States.MustReshape(results.States.Shape()[1:]), 0)
+		stateArray := results.States.MustReshape(results.States.Shape()[1:])
+		if splitOutputs {
+			stateMap := make(map[string]interface{})
+			for i, state := range description.States {
+				singleState := stateArray.Get([]int{i})
+				stateMap[state] = singleState
+			}
+			overall.RunResults.States = stateMap
+		} else {
+			overall.RunResults.States = owjs.JsonSafeArray(stateArray, 0)
+		}
 	}
 
 	encoder := json.NewEncoder(w)

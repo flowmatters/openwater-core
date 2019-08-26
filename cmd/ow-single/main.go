@@ -30,5 +30,5 @@ import (
 // }
 
 func main() {
-	sim.RunSingleModelJSON(os.Stdin, os.Stdout)
+	sim.RunSingleModelJSON(os.Stdin, os.Stdout, true)
 }
