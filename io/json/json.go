@@ -24,17 +24,20 @@ func JsonSafeArray(vals data.NDFloat64, shiftDim int) []interface{} {
 		from[shiftDim] = i
 		if shiftDim == (ndims - 1) {
 			v := vals.Get(from)
-			if math.IsNaN(v) {
-				result[i] = fmt.Sprint(v)
-			} else if math.IsInf(v, 0) {
-				result[i] = fmt.Sprint(v)
-			} else {
-				result[i] = v
-			}
+			result[i] = JsonSafeValue(v)
 		} else {
 			to[shiftDim] = i
 			result[i] = JsonSafeArray(vals.Slice(from, to, step), shiftDim+1)
 		}
 	}
 	return result
+}
+
+func JsonSafeValue(val float64) interface{} {
+	if math.IsNaN(val) {
+		return fmt.Sprint(val)
+	} else if math.IsInf(val, 0) {
+		return fmt.Sprint(val)
+	}
+	return val
 }

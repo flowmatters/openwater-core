@@ -158,8 +158,6 @@ func RunSingleModelJSON(r io.Reader, w io.Writer, splitOutputs bool) {
 	model.Run(inputs, states, outputs)
 	results.Outputs = outputs
 	results.States = states
-
-	log(fmt.Sprintf("%#v", results.States))
 }
 
 func encodeResults(w io.Writer, runLogs []string, results RunResults,
@@ -192,7 +190,7 @@ func encodeResults(w io.Writer, runLogs []string, results RunResults,
 			stateMap := make(map[string]interface{})
 			for i, state := range description.States {
 				singleState := stateArray.Get([]int{i})
-				stateMap[state] = singleState
+				stateMap[state] = owjs.JsonSafeValue(singleState)
 			}
 			overall.RunResults.States = stateMap
 		} else {
