@@ -50,30 +50,36 @@ func (vals modelInputs) Find(name string) []float64 {
 	return nil
 }
 
-func (vals modelValues) Find(name string) float64 {
+func (vals modelValues) Find(name string, defaultValue float64) (float64, string) {
 	for _, v := range vals {
 		if v.Name == name {
-			return v.Value
+			return v.Value, ""
 		}
 	}
 
-	return 0
+	return defaultValue, fmt.Sprintf("%s not found, using default=%f", name, defaultValue)
 }
 
-func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3Float64, data.ND2Float64) {
+func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3Float64, data.ND2Float64, []string) {
+	warnings := make([]string, 1)
+
 	if m.Name == "" {
-		return errors.New("No model name provided"), nil, nil, nil
+		return errors.New("No model name provided"), nil, nil, nil, warnings
 	}
 	factory := Catalog[m.Name]
 	if factory == nil {
-		return errors.New(fmt.Sprintf("Unknown model: %s", m.Name)), nil, nil, nil
+		return errors.New(fmt.Sprintf("Unknown model: %s", m.Name)), nil, nil, nil, warnings
 	}
 	model := factory()
 	desc := model.Description()
 
 	params := make([]float64, len(desc.Parameters))
 	for i, p := range desc.Parameters {
-		params[i] = m.Parameters.Find(p.Name)
+		paramValue, msg := m.Parameters.Find(p.Name, p.Default)
+		params[i] = paramValue
+		if msg != "" {
+			warnings = append(warnings, msg)
+		}
 	}
 
 	model.ApplyParameters(uniformParameters(params, 1))
@@ -88,7 +94,8 @@ func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3Float64, da
 	for i, p := range desc.Inputs {
 		thisInput := m.Inputs.Find(p)
 		if thisInput == nil {
-			return errors.New(fmt.Sprintf("Missing input: %s", p)), nil, nil, nil
+			warnings = append(warnings, fmt.Sprintf("Missing input: %s, using 0", p))
+			continue
 		}
 
 		if inputs == nil {
@@ -98,7 +105,7 @@ func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3Float64, da
 		inputs.Apply([]int{0, i, 0}, 2, 1, thisInput)
 	}
 
-	return nil, model, inputs, states
+	return nil, model, inputs, states, warnings
 }
 
 func uniformParameters(params []float64, n int) data.ND2Float64 {
@@ -133,26 +140,26 @@ func RunSingleModelJSON(r io.Reader, w io.Writer, splitOutputs bool) {
 		return
 	}
 
-	err, model, inputs, states := modelDescription.Initialise()
-	description = model.Description()
+	err, model, inputs, states, warnings := modelDescription.Initialise()
 
 	if err != nil {
 		log(err.Error())
 		return
 	}
 
-	log(fmt.Sprint(states))
-	log(fmt.Sprintln(states.Len(0)))
+	for _, w := range warnings {
+		log(w)
+	}
+
+	description = model.Description()
+
 	outputs := InitialiseOutputs(model, inputs.Len3(), 1)
-	//fmt.Println(outputs.Shape())
+
 	model.Run(inputs, states, outputs)
 	results.Outputs = outputs
 	results.States = states
-	//  runoff := modelResults.Outputs[0][0];
 
 	log(fmt.Sprintf("%#v", results.States))
-
-	//  fmt.Println(runoff);
 }
 
 func encodeResults(w io.Writer, runLogs []string, results RunResults,
@@ -163,8 +170,7 @@ func encodeResults(w io.Writer, runLogs []string, results RunResults,
 
 	var overall singleModelResults
 	overall.Log = runLogs
-	//  fmt.Println("O",results.Outputs.Shape(),"S",results.States.Shape())
-	//fmt.Println(results.Outputs.Shape())
+
 	if results.Outputs != nil {
 		outputArray := results.Outputs.MustReshape(results.Outputs.Shape()[1:])
 		if splitOutputs {
