@@ -12,8 +12,9 @@ before_install:
 script:
   - python3 --version
   - ./build/bootstrap-test-env.sh
-  - ls -a
-  - go test -v ./...
+  - cd ..
+  - go test ./...
+  - cd -
   - ./build/build.sh
   - ./build/run_test.sh
   - ls -a
