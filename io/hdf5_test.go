@@ -1,6 +1,7 @@
 package io
 
 import (
+	"fmt"
 	"math"
 	"os"
 	"strings"
@@ -25,14 +26,16 @@ func findInSlice(strings []string, target string) int {
 
 func test_filename() string {
 	return strings.Join([]string{
-		os.Getenv("GOPATH"),
-		TEST_PATH,
+		os.Getenv("OW_TEST_PATH"),
 		TEST_FILE}, string(os.PathSeparator))
 }
 
 func TestReadStrings(t *testing.T) {
 	assert := assert.New(t)
 	fn := test_filename()
+	_, err := os.Stat(fn)
+	assert.Nil(err, fmt.Sprintf("File (%s) doesn't exist", fn))
+
 	ref := H5RefFloat64{Filename: fn, Dataset: "simple/strings"}
 	theStrings, err := ref.LoadText()
 

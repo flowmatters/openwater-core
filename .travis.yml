@@ -12,9 +12,7 @@ before_install:
 script:
   - python3 --version
   - ./build/bootstrap-test-env.sh
-  - cd ..
-  - go test ./...
-  - cd -
+  - OW_TEST_PATH=$PWD/test/files go test ./...
   - ./build/build.sh
   - ./build/run_test.sh
   - ls -a
