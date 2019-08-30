@@ -132,15 +132,24 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		}
 
 		inputRef := mr.GetReference(genSlice, "inputs")
-		inputs, _ := inputRef.Load()
+		inputs, err := inputRef.Load()
+		if err != nil {
+			return nil, err
+		}
 		gen.Inputs = inputs.(data.ND3Float64)
 
 		paramRef := mr.GetReference(genSlice, "parameters")
-		parameters, _ := paramRef.Load()
+		parameters, err := paramRef.Load()
+		if err != nil {
+			return nil, err
+		}
 		gen.Parameters = parameters.(data.ND2Float64)
 
 		stateRef := mr.GetReference(genSlice, "states")
-		states, _ := stateRef.Load()
+		states, err := stateRef.Load()
+		if err != nil {
+			return nil, err
+		}
 		gen.States = states.(data.ND2Float64)
 	}
 	return mr.Generations[i], nil
@@ -165,7 +174,7 @@ func (mr *modelReference) initialiseDataset(label string, refShape []int) error 
 func (mr *modelReference) InitialiseOutputs(refGeneration int) error {
 	gen, err := mr.GetGeneration(refGeneration)
 	if err != nil {
-		return prefix("Couldn't get generation: ", err)
+		return prefix(fmt.Sprintf("Couldn't get generation for %s: ", mr.ModelName), err)
 	}
 
 	if mr.WriteOutputs {
