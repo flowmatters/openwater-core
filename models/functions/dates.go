@@ -77,7 +77,7 @@ func dateGenerator(tick data.ND1Float64,
 	idx := []int{0}
 
 	for i := 0; i < n; i++ {
-		idx[0] = n
+		idx[0] = i
 		dayOfYear.Set(idx, float64(_dayOfYear(d, m, y)))
 		date.Set(idx, float64(d))
 		month.Set(idx, float64(m))
