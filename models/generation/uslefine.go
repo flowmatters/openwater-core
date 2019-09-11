@@ -36,7 +36,7 @@ USLEFineSedimentGeneration:
 		maxConc: '[0,10000]mg.L^-1 USLE Maximum Fine Sediment Allowable Runoff Concentration'
 		usleHSDRFine: '[0,100]% Hillslope Fine Sediment Delivery Ratio'
 		usleHSDRCoarse: '[0,100]% Hillslope Coarse Sediment Delivery Ratio'
-		timeStepInSeconds: '[0,100000000]s Duration of timestep in seconds'
+		timeStepInSeconds: '[0,100000000]s Duration of timestep in seconds, default=86400'
 	outputs:
 		quickLoadFine: kg
 		slowLoadFine: kg
@@ -77,8 +77,8 @@ func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYe
 
 		loadQ := 0.0
 
-		theKLSCval := 0.
-		theKLSCClayval := 0.
+		theKLSCval := klsc.Get(idx)
+		theKLSCClayval := klscFine.Get(idx)
 		useAvModel := false
 		//Use averaged data first if needed
 		if useAvModel {

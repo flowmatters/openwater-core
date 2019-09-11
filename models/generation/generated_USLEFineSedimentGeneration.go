@@ -92,7 +92,7 @@ func (m *USLEFineSedimentGeneration)  Description() sim.ModelDescription{
   sim.DescribeParameter("maxConc",0,"mg.L^-1 USLE Maximum Fine Sediment Allowable Runoff Concentration",[]float64{ 0, 10000 },""),
   sim.DescribeParameter("usleHSDRFine",0,"% Hillslope Fine Sediment Delivery Ratio",[]float64{ 0, 100 },""),
   sim.DescribeParameter("usleHSDRCoarse",0,"% Hillslope Coarse Sediment Delivery Ratio",[]float64{ 0, 100 },""),
-  sim.DescribeParameter("timeStepInSeconds",0,"s Duration of timestep in seconds",[]float64{ 0, 1e+08 },""),}
+  sim.DescribeParameter("timeStepInSeconds",86400,"s Duration of timestep in seconds",[]float64{ 0, 1e+08 },""),}
 
   result.Inputs = []string{
   "quickflow","baseflow","rainfall","KLSC","KLSC_Fine","CovOrCFact","dayOfYear",}
