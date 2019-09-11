@@ -15,7 +15,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const templatePath = "src/github.com/flowmatters/openwater-core/pre/ow-specgen/*.got"
+const templatePath = "pre/ow-specgen/*.got"
 const floatTemplate = "[+-]?([0-9]*[.])?[0-9]+"
 const parameterTemplate = `(\[(?P<Min>%s),(?P<Max>%s)\]((?P<Units>[\s]+))?)?\s*(?P<Description>[^,]*)(,\s*default=(?P<Default>%s))?`
 
