@@ -70,7 +70,7 @@ func (m *{{.Name}}) InitialiseStates(n int) data.ND2Float64 {
 		{{lower $v.Key}} := m.{{$v.Key}}.Get1(i%{{lower $v.Key}}Len)
     {{end}}
 
-		states := {{.InitFunc}}(x1,x2,x3,x4)
+		states := {{.InitFunc}}({{range $i, $v := .Parameters}}{{lower $v.Key}},{{end}})
 
     if result==nil {
       result = data.NewArray2DFloat64(n,states.Len(1))
