@@ -19,12 +19,13 @@ InstreamDissolvedNutrientDecay:
   states:
 		totalStoredMass:
 	parameters:
+		doDecay:
 		pointSourceLoad:
 		linkHeight:
 		linkWidth:
 		linkLength:
 		uptakeVelocity:
-		durationInSeconds:
+		durationInSeconds: '[1,86400] Timestep, default=86400'
 	outputs:
 		loadDownstream:
 		loadToFloodplain:
@@ -48,13 +49,18 @@ InstreamDissolvedNutrientDecay:
 
 func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachVolume, outflow, floodplainDepositionFraction data.ND1Float64,
 	storedMass float64,
-	pointSourceLoad, linkHeight, linkWidth, linkLength, uptakeVelocity, durationInSeconds float64,
+	doDecay, pointSourceLoad, linkHeight, linkWidth, linkLength, uptakeVelocity, durationInSeconds float64,
 	loadDownstream, loadToFloodplain data.ND1Float64) float64 {
 	n := incomingMassUpstream.Len1()
 	idx := []int{0}
 	prevVolume := reachVolume.Get(idx)
 
 	timeStepInDays := units.SECONDS_PER_DAY / durationInSeconds
+
+	if doDecay < 0.5 {
+		storedMass = lumpedConstituents(incomingMassUpstream, incomingMassLateral, outflow, reachVolume, storedMass, 0, durationInSeconds, loadDownstream)
+		return storedMass
+	}
 
 	for i := 0; i < n; i++ {
 		idx[0] = i
@@ -124,7 +130,7 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 		//Assuming that geometries dont change and velocity is constant for the day
 
 		flowVelocity := 0.0
-		outflowRate := outflowNow / durationInSeconds
+		outflowRate := outflowNow // / durationInSeconds
 
 		if crossAreaSection_m2 > 0 {
 			if outflowRate > 0 {

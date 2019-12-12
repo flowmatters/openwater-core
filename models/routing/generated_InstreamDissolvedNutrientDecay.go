@@ -14,6 +14,7 @@ import (
 
 
 type InstreamDissolvedNutrientDecay struct {
+  doDecay data.ND1Float64
   pointSourceLoad data.ND1Float64
   linkHeight data.ND1Float64
   linkWidth data.ND1Float64
@@ -28,12 +29,13 @@ func (m *InstreamDissolvedNutrientDecay) ApplyParameters(parameters data.ND2Floa
   nSets := parameters.Len(sim.DIMP_CELL)
   newShape := []int{nSets}
 
-  m.pointSourceLoad = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.linkHeight = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.linkWidth = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.linkLength = parameters.Slice([]int{ 3, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.uptakeVelocity = parameters.Slice([]int{ 4, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.durationInSeconds = parameters.Slice([]int{ 5, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.doDecay = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.pointSourceLoad = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.linkHeight = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.linkWidth = parameters.Slice([]int{ 3, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.linkLength = parameters.Slice([]int{ 4, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.uptakeVelocity = parameters.Slice([]int{ 5, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.durationInSeconds = parameters.Slice([]int{ 6, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   
 }
 
@@ -51,12 +53,13 @@ func (m *InstreamDissolvedNutrientDecay)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
+  sim.DescribeParameter("doDecay",0,"",[]float64{ 0, 0 },""),
   sim.DescribeParameter("pointSourceLoad",0,"",[]float64{ 0, 0 },""),
   sim.DescribeParameter("linkHeight",0,"",[]float64{ 0, 0 },""),
   sim.DescribeParameter("linkWidth",0,"",[]float64{ 0, 0 },""),
   sim.DescribeParameter("linkLength",0,"",[]float64{ 0, 0 },""),
   sim.DescribeParameter("uptakeVelocity",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("durationInSeconds",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," "),}
 
   result.Inputs = []string{
   "incomingMassUpstream","incomingMassLateral","reachVolume","outflow","floodplainDepositionFraction",}
@@ -140,6 +143,9 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3Float64, states data
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
       
+      // fmt.Println("doDecay=",m.doDecay)
+      dodecay := m.doDecay.Get1(i%m.doDecay.Len1())
+      
       // fmt.Println("pointSourceLoad=",m.pointSourceLoad)
       pointsourceload := m.pointSourceLoad.Get1(i%m.pointSourceLoad.Len1())
       
@@ -205,7 +211,7 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3Float64, states data
       
       
 
-      totalstoredmass= instreamDissolvedNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,floodplaindepositionfraction,totalstoredmass,pointsourceload,linkheight,linkwidth,linklength,uptakevelocity,durationinseconds,loaddownstream,loadtofloodplain)
+      totalstoredmass= instreamDissolvedNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,floodplaindepositionfraction,totalstoredmass,dodecay,pointsourceload,linkheight,linkwidth,linklength,uptakevelocity,durationinseconds,loaddownstream,loadtofloodplain)
 
       
       
