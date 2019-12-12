@@ -88,7 +88,7 @@ func (m *GR4J) InitialiseStates(n int) data.ND2Float64 {
 		x4 := m.X4.Get1(i%x4Len)
     
 
-		states := initGR4J(x1,x2,x3,x4)
+		states := initGR4J(x1,x2,x3,x4,)
 
     if result==nil {
       result = data.NewArray2DFloat64(n,states.Len(1))
