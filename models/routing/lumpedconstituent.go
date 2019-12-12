@@ -12,7 +12,6 @@ LumpedConstituentRouting:
   inputs:
 		inflowLoad: kg.s^-1
 		lateralLoad: kg.s^-1
-    inflow: m^3.s^-1
 		outflow: m^3.s^-1
 		storage: m^3
 	states:
@@ -34,11 +33,11 @@ LumpedConstituentRouting:
 		constituent routing
 */
 
-func lumpedConstituents(inflowLoads, lateralLoads, inflows, outflows, storage data.ND1Float64,
+func lumpedConstituents(inflowLoads, lateralLoads, outflows, storage data.ND1Float64,
 	storedMass float64,
 	x, deltaT float64,
 	outflowLoads data.ND1Float64) float64 {
-	nDays := inflows.Len1()
+	nDays := inflowLoads.Len1()
 
 	idx := []int{0}
 	for i := 0; i < nDays; i++ {
@@ -59,6 +58,7 @@ func lumpedConstituents(inflowLoads, lateralLoads, inflows, outflows, storage da
 
 		concentration := workingMass / workingVol
 		storedMass = concentration * storedV
+
 		outflowLoad := concentration * outflowV / deltaT
 
 		outflowLoads.Set(idx, outflowLoad)

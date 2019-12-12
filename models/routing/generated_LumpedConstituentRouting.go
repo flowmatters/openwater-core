@@ -47,7 +47,7 @@ func (m *LumpedConstituentRouting)  Description() sim.ModelDescription{
   sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),}
 
   result.Inputs = []string{
-  "inflowLoad","lateralLoad","inflow","outflow","storage",}
+  "inflowLoad","lateralLoad","outflow","storage",}
   result.Outputs = []string{
   "outflowLoad",}
 
@@ -159,14 +159,11 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3Float64, states data.ND2Fl
   //    fmt.Println("{lateralLoad kg.s^-1}",tmpTS.Shape())
       lateralload := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
       
-  //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
-      inflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
-      
   //    fmt.Println("{outflow m^3.s^-1}",tmpTS.Shape())
-      outflow := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      outflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
       
   //    fmt.Println("{storage m^3}",tmpTS.Shape())
-      storage := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      storage := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
       
 
       
@@ -178,7 +175,7 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3Float64, states data.ND2Fl
       
       
 
-      storedmass= lumpedConstituents(inflowload,lateralload,inflow,outflow,storage,storedmass,x,deltat,outflowload)
+      storedmass= lumpedConstituents(inflowload,lateralload,outflow,storage,storedmass,x,deltat,outflowload)
 
       
       
