@@ -17,6 +17,7 @@ SednetDissolvedNutrientGeneration:
 	outputs:
 		quickflowConstituent: kg.s^-1
 		slowflowConstituent: kg.s^-1
+		totalLoad: kg.s^-1
 	implementation:
 		function: dissolvedNutrients
 		type: scalar
@@ -30,7 +31,7 @@ SednetDissolvedNutrientGeneration:
 */
 func dissolvedNutrients(quickflow, slowflow data.ND1Float64,
 	dissConst_EMC, dissConst_DWC float64,
-	quickflowConstituent, slowflowConstituent data.ND1Float64) {
+	quickflowConstituent, slowflowConstituent, totalLoad data.ND1Float64) {
 	//All calcs done in units / day then converted back to units per sec for E2 consumption
 	n := quickflow.Len1()
 
@@ -56,7 +57,7 @@ func dissolvedNutrients(quickflow, slowflow data.ND1Float64,
 
 		quickflowConstituent.Set(idx, dissolvedConstituent_Quickflow_Load_kg/units.SECONDS_PER_DAY)
 		slowflowConstituent.Set(idx, dissolvedConstituent_Slowflow_Load_kg/units.SECONDS_PER_DAY)
-
+		totalLoad.Set(idx, (dissolvedConstituent_Quickflow_Load_kg+dissolvedConstituent_Slowflow_Load_kg)/units.SECONDS_PER_DAY)
 		// total_Dissolved_Constituent_kg += (dissolvedConstituent_Quickflow_Load_kg + dissolvedConstituent_Slowflow_Load_kg)
 	}
 }
