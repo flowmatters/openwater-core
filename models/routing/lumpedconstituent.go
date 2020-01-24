@@ -18,6 +18,7 @@ LumpedConstituentRouting:
 		storedMass:
 	parameters:
 		X: '[0,1] Weighting'
+		pointInput: kg.s^-1
 		DeltaT: '[1,86400] Timestep, default=86400'
 	outputs:
 		outflowLoad: kg.s^-1
@@ -35,23 +36,24 @@ LumpedConstituentRouting:
 
 func lumpedConstituents(inflowLoads, lateralLoads, outflows, storage data.ND1Float64,
 	storedMass float64,
-	x, deltaT float64,
+	x, pointInput, deltaT float64,
 	outflowLoads data.ND1Float64) float64 {
 	nDays := inflowLoads.Len1()
 
 	idx := []int{0}
 	for i := 0; i < nDays; i++ {
 		idx[0] = i
-		inflowLoad := inflowLoads.Get(idx) * deltaT
-		lateralLoad := lateralLoads.Get(idx) * deltaT
-		workingMass := storedMass + inflowLoad + lateralLoad
+		inflowLoad := inflowLoads.Get(idx)
+		lateralLoad := lateralLoads.Get(idx)
+		totalLoadIn := (inflowLoad + lateralLoad + pointInput) * deltaT
+		workingMass := storedMass + totalLoadIn
 
 		outflowV := outflows.Get(idx) * deltaT
 		storedV := storage.Get(idx)
 
 		workingVol := outflowV + storedV
 		if workingVol < MINIMUM_VOLUME {
-			storedMass = workingMass
+			storedMass = 0.0 // workingMass
 			outflowLoads.Set(idx, 0.0)
 			continue
 		}

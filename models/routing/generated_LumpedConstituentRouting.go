@@ -15,6 +15,7 @@ import (
 
 type LumpedConstituentRouting struct {
   X data.ND1Float64
+  pointInput data.ND1Float64
   DeltaT data.ND1Float64
   
 }
@@ -25,7 +26,8 @@ func (m *LumpedConstituentRouting) ApplyParameters(parameters data.ND2Float64) {
   newShape := []int{nSets}
 
   m.X = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.DeltaT = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.pointInput = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.DeltaT = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   
 }
 
@@ -44,6 +46,7 @@ func (m *LumpedConstituentRouting)  Description() sim.ModelDescription{
 	result.Parameters = []sim.ParameterDescription{
   
   sim.DescribeParameter("X",0,"Weighting",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("pointInput",0,"kg.s^-1",[]float64{ 0, 0 },""),
   sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),}
 
   result.Inputs = []string{
@@ -131,6 +134,9 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3Float64, states data.ND2Fl
       // fmt.Println("X=",m.X)
       x := m.X.Get1(i%m.X.Len1())
       
+      // fmt.Println("pointInput=",m.pointInput)
+      pointinput := m.pointInput.Get1(i%m.pointInput.Len1())
+      
       // fmt.Println("DeltaT=",m.DeltaT)
       deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
       
@@ -175,7 +181,7 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3Float64, states data.ND2Fl
       
       
 
-      storedmass= lumpedConstituents(inflowload,lateralload,outflow,storage,storedmass,x,deltat,outflowload)
+      storedmass= lumpedConstituents(inflowload,lateralload,outflow,storage,storedmass,x,pointinput,deltat,outflowload)
 
       
       
