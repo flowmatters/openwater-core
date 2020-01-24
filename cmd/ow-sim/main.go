@@ -355,6 +355,7 @@ func main() {
 		fmt.Printf("==== Generation %d ====\n", i)
 		simulationDone := make(chan string)
 		genStart := time.Now()
+		modelCount := 0
 
 		for _, modelName := range modelNames {
 			gen, err := models[modelName].GetGeneration(i)
@@ -362,9 +363,12 @@ func main() {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			if gen.Count > 0 {
-				verbosePrintf("* %d x %s\n", gen.Count, modelName)
+			if gen.Count == 0 {
+				continue
 			}
+			verbosePrintf("* %d x %s\n", gen.Count, modelName)
+			modelCount++
+
 			genTotal += gen.Count
 			go func(g *modelGeneration, name string) {
 				if g.Count > 0 {
@@ -379,7 +383,7 @@ func main() {
 			}(gen, modelName)
 		}
 
-		for i, _ := range modelNames {
+		for i := 0; i < modelCount; i++ {
 			mn := <-simulationDone
 			verbosePrintf("%d: %s finished\n", i, mn)
 		}
