@@ -116,7 +116,13 @@ func (mr *modelReference) GetReference(genSlice []int, element string) io.H5RefF
 func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 	if mr.Generations[i] == nil {
 		gen := modelGeneration{}
-		gen.Model = sim.Catalog[mr.ModelName]()
+		modelRef := sim.Catalog[mr.ModelName]
+		if modelRef == nil {
+			errorMsg := fmt.Sprintf("Unknown model: %s", mr.ModelName)
+			return nil, &errorString{errorMsg}
+		}
+
+		gen.Model = modelRef()
 		mr.Generations[i] = &gen
 		genSlice := []int{0, int(mr.Batches[i]), 1}
 		if i > 0 {
