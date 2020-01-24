@@ -57,8 +57,14 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 
 	timeStepInDays := units.SECONDS_PER_DAY / durationInSeconds
 
+	pointSourcePerSecond := pointSourceLoad / (rough.DAYS_PER_YEAR * units.SECONDS_PER_DAY)
+
 	if doDecay < 0.5 {
-		storedMass = lumpedConstituents(incomingMassUpstream, incomingMassLateral, outflow, reachVolume, storedMass, 0, durationInSeconds, loadDownstream)
+		storedMass = lumpedConstituents(
+			incomingMassUpstream, incomingMassLateral, outflow, reachVolume,
+			storedMass,
+			0, pointSourcePerSecond, durationInSeconds,
+			loadDownstream)
 		return storedMass
 	}
 
@@ -78,7 +84,7 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 		incomingMassNow := incomingMassUpstreamNow + incomingMassLateralNow
 		totalConstsituentLoad := storedMass + incomingMassNow
 
-		DailyPointSourceLoad_kg := 0.0
+		pointSourceLoad_kg := 0.0
 		//Convert annual load to daily, if there's a stream volume to put it in
 		//This is important, or else internal E2 stuff will throw a double infinity
 		//when creating a concentration from a non-zero mass in a zero volume
@@ -87,7 +93,7 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 
 		//if (ConstituentOutput.StoredMass > 0)
 		if reachVolumeNow > 0 {
-			DailyPointSourceLoad_kg = pointSourceLoad / rough.DAYS_PER_YEAR
+			pointSourceLoad_kg = pointSourcePerSecond
 		}
 
 		//Need to grab this to separate existiing ConstituentStorage from included Inflows, as Inflows are added by Flow Routing
@@ -95,7 +101,7 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 
 		constituentStoragePriorToInflows := totalConstsituentLoad - incomingMassNow
 
-		totalConstsituentLoad += DailyPointSourceLoad_kg
+		totalConstsituentLoad += pointSourceLoad_kg
 
 		////this.Link.Storage.Constituents[this.Constituent].Amount = totalConstsituentLoad;
 		//ConstituentOutput.StoredMass = totalConstsituentLoad;
@@ -150,7 +156,7 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 		//Should be zero if decayCoefficient has remained 1000
 		effectiveDecayCoefficient = math.Exp(-1 * decayCoefficient * timeStepInDays)
 
-		DailyLateralLoad_Kg_per_Day := incomingMassLateralNow + DailyPointSourceLoad_kg
+		DailyLateralLoad_Kg_per_s := incomingMassLateralNow + pointSourceLoad_kg
 		//DailyFromAboveLoad_Kg_per_Day := UpstreamFlowMass
 
 		//Include amount in link prior to adding inflows
@@ -192,7 +198,7 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 			//This is contradictory to all other Dyn SedNet stream models
 			//where all ConstituentStorage and ConstituentOutflow is apportioned by concentration
 
-			loadOut = (DailyLateralLoad_Kg_per_Day + constituentStoragePriorToInflows) * (durationInSeconds / travelTimeInSeconds) * effectiveDecayCoefficient
+			loadOut = (DailyLateralLoad_Kg_per_s + constituentStoragePriorToInflows) * (durationInSeconds / travelTimeInSeconds) * effectiveDecayCoefficient
 
 			//timeFraction := (travelTimeInSeconds - durationInSeconds) / travelTimeInSeconds
 
