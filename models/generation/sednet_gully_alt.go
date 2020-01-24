@@ -10,21 +10,22 @@ DynamicSednetGullyAlt:
 	inputs:
 		quickflow: m^3.s^-1
 		year: year
+		AnnualRunoff: 'mm.yr^-1'
+		annualLoad: ''
 	states:
 	parameters:
 		YearDisturbance: ''
 		GullyEndYear: ''
 		Area: m^2
 		averageGullyActivityFactor: '[0,3]'
-		AnnualRunoff: 'mm.yr^-1'
 		GullyAnnualAverageSedimentSupply: 't.yr^-1'
 		GullyPercentFine: 'Average clay + silt percentage of gully material'
 		managementPracticeFactor: ''
-		annualLoad: ''
 		longtermRunoffFactor: ''
 		dailyRunoffPowerFactor: ''
 		sdrFine: ''
 		sdrCoarse: ''
+		timeStepInSeconds: '[0,100000000]s Duration of timestep in seconds, default=86400'
 	outputs:
 		fineLoad: kg
 		coarseLoad: kg
@@ -41,16 +42,16 @@ DynamicSednetGullyAlt:
 		gully
 */
 
-func sednetGullyDerm(quickflow, year data.ND1Float64,
+func sednetGullyDerm(quickflow, year, annualRunoff, annualLoad data.ND1Float64,
 	yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
-	annualRunoff, annualAverageSedimentSupply, percentFine,
-	managementPracticeFactor, annualLoad, longtermRunoffFactor, dailyRunoffPowerFactor,
-	sdrFine, sdrCoarse float64, fineLoad, coarseLoad data.ND1Float64) {
-	sednetGully(quickflow, year,
+	annualAverageSedimentSupply, percentFine,
+	managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
+	sdrFine, sdrCoarse, timeStepInSeconds float64, fineLoad, coarseLoad data.ND1Float64) {
+	sednetGully(quickflow, year, annualRunoff, annualLoad,
 		yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
-		annualRunoff, annualAverageSedimentSupply, percentFine,
-		managementPracticeFactor, annualLoad, longtermRunoffFactor, dailyRunoffPowerFactor,
-		sdrFine, sdrCoarse, fineLoad, coarseLoad, gullyLoadDerm)
+		annualAverageSedimentSupply, percentFine,
+		managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
+		sdrFine, sdrCoarse, timeStepInSeconds, fineLoad, coarseLoad, gullyLoadDerm)
 }
 
 func gullyLoadDerm(dailyRunoff, annualRunoff, area, propFine, activityFactor, managementPracticeFactor, annualLoad, annualSupply,
