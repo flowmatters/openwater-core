@@ -70,7 +70,7 @@ func (m *SednetParticulateNutrientGeneration)  Description() sim.ModelDescriptio
   result.Inputs = []string{
   "fineSedModelFineSheetGeneratedKg","fineSedModelCoarseSheetGeneratedKg","fineSedModelFineGullyGeneratedKg","fineSedModelCoarseGullyGeneratedKg","slowflow",}
   result.Outputs = []string{
-  "quickflowConstituent","slowflowConstituent",}
+  "quickflowConstituent","slowflowConstituent","totalLoad",}
 
   result.States = []string{
   }
@@ -130,7 +130,7 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3Float64, states
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 2, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 3, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
@@ -215,15 +215,18 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3Float64, states
       outputPosSlice[sim.DIMO_OUTPUT] = 1
       slowflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
-      
-
-       particulateNutrients(finesedmodelfinesheetgeneratedkg,finesedmodelcoarsesheetgeneratedkg,finesedmodelfinegullygeneratedkg,finesedmodelcoarsegullygeneratedkg,slowflow,area,nutsurfsoilconc,hilldeliveryratio,nutrient_enrichment_ratio,nutsubsoilconc,nutrient_enrichment_ratio_gully,gullydeliveryratio,nutrientdwc,do_p_creams_enrichment,quickflowconstituent,slowflowconstituent)
-
-      
+      outputPosSlice[sim.DIMO_OUTPUT] = 2
+      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 2)
+       particulateNutrients(finesedmodelfinesheetgeneratedkg,finesedmodelcoarsesheetgeneratedkg,finesedmodelfinegullygeneratedkg,finesedmodelcoarsegullygeneratedkg,slowflow,area,nutsurfsoilconc,hilldeliveryratio,nutrient_enrichment_ratio,nutsubsoilconc,nutrient_enrichment_ratio_gully,gullydeliveryratio,nutrientdwc,do_p_creams_enrichment,quickflowconstituent,slowflowconstituent,totalload)
+
+      
+      
+      
+
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 3)
       
 
       doneChan <- i
