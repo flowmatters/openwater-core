@@ -20,6 +20,7 @@ before_install:
   - ./build/ci/$TRAVIS_OS_NAME.sh
 
 script:
+  - if [ "$TRAVIS_OS_NAME" = 'windows' ]; then source compilation_vars.txt; fi
   - python3 --version
   - ./build/bootstrap-test-env.sh
   - OW_TEST_PATH=$PWD/test/files go test ./...
