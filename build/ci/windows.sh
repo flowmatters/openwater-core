@@ -12,3 +12,5 @@ source compilation_vars.txt
 echo HDF5_DIR: $HDF5_DIR
 echo CGO_CFLAGS: $CGO_CFLAGS
 echo CGO_LDFLAGS: $CGO_LDFLAGS
+
+choco install python --version=3.7.2
