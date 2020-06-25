@@ -1,6 +1,8 @@
 #!/bin/bash
 
 choco install python --version=3.7.2
+ls -l /c/Python37
+ls -l /c/Python37/bin
 
 curl -o hdf5.zip https://www.flowmatters.com.au/ow/1.10.5.zip
 unzip -q hdf5.zip
