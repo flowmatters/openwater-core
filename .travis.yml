@@ -27,6 +27,6 @@ script:
   - OW_TEST_PATH=$PWD/test/files go test ./...
   - ./build/build.sh
   - ./build/run_test.sh
-  - ls -a
+  - ls -al
 
 
