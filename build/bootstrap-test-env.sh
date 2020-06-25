@@ -3,6 +3,7 @@
 set -e
 
 python3 -c "import sys; print(sys.path)"
+python3 -m venv -h
 python3 -m venv .ow-test
 source .ow-test/bin/activate
 pip --version
