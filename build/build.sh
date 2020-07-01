@@ -14,3 +14,4 @@ done
 echo libopenwater
 go build -buildmode=c-shared -o libopenwater.so ./libopenwater 
 
+ls -lh
