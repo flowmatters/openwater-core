@@ -1,9 +1,9 @@
 language: go
 
-os:
-  - linux
-  - osx
-  - windows
+# os:
+#   - linux
+#   - osx
+#   - windows
 
 jobs:
   include:
