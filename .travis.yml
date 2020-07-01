@@ -9,25 +9,29 @@ jobs:
   include:
     - os: linux
       dist: xenial
+      before_install:
+        - ./build/ci/$TRAVIS_OS_NAME.sh
     - os: osx
+      before_install:
+        - ./build/ci/$TRAVIS_OS_NAME.sh
     - os: windows
       before_install:
-        - choco install python3
-        - export PATH='/c/Python37:/c/Python37/Scripts:$PATH'
-        - virtualenv $HOME/venv
-        - source $HOME/venv/Scripts/activate
+        - ./build/ci/$TRAVIS_OS_NAME.sh
+        - source compilation_vars.txt
+        - source ow-test/Scripts/activate
+
 sudo: required
 
 go:
   - 1.x
 
-before_install:
-  - ./build/ci/$TRAVIS_OS_NAME.sh
-  - if [ "$TRAVIS_OS_NAME" = 'windows' ]; then source compilation_vars.txt; fi
+# before_install:
+#   - ./build/ci/$TRAVIS_OS_NAME.sh
+#   - if [ "$TRAVIS_OS_NAME" = 'windows' ]; then source compilation_vars.txt; fi
 
 script:
   - export VENV_DIR=bin
-  - if [ "$TRAVIS_OS_NAME" = 'windows' ]; then source compilation_vars.txt; fi
+  # - if [ "$TRAVIS_OS_NAME" = 'windows' ]; then source compilation_vars.txt; fi
   - python3 --version
   - ./build/bootstrap-test-env.sh
   - OW_TEST_PATH=$PWD/test/files go test -v ./...
