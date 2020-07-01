@@ -21,4 +21,4 @@ echo CGO_CFLAGS: $CGO_CFLAGS
 echo CGO_LDFLAGS: $CGO_LDFLAGS
 echo $PATH
 
-virtualenv ow-test
+python -m venv ow-test
