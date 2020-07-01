@@ -24,7 +24,7 @@ script:
   - if [ "$TRAVIS_OS_NAME" = 'windows' ]; then source compilation_vars.txt; fi
   - python3 --version
   - ./build/bootstrap-test-env.sh
-  - OW_TEST_PATH=$PWD/test/files go test ./...
+  - OW_TEST_PATH=$PWD/test/files go -v test ./...
   - ./build/build.sh
   - ./build/run_test.sh
   - ls -al
