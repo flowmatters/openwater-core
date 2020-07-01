@@ -9,6 +9,7 @@ export HDF5_DIR=`pwd -W`/1.10.5
 echo export CGO_CFLAGS=\"-I$HDF5_DIR/include\" > compilation_vars.txt
 echo export CGO_LDFLAGS=\"-L$HDF5_DIR/lib -lhdf5 -lhdf5_hl\"  >> compilation_vars.txt
 echo export PATH=\"$PATH:/c/Python37:/c/Python37/Scripts\" >> compilation_vars.txt
+echo export VENV_DIR=Scripts >> compilation_vars.txt
 
 echo '--- compilation_vars.txt ---'
 

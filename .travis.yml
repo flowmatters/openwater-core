@@ -21,6 +21,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = 'windows' ]; then source compilation_vars.txt; fi
 
 script:
+  - export VENV_DIR=bin
   - if [ "$TRAVIS_OS_NAME" = 'windows' ]; then source compilation_vars.txt; fi
   - python3 --version
   - ./build/bootstrap-test-env.sh
