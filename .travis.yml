@@ -12,12 +12,12 @@ jobs:
       before_install:
         - ./build/ci/$TRAVIS_OS_NAME.sh
         - python3 -m venv ow-test
-        - source ow-test/$VENV_DIR/activate
+        - source ow-test/bin/activate
     - os: osx
       before_install:
         - ./build/ci/$TRAVIS_OS_NAME.sh
         - python3 -m venv ow-test
-        - source ow-test/$VENV_DIR/activate
+        - source ow-test/bin/activate
     - os: windows
       before_install:
         - ./build/ci/$TRAVIS_OS_NAME.sh
