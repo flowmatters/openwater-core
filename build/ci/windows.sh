@@ -21,6 +21,4 @@ echo CGO_CFLAGS: $CGO_CFLAGS
 echo CGO_LDFLAGS: $CGO_LDFLAGS
 echo $PATH
 
-ls /c/Python37/Scripts
-
-python3 -m venv ow-test
+python -m venv ow-test
