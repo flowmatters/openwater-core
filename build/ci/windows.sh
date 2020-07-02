@@ -22,5 +22,5 @@ echo CGO_LDFLAGS: $CGO_LDFLAGS
 echo $PATH
 
 #python -m venv ow-test
-pip install virtualenv
-virtualenv ow-test
+# pip install virtualenv
+# virtualenv ow-test

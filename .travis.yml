@@ -11,14 +11,18 @@ jobs:
       dist: xenial
       before_install:
         - ./build/ci/$TRAVIS_OS_NAME.sh
+        - python3 -m venv ow-test
+        - source ow-test/$VENV_DIR/activate
     - os: osx
       before_install:
         - ./build/ci/$TRAVIS_OS_NAME.sh
+        - python3 -m venv ow-test
+        - source ow-test/$VENV_DIR/activate
     - os: windows
       before_install:
         - ./build/ci/$TRAVIS_OS_NAME.sh
         - source compilation_vars.txt
-        - source ow-test/Scripts/activate
+        # - source ow-test/Scripts/activate
 
 sudo: required
 
