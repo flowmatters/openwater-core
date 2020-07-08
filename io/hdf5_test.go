@@ -51,8 +51,8 @@ func TestGetDatasetNames(t *testing.T) {
 
 	ref := H5RefFloat64{Filename: fn, Dataset: "simple"}
 	datasetNames, err := ref.GetDatasets()
-
 	assert.Nil(err)
+
 	assert.Equal(3, len(datasetNames))
 	assert.True(findInSlice(datasetNames, "strings") >= 0)
 	assert.True(findInSlice(datasetNames, "ints") >= 0)

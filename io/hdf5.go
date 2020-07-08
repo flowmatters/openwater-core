@@ -253,8 +253,9 @@ func (h H5RefArrayType) GetDatasets() ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		ds, err := g.OpenDataset(name)
-		if err == nil {
+		if err == nil && ds != nil {
 			ds.Close()
 			result = append(result, name)
 		}
