@@ -71,7 +71,7 @@ func (mr *modelReference) GetReference(genSlice []int, element string) io.H5RefF
 
 func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 	if mr.Generations[i] == nil {
-		verbosePrintf("Initialising Generation %d for %s\n",i+1,mr.ModelName)
+		verbosePrintf("Initialising Generation %d for %s\n",i,mr.ModelName)
 		gen := modelGeneration{}
 		modelRef := sim.Catalog[mr.ModelName]
 		if modelRef == nil {
@@ -119,7 +119,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 }
 
 func (mr *modelReference) PurgeGeneration(i int) {
-	verbosePrintf("Purging Generation %d for %s\n",i+1,mr.ModelName)
+	verbosePrintf("Purging Generation %d for %s\n",i,mr.ModelName)
 	mr.Generations[i] = nil
 }
 

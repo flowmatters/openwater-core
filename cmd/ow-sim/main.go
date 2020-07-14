@@ -208,6 +208,12 @@ func main() {
 					prevG := -1
 					for {
 						prevG = <-writingDone
+
+						for _, modelName := range modelNames {
+							modelRef := models[modelName]
+							modelRef.PurgeGeneration(prevG)
+						}
+
 						if prevG == (g - 1) {
 							break
 						}
