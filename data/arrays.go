@@ -29,6 +29,7 @@ type NDArrayType interface {
 	Reshape(newShape []int) (NDArrayType, error)
 	MustReshape(newShape []int) NDArrayType
 	ReshapeFast(newShape []int) (NDArrayType, error)
+	Maximum() ArrayType
 }
 
 type ND1ArrayType interface {

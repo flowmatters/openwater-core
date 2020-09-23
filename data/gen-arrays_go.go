@@ -209,6 +209,22 @@ func (nd *ndfloat64) Set3(loc1 int, loc2 int, loc3 int, val float64) {
 	nd.Set([]int{loc1, loc2, loc3}, val)
 }
 
+func (nd *ndfloat64) Maximum() float64 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
 func NewArrayFloat64(dims []int) NDFloat64 {
 	return newArrayfloat64(dims)
 }
@@ -444,6 +460,22 @@ func (nd *ndfloat32) Get3(loc1 int, loc2 int, loc3 int) float32 {
 
 func (nd *ndfloat32) Set3(loc1 int, loc2 int, loc3 int, val float32) {
 	nd.Set([]int{loc1, loc2, loc3}, val)
+}
+
+func (nd *ndfloat32) Maximum() float32 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
 }
 
 func NewArrayFloat32(dims []int) NDFloat32 {
@@ -683,6 +715,22 @@ func (nd *ndint32) Set3(loc1 int, loc2 int, loc3 int, val int32) {
 	nd.Set([]int{loc1, loc2, loc3}, val)
 }
 
+func (nd *ndint32) Maximum() int32 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
 func NewArrayInt32(dims []int) NDInt32 {
 	return newArrayint32(dims)
 }
@@ -918,6 +966,22 @@ func (nd *nduint32) Get3(loc1 int, loc2 int, loc3 int) uint32 {
 
 func (nd *nduint32) Set3(loc1 int, loc2 int, loc3 int, val uint32) {
 	nd.Set([]int{loc1, loc2, loc3}, val)
+}
+
+func (nd *nduint32) Maximum() uint32 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
 }
 
 func NewArrayUint32(dims []int) NDUint32 {
@@ -1157,6 +1221,22 @@ func (nd *ndint64) Set3(loc1 int, loc2 int, loc3 int, val int64) {
 	nd.Set([]int{loc1, loc2, loc3}, val)
 }
 
+func (nd *ndint64) Maximum() int64 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
 func NewArrayInt64(dims []int) NDInt64 {
 	return newArrayint64(dims)
 }
@@ -1392,6 +1472,22 @@ func (nd *nduint64) Get3(loc1 int, loc2 int, loc3 int) uint64 {
 
 func (nd *nduint64) Set3(loc1 int, loc2 int, loc3 int, val uint64) {
 	nd.Set([]int{loc1, loc2, loc3}, val)
+}
+
+func (nd *nduint64) Maximum() uint64 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
 }
 
 func NewArrayUint64(dims []int) NDUint64 {
@@ -1631,6 +1727,22 @@ func (nd *ndint) Set3(loc1 int, loc2 int, loc3 int, val int) {
 	nd.Set([]int{loc1, loc2, loc3}, val)
 }
 
+func (nd *ndint) Maximum() int {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
 func NewArrayInt(dims []int) NDInt {
 	return newArrayint(dims)
 }
@@ -1866,6 +1978,22 @@ func (nd *nduint) Get3(loc1 int, loc2 int, loc3 int) uint {
 
 func (nd *nduint) Set3(loc1 int, loc2 int, loc3 int, val uint) {
 	nd.Set([]int{loc1, loc2, loc3}, val)
+}
+
+func (nd *nduint) Maximum() uint {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
 }
 
 func NewArrayUint(dims []int) NDUint {

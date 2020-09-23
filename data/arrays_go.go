@@ -207,6 +207,22 @@ func (nd *ndArrayType) Set3(loc1 int, loc2 int, loc3 int, val ArrayType) {
 	nd.Set([]int{loc1, loc2, loc3}, val)
 }
 
+func (nd *ndArrayType) Maximum() ArrayType {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
 func NewArrayArrayType(dims []int) NDArrayType {
 	return newArrayArrayType(dims)
 }
