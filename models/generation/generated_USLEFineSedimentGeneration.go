@@ -38,26 +38,119 @@ type USLEFineSedimentGeneration struct {
 func (m *USLEFineSedimentGeneration) ApplyParameters(parameters data.ND2Float64) {
 
   nSets := parameters.Len(sim.DIMP_CELL)
-  newShape := []int{nSets}
+  var newShape []int
+  paramIdx := 0
+  paramSize := 1
 
-  m.S = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.P = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.RainThreshold = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.Alpha = parameters.Slice([]int{ 3, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.Beta = parameters.Slice([]int{ 4, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.Eta = parameters.Slice([]int{ 5, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.A1 = parameters.Slice([]int{ 6, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.A2 = parameters.Slice([]int{ 7, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.A3 = parameters.Slice([]int{ 8, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.DWC = parameters.Slice([]int{ 9, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.avK = parameters.Slice([]int{ 10, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.avLS = parameters.Slice([]int{ 11, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.avFines = parameters.Slice([]int{ 12, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.area = parameters.Slice([]int{ 13, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.maxConc = parameters.Slice([]int{ 14, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.usleHSDRFine = parameters.Slice([]int{ 15, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.usleHSDRCoarse = parameters.Slice([]int{ 16, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.timeStepInSeconds = parameters.Slice([]int{ 17, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.S = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.P = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.RainThreshold = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.Alpha = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.Beta = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.Eta = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.A1 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.A2 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.A3 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.DWC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.avK = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.avLS = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.avFines = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.area = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.maxConc = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.usleHSDRFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.usleHSDRCoarse = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.timeStepInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
   
 }
 
@@ -173,59 +266,23 @@ func (m *USLEFineSedimentGeneration) Run(inputs data.ND3Float64, states data.ND2
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      
-      // fmt.Println("S=",m.S)
       s := m.S.Get1(i%m.S.Len1())
-      
-      // fmt.Println("P=",m.P)
       p := m.P.Get1(i%m.P.Len1())
-      
-      // fmt.Println("RainThreshold=",m.RainThreshold)
       rainthreshold := m.RainThreshold.Get1(i%m.RainThreshold.Len1())
-      
-      // fmt.Println("Alpha=",m.Alpha)
       alpha := m.Alpha.Get1(i%m.Alpha.Len1())
-      
-      // fmt.Println("Beta=",m.Beta)
       beta := m.Beta.Get1(i%m.Beta.Len1())
-      
-      // fmt.Println("Eta=",m.Eta)
       eta := m.Eta.Get1(i%m.Eta.Len1())
-      
-      // fmt.Println("A1=",m.A1)
       a1 := m.A1.Get1(i%m.A1.Len1())
-      
-      // fmt.Println("A2=",m.A2)
       a2 := m.A2.Get1(i%m.A2.Len1())
-      
-      // fmt.Println("A3=",m.A3)
       a3 := m.A3.Get1(i%m.A3.Len1())
-      
-      // fmt.Println("DWC=",m.DWC)
       dwc := m.DWC.Get1(i%m.DWC.Len1())
-      
-      // fmt.Println("avK=",m.avK)
       avk := m.avK.Get1(i%m.avK.Len1())
-      
-      // fmt.Println("avLS=",m.avLS)
       avls := m.avLS.Get1(i%m.avLS.Len1())
-      
-      // fmt.Println("avFines=",m.avFines)
       avfines := m.avFines.Get1(i%m.avFines.Len1())
-      
-      // fmt.Println("area=",m.area)
       area := m.area.Get1(i%m.area.Len1())
-      
-      // fmt.Println("maxConc=",m.maxConc)
       maxconc := m.maxConc.Get1(i%m.maxConc.Len1())
-      
-      // fmt.Println("usleHSDRFine=",m.usleHSDRFine)
       uslehsdrfine := m.usleHSDRFine.Get1(i%m.usleHSDRFine.Len1())
-      
-      // fmt.Println("usleHSDRCoarse=",m.usleHSDRCoarse)
       uslehsdrcoarse := m.usleHSDRCoarse.Get1(i%m.usleHSDRCoarse.Len1())
-      
-      // fmt.Println("timeStepInSeconds=",m.timeStepInSeconds)
       timestepinseconds := m.timeStepInSeconds.Get1(i%m.timeStepInSeconds.Len1())
       
 

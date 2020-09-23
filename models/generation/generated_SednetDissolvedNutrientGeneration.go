@@ -22,10 +22,23 @@ type SednetDissolvedNutrientGeneration struct {
 func (m *SednetDissolvedNutrientGeneration) ApplyParameters(parameters data.ND2Float64) {
 
   nSets := parameters.Len(sim.DIMP_CELL)
-  newShape := []int{nSets}
+  var newShape []int
+  paramIdx := 0
+  paramSize := 1
 
-  m.dissConst_EMC = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.dissConst_DWC = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.dissConst_EMC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.dissConst_DWC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
   
 }
 
@@ -125,11 +138,7 @@ func (m *SednetDissolvedNutrientGeneration) Run(inputs data.ND3Float64, states d
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      
-      // fmt.Println("dissConst_EMC=",m.dissConst_EMC)
       dissconst_emc := m.dissConst_EMC.Get1(i%m.dissConst_EMC.Len1())
-      
-      // fmt.Println("dissConst_DWC=",m.dissConst_DWC)
       dissconst_dwc := m.dissConst_DWC.Get1(i%m.dissConst_DWC.Len1())
       
 

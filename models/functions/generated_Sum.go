@@ -19,6 +19,7 @@ type Sum struct {
 
 func (m *Sum) ApplyParameters(parameters data.ND2Float64) {
 
+
   
 }
 

@@ -32,20 +32,83 @@ type DynamicSednetGully struct {
 func (m *DynamicSednetGully) ApplyParameters(parameters data.ND2Float64) {
 
   nSets := parameters.Len(sim.DIMP_CELL)
-  newShape := []int{nSets}
+  var newShape []int
+  paramIdx := 0
+  paramSize := 1
 
-  m.YearDisturbance = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.GullyEndYear = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.Area = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.averageGullyActivityFactor = parameters.Slice([]int{ 3, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.GullyAnnualAverageSedimentSupply = parameters.Slice([]int{ 4, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.GullyPercentFine = parameters.Slice([]int{ 5, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.managementPracticeFactor = parameters.Slice([]int{ 6, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.longtermRunoffFactor = parameters.Slice([]int{ 7, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.dailyRunoffPowerFactor = parameters.Slice([]int{ 8, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.sdrFine = parameters.Slice([]int{ 9, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.sdrCoarse = parameters.Slice([]int{ 10, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.timeStepInSeconds = parameters.Slice([]int{ 11, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.YearDisturbance = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.GullyEndYear = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.Area = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.averageGullyActivityFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.GullyAnnualAverageSedimentSupply = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.GullyPercentFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.managementPracticeFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.longtermRunoffFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.dailyRunoffPowerFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.sdrFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.sdrCoarse = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.timeStepInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
   
 }
 
@@ -155,41 +218,17 @@ func (m *DynamicSednetGully) Run(inputs data.ND3Float64, states data.ND2Float64,
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      
-      // fmt.Println("YearDisturbance=",m.YearDisturbance)
       yeardisturbance := m.YearDisturbance.Get1(i%m.YearDisturbance.Len1())
-      
-      // fmt.Println("GullyEndYear=",m.GullyEndYear)
       gullyendyear := m.GullyEndYear.Get1(i%m.GullyEndYear.Len1())
-      
-      // fmt.Println("Area=",m.Area)
       area := m.Area.Get1(i%m.Area.Len1())
-      
-      // fmt.Println("averageGullyActivityFactor=",m.averageGullyActivityFactor)
       averagegullyactivityfactor := m.averageGullyActivityFactor.Get1(i%m.averageGullyActivityFactor.Len1())
-      
-      // fmt.Println("GullyAnnualAverageSedimentSupply=",m.GullyAnnualAverageSedimentSupply)
       gullyannualaveragesedimentsupply := m.GullyAnnualAverageSedimentSupply.Get1(i%m.GullyAnnualAverageSedimentSupply.Len1())
-      
-      // fmt.Println("GullyPercentFine=",m.GullyPercentFine)
       gullypercentfine := m.GullyPercentFine.Get1(i%m.GullyPercentFine.Len1())
-      
-      // fmt.Println("managementPracticeFactor=",m.managementPracticeFactor)
       managementpracticefactor := m.managementPracticeFactor.Get1(i%m.managementPracticeFactor.Len1())
-      
-      // fmt.Println("longtermRunoffFactor=",m.longtermRunoffFactor)
       longtermrunofffactor := m.longtermRunoffFactor.Get1(i%m.longtermRunoffFactor.Len1())
-      
-      // fmt.Println("dailyRunoffPowerFactor=",m.dailyRunoffPowerFactor)
       dailyrunoffpowerfactor := m.dailyRunoffPowerFactor.Get1(i%m.dailyRunoffPowerFactor.Len1())
-      
-      // fmt.Println("sdrFine=",m.sdrFine)
       sdrfine := m.sdrFine.Get1(i%m.sdrFine.Len1())
-      
-      // fmt.Println("sdrCoarse=",m.sdrCoarse)
       sdrcoarse := m.sdrCoarse.Get1(i%m.sdrCoarse.Len1())
-      
-      // fmt.Println("timeStepInSeconds=",m.timeStepInSeconds)
       timestepinseconds := m.timeStepInSeconds.Get1(i%m.timeStepInSeconds.Len1())
       
 

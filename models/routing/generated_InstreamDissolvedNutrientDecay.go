@@ -27,15 +27,53 @@ type InstreamDissolvedNutrientDecay struct {
 func (m *InstreamDissolvedNutrientDecay) ApplyParameters(parameters data.ND2Float64) {
 
   nSets := parameters.Len(sim.DIMP_CELL)
-  newShape := []int{nSets}
+  var newShape []int
+  paramIdx := 0
+  paramSize := 1
 
-  m.doDecay = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.pointSourceLoad = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.linkHeight = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.linkWidth = parameters.Slice([]int{ 3, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.linkLength = parameters.Slice([]int{ 4, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.uptakeVelocity = parameters.Slice([]int{ 5, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.durationInSeconds = parameters.Slice([]int{ 6, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.doDecay = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.pointSourceLoad = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.linkHeight = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.linkWidth = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.linkLength = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.uptakeVelocity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
   
 }
 
@@ -142,26 +180,12 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3Float64, states data
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      
-      // fmt.Println("doDecay=",m.doDecay)
       dodecay := m.doDecay.Get1(i%m.doDecay.Len1())
-      
-      // fmt.Println("pointSourceLoad=",m.pointSourceLoad)
       pointsourceload := m.pointSourceLoad.Get1(i%m.pointSourceLoad.Len1())
-      
-      // fmt.Println("linkHeight=",m.linkHeight)
       linkheight := m.linkHeight.Get1(i%m.linkHeight.Len1())
-      
-      // fmt.Println("linkWidth=",m.linkWidth)
       linkwidth := m.linkWidth.Get1(i%m.linkWidth.Len1())
-      
-      // fmt.Println("linkLength=",m.linkLength)
       linklength := m.linkLength.Get1(i%m.linkLength.Len1())
-      
-      // fmt.Println("uptakeVelocity=",m.uptakeVelocity)
       uptakevelocity := m.uptakeVelocity.Get1(i%m.uptakeVelocity.Len1())
-      
-      // fmt.Println("durationInSeconds=",m.durationInSeconds)
       durationinseconds := m.durationInSeconds.Get1(i%m.durationInSeconds.Len1())
       
 

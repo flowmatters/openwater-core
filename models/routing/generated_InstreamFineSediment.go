@@ -33,21 +33,89 @@ type InstreamFineSediment struct {
 func (m *InstreamFineSediment) ApplyParameters(parameters data.ND2Float64) {
 
   nSets := parameters.Len(sim.DIMP_CELL)
-  newShape := []int{nSets}
+  var newShape []int
+  paramIdx := 0
+  paramSize := 1
 
-  m.bankFullFlow = parameters.Slice([]int{ 0, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.fineSedSettVelocityFlood = parameters.Slice([]int{ 1, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.floodPlainArea = parameters.Slice([]int{ 2, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.linkWidth = parameters.Slice([]int{ 3, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.linkLength = parameters.Slice([]int{ 4, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.linkSlope = parameters.Slice([]int{ 5, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.bankHeight = parameters.Slice([]int{ 6, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.propBankHeightForFineDep = parameters.Slice([]int{ 7, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.sedBulkDensity = parameters.Slice([]int{ 8, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.manningsN = parameters.Slice([]int{ 9, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.fineSedSettVelocity = parameters.Slice([]int{ 10, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.fineSedReMobVelocity = parameters.Slice([]int{ 11, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
-  m.durationInSeconds = parameters.Slice([]int{ 12, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.bankFullFlow = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.fineSedSettVelocityFlood = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.floodPlainArea = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.linkWidth = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.linkLength = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.linkSlope = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.bankHeight = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.propBankHeightForFineDep = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.sedBulkDensity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.manningsN = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.fineSedSettVelocity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.fineSedReMobVelocity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
   
 }
 
@@ -162,44 +230,18 @@ func (m *InstreamFineSediment) Run(inputs data.ND3Float64, states data.ND2Float6
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      
-      // fmt.Println("bankFullFlow=",m.bankFullFlow)
       bankfullflow := m.bankFullFlow.Get1(i%m.bankFullFlow.Len1())
-      
-      // fmt.Println("fineSedSettVelocityFlood=",m.fineSedSettVelocityFlood)
       finesedsettvelocityflood := m.fineSedSettVelocityFlood.Get1(i%m.fineSedSettVelocityFlood.Len1())
-      
-      // fmt.Println("floodPlainArea=",m.floodPlainArea)
       floodplainarea := m.floodPlainArea.Get1(i%m.floodPlainArea.Len1())
-      
-      // fmt.Println("linkWidth=",m.linkWidth)
       linkwidth := m.linkWidth.Get1(i%m.linkWidth.Len1())
-      
-      // fmt.Println("linkLength=",m.linkLength)
       linklength := m.linkLength.Get1(i%m.linkLength.Len1())
-      
-      // fmt.Println("linkSlope=",m.linkSlope)
       linkslope := m.linkSlope.Get1(i%m.linkSlope.Len1())
-      
-      // fmt.Println("bankHeight=",m.bankHeight)
       bankheight := m.bankHeight.Get1(i%m.bankHeight.Len1())
-      
-      // fmt.Println("propBankHeightForFineDep=",m.propBankHeightForFineDep)
       propbankheightforfinedep := m.propBankHeightForFineDep.Get1(i%m.propBankHeightForFineDep.Len1())
-      
-      // fmt.Println("sedBulkDensity=",m.sedBulkDensity)
       sedbulkdensity := m.sedBulkDensity.Get1(i%m.sedBulkDensity.Len1())
-      
-      // fmt.Println("manningsN=",m.manningsN)
       manningsn := m.manningsN.Get1(i%m.manningsN.Len1())
-      
-      // fmt.Println("fineSedSettVelocity=",m.fineSedSettVelocity)
       finesedsettvelocity := m.fineSedSettVelocity.Get1(i%m.fineSedSettVelocity.Len1())
-      
-      // fmt.Println("fineSedReMobVelocity=",m.fineSedReMobVelocity)
       finesedremobvelocity := m.fineSedReMobVelocity.Get1(i%m.fineSedReMobVelocity.Len1())
-      
-      // fmt.Println("durationInSeconds=",m.durationInSeconds)
       durationinseconds := m.durationInSeconds.Get1(i%m.durationInSeconds.Len1())
       
 

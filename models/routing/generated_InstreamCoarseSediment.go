@@ -19,6 +19,7 @@ type InstreamCoarseSediment struct {
 
 func (m *InstreamCoarseSediment) ApplyParameters(parameters data.ND2Float64) {
 
+
   
 }
 
