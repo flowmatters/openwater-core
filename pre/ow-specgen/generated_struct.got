@@ -169,21 +169,20 @@ func (m *{{.Name}}) Run(inputs data.ND3Float64, states data.ND2Float64, outputs 
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
       {{range $i, $v := .ParameterSpecs}}
-      // fmt.Println("{{$v.Name}}=",m.{{$v.Name}})
-      {{if $v.Dimensions}}
+      {{- if $v.Dimensions -}}
       {{lower $v.Name}}Shape := m.{{$v.Name}}.Shape()
       {{lower $v.Name}}NSets := {{lower $v.Name}}Shape[len({{lower $v.Name}}Shape)-1]
       {{lower $v.Name}}From := []int{ {{range $d := $v.Dimensions}} 0, {{end}} i%{{lower $v.Name}}NSets }
       {{lower $v.Name}}SliceShape := []int{ {{range $d := $v.Dimensions}} int(m.{{ $d }}.Maximum()), {{end}} }
       {{lower $v.Name}} := m.{{$v.Name}}.Slice({{lower $v.Name}}From, {{lower $v.Name}}SliceShape, nil).(data.ND{{len $v.Dimensions}}Float64)
-      {{else}}
-      {{if $v.IsDimension}}
+      {{- else -}}
+      {{- if $v.IsDimension -}}
       // Dimension parameter
       {{lower $v.Name}} := int(m.{{$v.Name}}.Get1(i%m.{{$v.Name}}.Len1()))
-      {{else}}
+      {{- else -}}
       {{lower $v.Name}} := m.{{$v.Name}}.Get1(i%m.{{$v.Name}}.Len1())
-      {{end}}
-      {{end}}
+      {{- end}}
+      {{- end}}
       {{end}}
 
       // fmt.Println("i",i)
