@@ -18,6 +18,7 @@ import (
 const templatePath = "pre/ow-specgen/*.got"
 const floatTemplate = "[+-]?([0-9]*[.])?[0-9]+"
 const parameterTemplate = `(\[(?P<Min>%s),(?P<Max>%s)\]((?P<Units>[\s]+))?)?\s*(?P<Description>[^,]*)(,\s*default=(?P<Default>%s))?`
+const dimensionTemplate = `\[([_a-zA-Z][_a-zA-Z0-9]*)(,([_a-zA-Z][_a-zA-Z0-9]*))*\]`
 
 type ModelSpecs map[string]ModelSpec
 type VariableSpec struct {
@@ -27,6 +28,9 @@ type VariableSpec struct {
 	Default     float64
 	Description string
 	Range       []float64
+	IsDimension bool
+	Dimensions  []string
+	Dimensionality int
 }
 
 type ModelSpec struct {
@@ -77,6 +81,16 @@ func processDirectory(path string) {
 func transform(spec ModelSpec) ModelSpec {
 	spec.ParameterSpecs = make([]VariableSpec, len(spec.Parameters))
 	for i, v := range spec.Parameters {
+		paramName := fmt.Sprint(v.Key)
+		var dimensions []string = nil
+		if strings.Contains(paramName,"[") {
+			cleanName := strings.Replace(strings.Replace(paramName,"[",",",1),"]","",1)
+			nameComponents := strings.Split(cleanName,",")
+			paramName = nameComponents[0]
+			dimensions = nameComponents[1:]
+			fmt.Println(paramName,dimensions)
+		}
+
 		txt := fmt.Sprint(v.Value)
 		if txt == `<nil>` {
 			txt = ""
@@ -104,7 +118,36 @@ func transform(spec ModelSpec) ModelSpec {
 		paramRange[0] = minVal
 		paramRange[1] = maxVal
 
-		spec.ParameterSpecs[i] = VariableSpec{v.Key.(string), units, i, defaultVal, description, paramRange}
+		spec.ParameterSpecs[i] = VariableSpec{
+			paramName,
+			units,
+			i,
+			defaultVal,
+			description,
+			paramRange,
+			false,
+			dimensions,
+			len(dimensions) + 1}
+	}
+
+	for _,v := range spec.ParameterSpecs {
+		if v.Dimensions == nil {
+			continue
+		}
+		for _,d := range v.Dimensions {
+			for i,p := range spec.ParameterSpecs {
+				if strings.Compare(p.Name,d) == 0 {
+					fmt.Printf("%s is a dimension of %s\n",p.Name,v.Name)
+				  spec.ParameterSpecs[i].IsDimension = true
+				}
+			}
+		}
+	}
+
+	for _,v := range spec.ParameterSpecs {
+		if v.IsDimension {
+			fmt.Printf("%s is a dimension\n",v.Name)
+		}
 	}
 	return spec
 }

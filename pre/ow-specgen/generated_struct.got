@@ -14,18 +14,36 @@ import (
 
 {{if .Flags.GenerateStruct}}
 type {{.Name}} struct {
-  {{range $v := .Parameters -}}
-  {{$v.Key}} data.ND1Float64
+  {{range $v := .ParameterSpecs -}}
+  {{$v.Name}} data.ND{{$v.Dimensionality}}Float64
   {{end}}
 }
 
 func (m *{{.Name}}) ApplyParameters(parameters data.ND2Float64) {
 {{if .ParameterSpecs}}
   nSets := parameters.Len(sim.DIMP_CELL)
-  newShape := []int{nSets}
+  var newShape []int
+  paramIdx := 0
+  paramSize := 1
 {{end}}
+
   {{range $i, $v := .ParameterSpecs -}}
-  m.{{$v.Name}} = parameters.Slice([]int{ {{$i}}, 0}, []int{ 1, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramSize = 1
+    {{- if $v.Dimensions -}}
+      {{- range $d := $v.Dimensions -}}
+   + int(m.{{$d}}.Maximum())
+      {{- end}}
+    {{- end}}
+  newShape = []int{
+    {{- if $v.Dimensions -}}
+      {{- range $d := $v.Dimensions -}}
+   int(m.{{$d}}.Maximum()),
+      {{- end}}
+    {{- end}} nSets}
+
+  m.{{$v.Name}} = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND{{$v.Dimensionality}}Float64)
+  paramIdx += paramSize
+
   {{end}}
 }
 {{end}}
@@ -150,9 +168,22 @@ func (m *{{.Name}}) Run(inputs data.ND3Float64, states data.ND2Float64, outputs 
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      {{range $i, $v := .Parameters}}
-      // fmt.Println("{{$v.Key}}=",m.{{$v.Key}})
-      {{lower $v.Key}} := m.{{$v.Key}}.Get1(i%m.{{$v.Key}}.Len1())
+      {{range $i, $v := .ParameterSpecs}}
+      // fmt.Println("{{$v.Name}}=",m.{{$v.Name}})
+      {{if $v.Dimensions}}
+      {{lower $v.Name}}Shape := m.{{$v.Name}}.Shape()
+      {{lower $v.Name}}NSets := {{lower $v.Name}}Shape[len({{lower $v.Name}}Shape)-1]
+      {{lower $v.Name}}From := []int{ {{range $d := $v.Dimensions}} 0, {{end}} i%{{lower $v.Name}}NSets }
+      {{lower $v.Name}}SliceShape := []int{ {{range $d := $v.Dimensions}} int(m.{{ $d }}.Maximum()), {{end}} }
+      {{lower $v.Name}} := m.{{$v.Name}}.Slice({{lower $v.Name}}From, {{lower $v.Name}}SliceShape, nil).(data.ND{{len $v.Dimensions}}Float64)
+      {{else}}
+      {{if $v.IsDimension}}
+      // Dimension parameter
+      {{lower $v.Name}} := int(m.{{$v.Name}}.Get1(i%m.{{$v.Name}}.Len1()))
+      {{else}}
+      {{lower $v.Name}} := m.{{$v.Name}}.Get1(i%m.{{$v.Name}}.Len1())
+      {{end}}
+      {{end}}
       {{end}}
 
       // fmt.Println("i",i)
@@ -194,7 +225,7 @@ func (m *{{.Name}}) Run(inputs data.ND3Float64, states data.ND2Float64, outputs 
       {{- range $i, $v := .States}}{{if or $i (not $oAsP)}},{{end}}{{lower $v.Key}}{{end}}{{ if $oAsP }}{{if len .States}}={{end}}{{else}}:={{end}} {{.SingleFunc}}(
         {{- range .Inputs}}{{lower .Key}},{{end -}}
         {{- range .States}}{{lower .Key}},{{end -}}
-        {{- range .Parameters}}{{lower .Key}},{{end -}}
+        {{- range .ParameterSpecs}}{{lower .Name}},{{end -}}
         {{- if $oAsP}}
         {{- range $i, $v := .Outputs}}{{if $i}},{{end}}{{lower $v.Key}}{{end}}
         {{- end}})
