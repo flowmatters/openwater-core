@@ -202,6 +202,8 @@ func main() {
 		 totalTimeSimulation += genSimulationTime
 		// === /RUN GENERATION ===
 
+		// === WRITE GENERATION OUTPUTS ===
+		// asynchronous
 		if outputFn != "" {
 			go func(g int) {
 				if g > 0 {
