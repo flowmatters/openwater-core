@@ -87,9 +87,10 @@ func storageRouting(inflows, laterals, rainfall, evap data.ND1Float64,
 		if bias > 0.999 && i < 10 {
 			// fmt.Printf("\n==== TS %d, inflow=%f, laterial=%f ====\n", i, inflows.Get(idx), laterals.Get(idx))
 		}
-
+		inflow := inflows.Get(idx)
+		lateral := laterals.Get(idx)
 		evapRate := evap.Get(idx) - rainfall.Get(idx)/deltaT
-		qi, outflow, storage = calcOutflow(i, inflows.Get(idx), laterals.Get(idx), bias, qi, outflow, storage,
+		qi, outflow, storage = calcOutflow(i, inflow, lateral, bias, qi, outflow, storage,
 			evapRate, area, deadStorage, deltaT, x, k, Qlimit, Klimit, Koffset)
 		outflows.Set(idx, outflow)
 		storages.Set(idx, storage)
@@ -103,11 +104,11 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 	qi = prevQi
 	outflow = prevOutflow
 	storage = prevStorage
-
-	initialFluxMax := (math.Max(0.0, prevStorage) / duration) + inflow
+	totalInflow := inflow + lateral
+	initialFluxMax := (math.Max(0.0, prevStorage) / duration) + totalInflow // inflow + lateral
 
 	evaluateRouting := func(q float64) (massBalance, outflow, SIndex float64) {
-		return runRouting(q, inflow, lateral, initialFluxMax, storage, area, netEvapRate, deadStorage, duration,
+		return runRouting(q, totalInflow, 0, initialFluxMax, storage, area, netEvapRate, deadStorage, duration,
 			bias, routingPower, routingConstant, Qlimit, Klimit, Koffset)
 	}
 	evaluateRoutingMassBalance := func(q float64) float64 {
@@ -156,8 +157,6 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 	// massBalanceMin := delta
 
 	fluxmax := initialFluxMax
-
-	fluxmax += lateral
 
 	//Determine the maximum net evaporation flux assuming no outflow
 	netEvaporationFlux := math.Min(fluxmax, area*netEvapRate)

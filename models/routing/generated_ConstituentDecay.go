@@ -14,8 +14,9 @@ import (
 
 
 type ConstituentDecay struct {
-  halflife data.ND1Float64
-  durationInSeconds data.ND1Float64
+  X data.ND1Float64
+  halfLife data.ND1Float64
+  DeltaT data.ND1Float64
   
 }
 
@@ -30,13 +31,19 @@ func (m *ConstituentDecay) ApplyParameters(parameters data.ND2Float64) {
   paramSize = 1
   newShape = []int{ nSets}
 
-  m.halflife = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.X = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
 
-  m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  m.halfLife = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   paramIdx += paramSize
 
   
@@ -56,13 +63,14 @@ func (m *ConstituentDecay)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("halflife",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("durationInSeconds",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("X",0,"Weighting",[]float64{ 0, 1 }," "),
+  sim.DescribeParameter("halfLife",0,"",[]float64{ 0, 0 },""),
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),}
 
   result.Inputs = []string{
-  "incoming",}
+  "inflowLoad","lateralLoad","inflow","outflow","storage",}
   result.Outputs = []string{
-  "outgoing",}
+  "outflowLoad",}
 
   result.States = []string{
   "storedMass",}
@@ -140,8 +148,9 @@ func (m *ConstituentDecay) Run(inputs data.ND3Float64, states data.ND2Float64, o
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      halflife := m.halflife.Get1(i%m.halflife.Len1())
-      durationinseconds := m.durationInSeconds.Get1(i%m.durationInSeconds.Len1())
+      x := m.X.Get1(i%m.X.Len1())
+      halflife := m.halfLife.Get1(i%m.halfLife.Len1())
+      deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
       
 
       // fmt.Println("i",i)
@@ -162,8 +171,20 @@ func (m *ConstituentDecay) Run(inputs data.ND3Float64, states data.ND2Float64, o
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{incoming <nil>}",tmpTS.Shape())
-      incoming := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+  //    fmt.Println("{inflowLoad kg.s^-1}",tmpTS.Shape())
+      inflowload := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{lateralLoad kg.s^-1}",tmpTS.Shape())
+      lateralload := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
+      inflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{outflow m^3.s^-1}",tmpTS.Shape())
+      outflow := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{storage m^3}",tmpTS.Shape())
+      storage := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
       
 
       
@@ -171,11 +192,11 @@ func (m *ConstituentDecay) Run(inputs data.ND3Float64, states data.ND2Float64, o
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outgoing := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       
 
-      storedmass= constituentDecay(incoming,storedmass,halflife,durationinseconds,outgoing)
+      storedmass= constituentDecay(inflowload,lateralload,inflow,outflow,storage,storedmass,x,halflife,deltat,outflowload)
 
       
       
