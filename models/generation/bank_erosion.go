@@ -28,7 +28,7 @@ BankErosion:
 		dailyFlowPowerFactor:
 		longTermAvDailyFlow:
 		soilPercentFine:
-		durationInSeconds:
+		durationInSeconds: '[1,86400] Timestep, default=86400'
 	outputs:
 		bankErosionFine: kg
 		bankErosionCoarse: kg
@@ -73,7 +73,7 @@ func bankErosion(downstreamFlowVolume, totalVolume data.ND1Float64,
 	for i := 0; i < n; i++ {
 		idx[0] = i
 		LinkDischargeFactor := 0.0
-		outflow := downstreamFlowVolume.Get(idx) / durationInSeconds
+		outflow := downstreamFlowVolume.Get(idx)
 
 		if totalVolume.Get(idx) <= 0 || outflow <= 0 || longTermAvDailyFlow <= 0 {
 			LinkDischargeFactor = 0
@@ -84,20 +84,15 @@ func bankErosion(downstreamFlowVolume, totalVolume data.ND1Float64,
 
 		//	mainChannelArea := /*mainChannelStreamDimensions.*/contribArea_Km
 
-		//this means that Mean Annual Bank Erosion is recalculated on each timestep, but it allows for management factors to be rapidly included.
 		BankErosion_TperDay := (meanAnnual * LinkDischargeFactor) / rough.DAYS_PER_YEAR
-		//BankErosion_TperDay = (calculateMeanAnnualBankErosionForStreamSegment(mainChannelStreamDimensions, mainChannelArea) * LinkDischargeFactor) / conv.Days_in_one_year;
 
-		//convert to fit with TIME standard units (kg)
-		BankErosionTotal_kg_per_Day := BankErosion_TperDay * units.TONNES_TO_KG
+		BankErosionTotal_kg_per_Second := BankErosion_TperDay * units.TONNES_TO_KG / durationInSeconds
 
-		bankErosionFine_Kg_per_Day := BankErosionTotal_kg_per_Day * (soilPercentFine * units.PERCENT_TO_PROPORTION)
-		bankErosionCoarse_Kg_per_Day := BankErosionTotal_kg_per_Day * (1 - (soilPercentFine * units.PERCENT_TO_PROPORTION))
+		bankErosionFine_Kg_per_Second := BankErosionTotal_kg_per_Second * (soilPercentFine * units.PERCENT_TO_PROPORTION)
+		bankErosionCoarse_Kg_per_Second := BankErosionTotal_kg_per_Second * (1 - (soilPercentFine * units.PERCENT_TO_PROPORTION))
 
-		bankErosionFine.Set(idx, bankErosionFine_Kg_per_Day)
-		bankErosionCoarse.Set(idx, bankErosionCoarse_Kg_per_Day)
-		//	Total_StreamBank_Erosion_Fine += bankErosionFine_Kg_per_Day
-
+		bankErosionFine.Set(idx, bankErosionFine_Kg_per_Second)
+		bankErosionCoarse.Set(idx, bankErosionCoarse_Kg_per_Second)
 	}
 
 }

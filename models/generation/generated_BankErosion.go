@@ -153,7 +153,7 @@ func (m *BankErosion)  Description() sim.ModelDescription{
   sim.DescribeParameter("dailyFlowPowerFactor",0,"",[]float64{ 0, 0 },""),
   sim.DescribeParameter("longTermAvDailyFlow",0,"",[]float64{ 0, 0 },""),
   sim.DescribeParameter("soilPercentFine",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("durationInSeconds",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," "),}
 
   result.Inputs = []string{
   "downstreamFlowVolume","totalVolume",}
