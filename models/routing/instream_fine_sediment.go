@@ -29,7 +29,7 @@ InstreamFineSediment:
 		manningsN:
 		fineSedSettVelocity:
 		fineSedReMobVelocity:
-		durationInSeconds:
+		durationInSeconds: '[1,86400] Timestep, default=86400'
 	outputs:
 		loadDownstream:
 		loadToFloodplain:
@@ -58,6 +58,10 @@ func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
 
 	linkArea := linkWidth * linkLength
 	maxStorage := propBankHeightForFineDep * bankHeight * linkArea * sedBulkDensity * units.TONNES_TO_KG
+	if channelStoreFine < 0.0 {
+		// Treat initial value as proportion of maxStorage
+		channelStoreFine = math.Abs(channelStoreFine) * maxStorage
+	}
 
 	for i := 0; i < n; i++ {
 		idx[0] = i
@@ -84,17 +88,16 @@ func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
 
 		//		model.step(incomingMass.Get(idx), volumeAtEndTimestep.Get(idx), outflow.Get(idx))
 		//NOT USED: ChannelStoreAtStartOfTimeStep_Fine_kg := ism.channelStoreFine
-		incomingMassNow := incomingMass.Get(idx)
-		outflowNow := outflow.Get(idx)
+		incomingMassNow := incomingMass.Get(idx) * durationInSeconds
+		outflowRate := outflow.Get(idx)
+		outflowNow := outflowRate * durationInSeconds
 		reachVolumeNow := reachVolume.Get(idx)
 
 		totalDailyConstsituentMass := totalStoredMass + incomingMassNow
-
 		totalVolume := reachVolumeNow + outflowNow
 
 		//Use this for assessing proportions deposited on floodplain and stream bed
 		combinedConstituentStorageBeforeDeposition := totalDailyConstsituentMass
-		outflowRate := outflowNow / durationInSeconds
 
 		floodPlainDepositionFine_Kg_per_Day := floodPlainDepositionEmperical(outflowRate, totalDailyConstsituentMass,
 			bankFullFlow, fineSedSettVelocityFlood, floodPlainArea)
@@ -110,8 +113,7 @@ func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
 		//This will modify netStreamDepositionFineSed as it processes
 		//will only access the amoutn left for deposition that has remained post-flood assessment
 		netStreamDepositionFineSed := inChannelStorage(outflowRate, totalVolume, totalDailyConstsituentMass, channelStoreFine,
-			linkArea, linkWidth, linkSlope, bankHeight, sedBulkDensity, manningsN,
-			fineSedSettVelocity, fineSedReMobVelocity, maxStorage)
+			linkWidth, linkSlope, manningsN, fineSedSettVelocity, fineSedReMobVelocity, maxStorage)
 
 		channelStoreFine += netStreamDepositionFineSed
 		totalDailyConstsituentMass -= netStreamDepositionFineSed
@@ -122,10 +124,19 @@ func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
 		// 	//proportionDepositedBed = (fineDailyDeposited - fineDailyReMobilised) / combinedConstituentStorageBeforeDeposition;
 		// 	proportionDepositedBed = netStreamDepositionFineSed / combinedConstituentStorageBeforeDeposition
 		// }
+		outflowLoad := 0.0
 
-		//this gets apportioned to outflow & storage by conecntration in StorageRoutingConstituentProvider.ProcessLumped
-		loadDownstream.Set(idx, totalDailyConstsituentMass)
-		loadToFloodplain.Set(idx, floodPlainDepositionFine_Kg_per_Day)
+		if totalVolume > 0 {
+			concentration := totalDailyConstsituentMass / totalVolume
+			totalStoredMass = concentration * reachVolumeNow
+			outflowLoad = concentration * outflowRate
+		} else {
+			totalStoredMass = 0.0 // totalDailyConstsituentMass
+		}
+
+		//this gets apportioned to outflow & storage by concentration in StorageRoutingConstituentProvider.ProcessLumped
+		loadDownstream.Set(idx, outflowLoad)
+		loadToFloodplain.Set(idx, floodPlainDepositionFine_Kg_per_Day/durationInSeconds)
 		floodplainDepositionFraction.Set(idx, proportionDepositedFloodplain)
 	}
 
@@ -134,21 +145,23 @@ func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
 
 func floodPlainDepositionEmperical(outflow, totalDailyConstsituentMass,
 	bankFullFlow, fineSedSettVelocityFlood, floodPlainArea float64) float64 {
+
+	if outflow < bankFullFlow {
+		return 0.0
+	}
+
 	FloodPlainDepositionFine_Kg_per_Day := 0.0
-	if outflow > bankFullFlow {
 
-		Qf := outflow - bankFullFlow
-		FloodFlowProp := Qf / outflow
-		expTerm := -1 * ((fineSedSettVelocityFlood * floodPlainArea) / Qf)
+	Qf := outflow - bankFullFlow
+	FloodFlowProp := Qf / outflow
+	expTerm := -1 * ((fineSedSettVelocityFlood * floodPlainArea) / Qf)
 
-		//This will be zero if FloodPlainArea_M2 is zero
-		FloodPlainDepositionFine_Kg_per_Day := totalDailyConstsituentMass * FloodFlowProp * (1.0 - math.Exp(expTerm))
+	//This will be zero if FloodPlainArea_M2 is zero
+	FloodPlainDepositionFine_Kg_per_Day = totalDailyConstsituentMass * FloodFlowProp * (1.0 - math.Exp(expTerm))
 
-		//safety net, shouldn't happen given the eqn above
-		if FloodPlainDepositionFine_Kg_per_Day > totalDailyConstsituentMass {
-			FloodPlainDepositionFine_Kg_per_Day = totalDailyConstsituentMass
-		}
-
+	//safety net, shouldn't happen given the eqn above
+	if FloodPlainDepositionFine_Kg_per_Day > totalDailyConstsituentMass {
+		FloodPlainDepositionFine_Kg_per_Day = totalDailyConstsituentMass
 	}
 
 	return FloodPlainDepositionFine_Kg_per_Day
@@ -179,75 +192,58 @@ func floodPlainDepositionEmperical(outflow, totalDailyConstsituentMass,
 ///This is the long term channel storage component. Not to be confused with the much more transient Flow Routing Storage
 ///<//summary>
 func inChannelStorage(outflow, totalVolume, totalDailyConstsituentMass, initialChannelStore,
-	linkArea, linkWidth, linkSlope, bankHeight, sedBulkDensity, manningsN,
+	linkWidth, linkSlope, manningsN,
 	fineSedSettVelocity, fineSedReMobVelocity, maxStorage float64) float64 {
-	fineDailyReMobilised := 0.0
-	fineDailyDeposited := 0.0
 
-	totalFootprintArea := linkArea
+	// fineDailyReMobilised := 0.0
+	// fineDailyDeposited := 0.0
 
-	DoStorage := true
-	if DoStorage && totalVolume > 0 {
-		loadInStreamBeforeDep_tons := totalDailyConstsituentMass / 1000
-
-		//		inChannelCalcs(subStreamFootprintArea, loadInStreamBeforeDep_tons)
-		mainFootprintArea := totalFootprintArea
-
-		sedsetFine := fineSedSettVelocity
-		sedsetReMob := fineSedReMobVelocity
-
-		thisSegChannelFootprint := mainFootprintArea
-		subStreamsFootprintArea := 0.0 // TODO
-
-		//Will be 1 for sub-cats with no sub-streams
-		propTotalStreamFootprint := thisSegChannelFootprint / (subStreamsFootprintArea + mainFootprintArea)
-
-		outflowVal := outflow * propTotalStreamFootprint
-
-		//multiply by seconds_in_one_day to get t/d, not t/s
-
-		STC_Dep_t := (0.1 * (math.Pow(outflowVal, 1.4) * math.Pow(linkSlope, 1.3)) /
-			(sedsetFine * math.Pow(linkWidth, 0.4) * math.Pow(manningsN, 0.6))) * units.SECONDS_PER_DAY
-		STC_Mob_t := (0.1 * (math.Pow(outflowVal, 1.4) * math.Pow(linkSlope, 1.3)) /
-			(sedsetReMob * math.Pow(linkWidth, 0.4) * math.Pow(manningsN, 0.6))) * units.SECONDS_PER_DAY
-
-		loadInThisSegBeforeDep_tons := propTotalStreamFootprint * loadInStreamBeforeDep_tons
-		if loadInThisSegBeforeDep_tons > STC_Dep_t {
-			//Threshold of dep less than our load, so must be some deposition (and therefore no remobilisation)
-			//Can only deposit as much as we have room for (thus checking how much 'room' is left)
-
-			//Must do the daily deposition like this, adjusting TotalDailyLoadFine_Kg_per_DayOut later,
-			//otherwise we get tiny rounding errors that can result in negative ConstituentStorage
-			//Which compound through the system
-
-			//the amount deposited actually is dependent on ConstituentStorage, not the ConstituentStorage + ChannelStorage....
-			availDepFromStorage := (loadInThisSegBeforeDep_tons - STC_Dep_t) * 1000
-
-			fineDailyDeposited += math.Min(availDepFromStorage, maxStorage-(propTotalStreamFootprint*initialChannelStore))
-
-		} else if loadInThisSegBeforeDep_tons < STC_Mob_t {
-			//Some remobilisation
-			availReMob := (STC_Mob_t - loadInThisSegBeforeDep_tons) * 1000
-
-			fineDailyReMobilised += math.Min(availReMob, (propTotalStreamFootprint * initialChannelStore))
-		}
-
+	// DoStorage := true
+	// if !DoStorage || (totalVolume <= 0) {
+	if totalVolume <= 0 {
+		return 0.0
 	}
 
-	netStreamDepositionFineSed := fineDailyDeposited - fineDailyReMobilised
+	// thisSegChannelFootprint := linkArea
+	// subStreamsFootprintArea := 0.0 // TODO
 
-	//This is the mass in the stream right now, will be applied to Storage and Outflow
-	//Moved to main runTimeStep to assist following process, April 2016
-	//totalDailyConstsituentMass -= netStreamDepositionFineSed;//Should decrease if deposition, increase if remobilisation
+	//Will be 1 for sub-cats with no sub-streams
+	propTotalStreamFootprint := 1.0 //thisSegChannelFootprint / (subStreamsFootprintArea + linkArea)
 
-	//totalStreamDepositionFineSed += netStreamDepositionFineSed //Should increase if deposition, decrease if remobilisation
+	loadInStreamBeforeDep_tons := totalDailyConstsituentMass * units.KG_TO_TONNES
+	loadInThisSegBeforeDep_tons := propTotalStreamFootprint * loadInStreamBeforeDep_tons
 
-	//TODO Update in caller channelStoreFine += netStreamDepositionFineSed //Should increase if deposition, decrease if remobilisation
+	outflowVal := outflow * propTotalStreamFootprint
 
-	//ChannelSedimentStoreDepth_M = ChannelStore_Fine_kg / (LinkWidth_M * LinkLength_M * sedBulkDensity * conv.Tonnes_to_Kilograms);
-	// TODO Update in caller (if required?) channelSedimentStoreDepth = (channelStoreFine / (sedBulkDensity * units.TONNES_TO_KG)) / totalFootprintArea
+	//multiply by seconds_in_one_day to get t/d, not t/s
 
-	return netStreamDepositionFineSed
+	STC_Dep_t := (0.1 * (math.Pow(outflowVal, 1.4) * math.Pow(linkSlope, 1.3)) /
+		(fineSedSettVelocity * math.Pow(linkWidth, 0.4) * math.Pow(manningsN, 0.6))) * units.SECONDS_PER_DAY
+	STC_Mob_t := (0.1 * (math.Pow(outflowVal, 1.4) * math.Pow(linkSlope, 1.3)) /
+		(fineSedReMobVelocity * math.Pow(linkWidth, 0.4) * math.Pow(manningsN, 0.6))) * units.SECONDS_PER_DAY
+
+	if loadInThisSegBeforeDep_tons > STC_Dep_t {
+		//Threshold of dep less than our load, so must be some deposition (and therefore no remobilisation)
+		//Can only deposit as much as we have room for (thus checking how much 'room' is left)
+
+		//Must do the daily deposition like this, adjusting TotalDailyLoadFine_Kg_per_DayOut later,
+		//otherwise we get tiny rounding errors that can result in negative ConstituentStorage
+		//Which compound through the system
+
+		//the amount deposited actually is dependent on ConstituentStorage, not the ConstituentStorage + ChannelStorage....
+		availDepFromStorage := (loadInThisSegBeforeDep_tons - STC_Dep_t) * units.TONNES_TO_KG
+
+		return math.Min(availDepFromStorage, maxStorage-(propTotalStreamFootprint*initialChannelStore))
+
+	} else if loadInThisSegBeforeDep_tons < STC_Mob_t {
+
+		//Some remobilisation
+		availReMob := (STC_Mob_t - loadInThisSegBeforeDep_tons) * units.TONNES_TO_KG
+
+		return -math.Min(availReMob, (propTotalStreamFootprint * initialChannelStore))
+	}
+
+	return 0.0
 }
 
 /*
