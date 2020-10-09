@@ -58,8 +58,8 @@ func daysInMonth(month, year int) int {
 
 func _dayOfYear(d, m, y int) int {
 	doy := 0
-	for i := 1; i < m; i++ {
-		doy += daysInMonth(m, y)
+	for mi := 1; mi < m; mi++ {
+		doy += daysInMonth(mi, y)
 	}
 	doy += d
 	return doy
