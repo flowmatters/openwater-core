@@ -17,7 +17,7 @@ func initialiseDataset(fn, modelName, label string, shape []int) error {
 	ref := io.H5RefFloat64{}
 	ref.Filename = fn
 	ref.Dataset = "/MODELS/" + modelName + "/" + label
-	return ref.Create(shape, math.NaN())
+	return ref.Create(shape, math.NaN(),false)
 }
 
 func writeData(
