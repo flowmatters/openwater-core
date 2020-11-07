@@ -1,0 +1,17 @@
+syntax = "proto3";
+package openwater;
+option go_package = "io/protobuf";
+
+message ModelOutput {
+  string model = 1;
+  int32 cells = 2;
+  int32 total_cells = 3;
+  int32 starting_location = 4;
+  int32 length = 5;
+  int32 output_columns = 6;
+  int32 input_columns = 7;
+
+  repeated double output_values = 8;
+  repeated double input_values = 9;
+}
+

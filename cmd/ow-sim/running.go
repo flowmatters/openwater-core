@@ -51,3 +51,21 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 
 	return genSimulationElapsed
 }
+
+
+func writeGeneration(g int, models map[string]*modelReference, modelNames []string) {
+	genWriteStart := time.Now()
+	verbosePrintf("Writing results for generation %d...\n", g)
+	for _, modelName := range modelNames {
+		modelRef := models[modelName]
+		err := modelRef.WriteData(g)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+	genWriteEnd := time.Now()
+	genWriteElapsed := genWriteEnd.Sub(genWriteStart)
+	verbosePrintf("Results for generation %d written in %f seconds\n", g, genWriteElapsed.Seconds())
+}
+

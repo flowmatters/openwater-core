@@ -3,7 +3,14 @@ package main
 import (
 	"fmt"
 	"math"
-
+	"strings"
+	"os"
+	gio "io"
+	"os/exec"
+	"github.com/kardianos/osext"
+	"encoding/binary"
+	"github.com/flowmatters/openwater-core/io/protobuf"
+	"github.com/golang/protobuf/proto"
 	"github.com/flowmatters/openwater-core/sim"
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
@@ -36,6 +43,8 @@ type modelReference struct {
 	ModelName          string
 	Batches            []int32
 	Generations        []*modelGeneration
+	OutputWriter       *gio.PipeWriter
+	OutputProcess      *exec.Cmd
 	outputsInitialised bool
 }
 
@@ -166,6 +175,73 @@ func (mr *modelReference) writeData(label string, data data.ND3Float64, loc int3
 	return ref.WriteSlice(data, []int{int(loc), 0, 0})
 }
 
+func (mr *modelReference) writeProtobuf(generation int) error {
+	// TODO
+	// * Possibly push writing to a goroutine controlled by a mutex
+	//   (stored in modelreference?)
+	data := &protobuf.ModelOutput{}
+	data.Model = mr.ModelName
+
+	gen, err := mr.GetGeneration(generation)
+	if err != nil {
+		return err
+	}
+
+  data.Cells = int32(gen.Count);
+  data.TotalCells = int32(mr.TotalRuns())
+  data.StartingLocation = mr.generationLocation(generation)
+
+	if mr.WriteInputs {
+		shp := gen.Inputs.Shape()
+		data.Length = int32(shp[sim.DIMI_TIMESTEP])
+		data.InputColumns = int32(shp[sim.DIMI_INPUT])
+		data.InputValues = gen.Inputs.Unroll()
+	}
+
+	if mr.WriteOutputs {
+		shp := gen.Outputs.Shape()
+		data.Length = int32(shp[sim.DIMO_TIMESTEP])
+		data.OutputColumns = int32(shp[sim.DIMO_OUTPUT])
+		data.OutputValues = gen.Outputs.Unroll()
+	}
+
+	// Write the new address book back to disk.
+	msg, err := proto.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	buf := make([]byte, 4)
+	binary.LittleEndian.PutUint32(buf, uint32(len(msg)))
+	fmt.Printf("Writing gen %d of %s\n",generation,mr.ModelName)
+	if _, err := mr.OutputWriter.Write(buf); err != nil {
+			return err
+	}
+
+	if _, err := mr.OutputWriter.Write(msg); err != nil {
+			return err
+	}
+	fmt.Printf("Sent gen %d of %s\n",generation,mr.ModelName)
+
+	if generation == len(mr.Batches)-1 {
+		fmt.Printf("Waiting for output writer for %s to close\n",mr.ModelName)
+		mr.OutputWriter.Close()
+		mr.OutputProcess.Wait()
+		fmt.Printf("Output writer for %s closed\n",mr.ModelName)
+	}
+
+	return nil
+}
+
+func (mr *modelReference) generationLocation(generation int) int32 {
+	if generation == 0 {
+		return 0
+	}
+
+	return mr.Batches[generation-1]
+
+}
+
 func (mr *modelReference) WriteData(generation int) error {
 	gen, err := mr.GetGeneration(generation)
 	if err != nil {
@@ -174,6 +250,10 @@ func (mr *modelReference) WriteData(generation int) error {
 
 	if gen.Count == 0 {
 		return nil
+	}
+
+	if mr.OutputProcess != nil {
+		return mr.writeProtobuf(generation)
 	}
 
 	if !mr.outputsInitialised {
@@ -187,7 +267,7 @@ func (mr *modelReference) WriteData(generation int) error {
 		}
 	}
 
-	var loc int32 = 0
+	loc := mr.generationLocation(generation)
 	if generation > 0 {
 		loc = mr.Batches[generation-1]
 	}
@@ -208,3 +288,60 @@ func (mr *modelReference) WriteData(generation int) error {
 
 	return nil
 }
+
+func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models map[string]*modelReference, genCount int) {
+
+	outputPaths := make(map[string]string)
+	if *splitOutputs != "" {
+		pairs := strings.Split(*splitOutputs,",")
+		for _, pair := range pairs {
+			elements := strings.Split(pair,"=")
+			outputPaths[elements[0]] = elements[1]
+		}
+	}
+
+	models = make(map[string]*modelReference)
+	for _, modelName := range modelNames {
+		ref, err := initModel(inputFn, modelName)
+		if err != nil {
+			fmt.Println("Couldn't initialise model", modelName)
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		destFn := outputPaths[modelName]
+		if destFn == "" {
+			destFn = defaultOutputFn
+		}
+
+		if destFn != "" {
+			ref.OutputFilename = destFn
+			ref.WriteOutputs = true
+
+			if ref.Batches[0] == 0 {
+				ref.WriteInputs = true
+			}
+
+			if destFn != defaultOutputFn {
+				exe_path, _ := osext.Executable()
+				fmt.Printf("Configuring external write process: %s\n",exe_path)
+				write_cmd := exec.Command(exe_path,"-writer",destFn)
+				reader, writer := gio.Pipe()
+				write_cmd.Stdin = reader
+				write_cmd.Stdout = os.Stdout
+				ref.OutputWriter = writer
+				write_cmd.Start()
+				ref.OutputProcess = write_cmd
+				// os.Exit(1)
+			}
+		}
+
+		verbosePrintln("Batches for ", ref.ModelName, ref.Batches)
+		verbosePrintln("Generations for ", ref.ModelName, ref.Generations)
+		models[modelName] = ref
+		genCount = len(ref.Generations)
+	}
+
+	return
+}
+

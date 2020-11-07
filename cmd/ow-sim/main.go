@@ -13,7 +13,6 @@ import (
 	_ "github.com/flowmatters/openwater-core/models"
 )
 
-
 const (
 	LINK_SRC_GENERATION  = 0
 	LINK_SRC_MODEL       = 1
@@ -40,6 +39,16 @@ func main() {
 	}
 
 	args := flag.Args()
+
+	if *writerMode {
+		run_writer(args)
+	} else {
+		run_simulation(args)
+	}
+}
+
+func run_simulation(args []string){
+
 	fn := args[0]
 	var outputFn string = ""
 	if len(args) > 1 {
@@ -87,31 +96,9 @@ func main() {
 	totalTimeLinks := 0.0
 
 	var genCount int
-	models := make(map[string]*modelReference)
 	writingDone := make(chan int)
 
-	for _, modelName := range modelNames {
-		ref, err := initModel(fn, modelName)
-		if err != nil {
-			fmt.Println("Couldn't initialise model", modelName)
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		if outputFn != "" {
-			ref.OutputFilename = outputFn
-			ref.WriteOutputs = true
-
-			if ref.Batches[0] == 0 {
-				ref.WriteInputs = true
-			}
-		}
-
-		verbosePrintln("Batches for ", ref.ModelName, ref.Batches)
-		verbosePrintln("Generations for ", ref.ModelName, ref.Generations)
-		models[modelName] = ref
-		genCount = len(ref.Generations)
-	}
+	models, genCount := makeModelRefs(modelNames,fn,outputFn)
 
 	fmt.Println()
 	for i := 0; i < genCount; i++ {
@@ -144,19 +131,7 @@ func main() {
 					}
 				}
 
-				genWriteStart := time.Now()
-				verbosePrintf("Writing results for generation %d...\n", g)
-				for _, modelName := range modelNames {
-					modelRef := models[modelName]
-					err := modelRef.WriteData(g)
-					if err != nil {
-						fmt.Println(err)
-						os.Exit(1)
-					}
-				}
-				genWriteEnd := time.Now()
-				genWriteElapsed := genWriteEnd.Sub(genWriteStart)
-				verbosePrintf("Results for generation %d written in %f seconds\n", g, genWriteElapsed.Seconds())
+				writeGeneration(g,models,modelNames)
 				writingDone <- g
 			}(i)
 		}

@@ -35,6 +35,8 @@ github.com/joelrahman/genny v0.0.0-20190825033713-2198659d4726 h1:vDjOC3Yfk2xWt6
 github.com/joelrahman/genny v0.0.0-20190825033713-2198659d4726/go.mod h1:haLHhzU8Z7IZABiGAUctoIzLuh/6XjjMKtJ+zXVI2rE=
 github.com/joelrahman/genny v0.0.0-20190825034740-e87a679b6495 h1:XKV6uGn31I21MeRq7lVnh1gfTrcCBUgHR/UEBmdnIus=
 github.com/joelrahman/genny v0.0.0-20190825034740-e87a679b6495/go.mod h1:nOCAqPWH72DYD78l2wICmDERgbDN5jXfmXFgW0+kgew=
+github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 h1:iQTw/8FWTuc7uiaSepXwyf3o52HaUYcV+Tu66S3F5GA=
+github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0/go.mod h1:1NbS8ALrpOvjt0rHPNLyCIeMtbizbir8U//inJ+zuB8=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
