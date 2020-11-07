@@ -29,6 +29,8 @@ DynamicSednetGullyAlt:
 	outputs:
 		fineLoad: kg
 		coarseLoad: kg
+		generatedFine: kg
+		generatedCoarse: kg
 	implementation:
 		function: sednetGullyDerm
 		type: scalar
@@ -46,15 +48,16 @@ func sednetGullyDerm(quickflow, year, annualRunoff, annualLoad data.ND1Float64,
 	yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 	annualAverageSedimentSupply, percentFine,
 	managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
-	sdrFine, sdrCoarse, timeStepInSeconds float64, fineLoad, coarseLoad data.ND1Float64) {
+	sdrFine, sdrCoarse, timeStepInSeconds float64,
+	fineLoad, coarseLoad, generatedFine, generatedCoarse data.ND1Float64) {
 	sednetGully(quickflow, year, annualRunoff, annualLoad,
 		yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 		annualAverageSedimentSupply, percentFine,
 		managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
-		sdrFine, sdrCoarse, timeStepInSeconds, fineLoad, coarseLoad, gullyLoadDerm)
+		sdrFine, sdrCoarse, timeStepInSeconds, fineLoad, coarseLoad, generatedFine, generatedCoarse, gullyLoadDerm)
 }
 
-func gullyLoadDerm(dailyRunoff, annualRunoff, area, propFine, activityFactor, managementPracticeFactor, annualLoad, annualSupply,
+func gullyLoadDerm(runoffRate, annualRunoff, area, propFine, activityFactor, managementPracticeFactor, annualLoad, annualSupply,
 	longTermRunoffFactor, dailyRunoffPowerfactor float64) (float64, float64) {
 	//Annual_Gully_Load has already had the 'yearly proportion' taken into account (could be a non-linear calculation
 	//and has also had the 'annual runoff magnitude compared to average annual runoff' adjustment made during parameterisation
@@ -66,11 +69,11 @@ func gullyLoadDerm(dailyRunoff, annualRunoff, area, propFine, activityFactor, ma
 
 	//DateTime checker = new DateTime(1987, 1, 15);
 	////if (quickflow > 0)
-	runoffDepth := (dailyRunoff / area) * units.METRES_TO_MILLIMETRES * units.SECONDS_PER_DAY
+	dailyRunoffDepth := (runoffRate / area) * units.METRES_TO_MILLIMETRES * units.SECONDS_PER_DAY
 	annualSupplyAfterManagement := managementPracticeFactor * annualLoad
-	Gully_Daily_Load_kg_Fine := (runoffDepth / annualRunoff) * propFine * activityFactor * annualSupplyAfterManagement
+	Gully_Daily_Load_kg_Fine := (dailyRunoffDepth / annualRunoff) * propFine * activityFactor * annualSupplyAfterManagement
 
-	Gully_Daily_Load_kg_Coarse := (runoffDepth / annualRunoff) * (1 - propFine) * annualSupplyAfterManagement
+	Gully_Daily_Load_kg_Coarse := (dailyRunoffDepth / annualRunoff) * (1 - propFine) * annualSupplyAfterManagement
 
 	return Gully_Daily_Load_kg_Fine, Gully_Daily_Load_kg_Coarse
 }

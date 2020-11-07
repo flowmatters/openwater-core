@@ -142,7 +142,7 @@ func (m *DynamicSednetGullyAlt)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "quickflow","year","AnnualRunoff","annualLoad",}
   result.Outputs = []string{
-  "fineLoad","coarseLoad",}
+  "fineLoad","coarseLoad","generatedFine","generatedCoarse",}
 
   result.States = []string{
   }
@@ -202,7 +202,7 @@ func (m *DynamicSednetGullyAlt) Run(inputs data.ND3Float64, states data.ND2Float
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 2, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 4, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
@@ -269,15 +269,21 @@ func (m *DynamicSednetGullyAlt) Run(inputs data.ND3Float64, states data.ND2Float
       outputPosSlice[sim.DIMO_OUTPUT] = 1
       coarseload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
+      outputPosSlice[sim.DIMO_OUTPUT] = 2
+      generatedfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 3
+      generatedcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
       
 
-       sednetGullyDerm(quickflow,year,annualrunoff,annualload,yeardisturbance,gullyendyear,area,averagegullyactivityfactor,gullyannualaveragesedimentsupply,gullypercentfine,managementpracticefactor,longtermrunofffactor,dailyrunoffpowerfactor,sdrfine,sdrcoarse,timestepinseconds,fineload,coarseload)
+       sednetGullyDerm(quickflow,year,annualrunoff,annualload,yeardisturbance,gullyendyear,area,averagegullyactivityfactor,gullyannualaveragesedimentsupply,gullypercentfine,managementpracticefactor,longtermrunofffactor,dailyrunoffpowerfactor,sdrfine,sdrcoarse,timestepinseconds,fineload,coarseload,generatedfine,generatedcoarse)
 
       
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 2)
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
       
 
       doneChan <- i

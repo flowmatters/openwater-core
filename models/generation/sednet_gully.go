@@ -31,6 +31,8 @@ DynamicSednetGully:
 	outputs:
 		fineLoad: kg
 		coarseLoad: kg
+		generatedFine: kg
+		generatedCoarse: kg
 	implementation:
 		function: sednetGullyOrig
 		type: scalar
@@ -50,7 +52,8 @@ func sednetGully(quickflow, year, annualRunoff_ts, annualLoad_ts data.ND1Float64
 	yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 	annualAverageSedimentSupply, percentFine,
 	managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
-	sdrFine, sdrCoarse, timestepInSeconds float64, fineLoad, coarseLoad data.ND1Float64, calc gullyExportFn) {
+	sdrFine, sdrCoarse, timestepInSeconds float64, 
+	fineLoad, coarseLoad, generatedFine, generatedCoarse data.ND1Float64, calc gullyExportFn) {
 	n := quickflow.Len1()
 	idx := []int{0}
 	propFine := percentFine / 100
@@ -61,10 +64,11 @@ func sednetGully(quickflow, year, annualRunoff_ts, annualLoad_ts data.ND1Float64
 		annualLoad := annualLoad_ts.Get(idx)
 		annualRunoff := annualRunoff_ts.Get(idx)
 
-		dailyRunoff := quickflow.Get(idx)
+		runoffRate := quickflow.Get(idx)
 		if yr < yearDisturbance {
 			fineLoad.Set(idx, 0)
 			coarseLoad.Set(idx, 0)
+			continue
 		}
 		activityFactor := 1.0
 
@@ -72,17 +76,22 @@ func sednetGully(quickflow, year, annualRunoff_ts, annualLoad_ts data.ND1Float64
 			activityFactor = averageGullyActivityFactor
 		}
 
-		if dailyRunoff == 0 || annualRunoff == 0 { //|| annualAverageSedimentSupply == 0 {
+		if runoffRate == 0 || annualRunoff == 0 { //|| annualAverageSedimentSupply == 0 {
 			fineLoad.Set(idx, 0)
 			coarseLoad.Set(idx, 0)
 			continue
 		}
 
-		Gully_Daily_Load_kg_Fine, Gully_Daily_Load_kg_Coarse := calc(dailyRunoff, annualRunoff, area, propFine, activityFactor, managementPracticeFactor,
+		generated_gully_load_kg_fine, generated_gully_load_kg_coarse := calc(runoffRate, annualRunoff, area, propFine, activityFactor, managementPracticeFactor,
 			annualLoad, annualAverageSedimentSupply, longtermRunoffFactor, dailyRunoffPowerFactor)
 
-		fineLoad.Set(idx, Gully_Daily_Load_kg_Fine*(sdrFine*0.01)/timestepInSeconds)
-		coarseLoad.Set(idx, Gully_Daily_Load_kg_Coarse*(sdrCoarse*0.01)/timestepInSeconds)
+		generated_gully_load_kg_fine = generated_gully_load_kg_fine/timestepInSeconds
+		generated_gully_load_kg_coarse = generated_gully_load_kg_coarse/timestepInSeconds
+
+		fineLoad.Set(idx, generated_gully_load_kg_fine*(sdrFine*0.01))
+		coarseLoad.Set(idx, generated_gully_load_kg_coarse*(sdrCoarse*0.01))
+		generatedFine.Set(idx, generated_gully_load_kg_fine)
+		generatedCoarse.Set(idx, generated_gully_load_kg_coarse)
 	}
 }
 
@@ -90,12 +99,13 @@ func sednetGullyOrig(quickflow, year, annualRunoff, annualLoad data.ND1Float64,
 	yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 	annualAverageSedimentSupply, percentFine,
 	managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
-	sdrFine, sdrCoarse, timestepInSeconds float64, fineLoad, coarseLoad data.ND1Float64) {
+	sdrFine, sdrCoarse, timestepInSeconds float64,
+	fineLoad, coarseLoad, generatedFine, generatedCoarse data.ND1Float64) {
 	sednetGully(quickflow, year, annualRunoff, annualLoad,
 		yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 		annualAverageSedimentSupply, percentFine,
 		managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
-		sdrFine, sdrCoarse, timestepInSeconds, fineLoad, coarseLoad, gullyLoadOrig)
+		sdrFine, sdrCoarse, timestepInSeconds, fineLoad, coarseLoad, generatedFine, generatedCoarse, gullyLoadOrig)
 }
 
 func gullyLoadOrig(dailyRunoff, annualRunoff, area, propFine, activityFactor, managementPracticeFactor, annualLoad, annualSupply,
