@@ -43,6 +43,8 @@ USLEFineSedimentGeneration:
 		quickLoadCoarse: kg
 		slowLoadCoarse: kg
 		totalLoad: kg
+		generatedLoadFine: kg
+		generatedLoadCoarse: kg
 	implementation:
 		function: usleFine
 		type: scalar
@@ -61,7 +63,8 @@ func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYe
 	usleHSDRFine, usleHSDRCoarse, timeStepInSeconds float64,
 	quickLoadFine, slowLoadFine,
 	quickLoadCoarse, slowLoadCoarse,
-	totalLoad data.ND1Float64) {
+	totalLoad, generatedLoadFine,
+	generatedLoadCoarse data.ND1Float64) {
 	n := quickflow.Len1()
 
 	idx := []int{0}
@@ -210,5 +213,8 @@ func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYe
 		quickLoadCoarse.Set(idx, USLE_Daily_Load_kg_after_HSDR_applied_Coarse/timeStepInSeconds)
 		slowLoadCoarse.Set(idx, loadS)
 		totalLoad.Set(idx, loadQ+loadS)
+
+		generatedLoadFine.Set(idx,USLE_Daily_Load_kg_Fine/timeStepInSeconds)
+		generatedLoadCoarse.Set(idx,USLE_Daily_Load_kg_Coarse/timeStepInSeconds)
 	}
 }

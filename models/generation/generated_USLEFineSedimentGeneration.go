@@ -190,7 +190,7 @@ func (m *USLEFineSedimentGeneration)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "quickflow","baseflow","rainfall","KLSC","KLSC_Fine","CovOrCFact","dayOfYear",}
   result.Outputs = []string{
-  "quickLoadFine","slowLoadFine","quickLoadCoarse","slowLoadCoarse","totalLoad",}
+  "quickLoadFine","slowLoadFine","quickLoadCoarse","slowLoadCoarse","totalLoad","generatedLoadFine","generatedLoadCoarse",}
 
   result.States = []string{
   }
@@ -250,7 +250,7 @@ func (m *USLEFineSedimentGeneration) Run(inputs data.ND3Float64, states data.ND2
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 5, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 7, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
@@ -341,15 +341,21 @@ func (m *USLEFineSedimentGeneration) Run(inputs data.ND3Float64, states data.ND2
       outputPosSlice[sim.DIMO_OUTPUT] = 4
       totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
+      outputPosSlice[sim.DIMO_OUTPUT] = 5
+      generatedloadfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 6
+      generatedloadcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
       
 
-       usleFine(quickflow,baseflow,rainfall,klsc,klsc_fine,covorcfact,dayofyear,s,p,rainthreshold,alpha,beta,eta,a1,a2,a3,dwc,avk,avls,avfines,area,maxconc,uslehsdrfine,uslehsdrcoarse,timestepinseconds,quickloadfine,slowloadfine,quickloadcoarse,slowloadcoarse,totalload)
+       usleFine(quickflow,baseflow,rainfall,klsc,klsc_fine,covorcfact,dayofyear,s,p,rainthreshold,alpha,beta,eta,a1,a2,a3,dwc,avk,avls,avfines,area,maxconc,uslehsdrfine,uslehsdrcoarse,timestepinseconds,quickloadfine,slowloadfine,quickloadcoarse,slowloadcoarse,totalload,generatedloadfine,generatedloadcoarse)
 
       
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 5)
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 7)
       
 
       doneChan <- i
