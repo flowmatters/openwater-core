@@ -4,6 +4,9 @@ import (
 	"github.com/flowmatters/openwater-core/data"
 )
 
+const (
+	EFFECTIVELY_ZERO = 1e-8
+)
 /*OW-SPEC
 PassLoadIfFlow:
 	inputs:
@@ -37,7 +40,7 @@ func passLoadIfFlow(flow, inputLoad data.ND1Float64,
 		f := flow.Get(idx)
 		l := inputLoad.Get(idx)
 
-		if f > 0 {
+		if f > EFFECTIVELY_ZERO {
 			outputLoad.Set(idx, l*scalingFactor)
 		} else {
 			outputLoad.Set(idx, 0.0)
