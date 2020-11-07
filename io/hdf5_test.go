@@ -321,7 +321,7 @@ func TestWrite3DFloat64Partial(t *testing.T) {
 		values[i] = the_data.Get(idx)
 	}
 
-	err = ref.Create(the_data.Shape(), math.NaN())
+	err = ref.Create(the_data.Shape(), math.NaN(), false)
 	for d2 := 0; d2 < 20; d2++ {
 		for d3 := 0; d3 < 5; d3++ {
 			err = ref.WriteSlice(slice, []int{0, d2, d3})

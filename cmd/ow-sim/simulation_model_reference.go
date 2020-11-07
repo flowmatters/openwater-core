@@ -132,7 +132,7 @@ func (mr *modelReference) initialiseDataset(label string, refShape []int) error 
 	ref.Filename = mr.OutputFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	count := mr.TotalRuns()
-	return ref.Create([]int{count, refShape[1], refShape[2]}, math.NaN())
+	return ref.Create([]int{count, refShape[1], refShape[2]}, math.NaN(),false)
 }
 
 func (mr *modelReference) InitialiseOutputs(refGeneration int) error {

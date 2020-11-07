@@ -25,8 +25,10 @@ type H5RefArrayType struct {
 }
 
 func (h H5RefArrayType) Load() (data.NDArrayType, error) {
-	mu.RLock()
-	defer mu.RUnlock()
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
 
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
@@ -100,15 +102,17 @@ func (h H5RefArrayType) loadSubset(ds *hdf5.Dataset) (data.NDArrayType, error) {
 }
 
 func (h H5RefArrayType) Write(data data.NDArrayType) error {
-	mu.Lock()
-	defer mu.Unlock()
+	lockHDF5(h.Filename)
+	defer unlockHDF5(h.Filename)
+	// mu.Lock()
+	// defer mu.Unlock()
 	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)))
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)), false)
 	if err != nil {
 		return err
 	}
@@ -123,16 +127,18 @@ func (h H5RefArrayType) Write(data data.NDArrayType) error {
 	return nil
 }
 
-func (h H5RefArrayType) Create(shape []int, fillValue ArrayType) error {
-	mu.Lock()
-	defer mu.Unlock()
+func (h H5RefArrayType) Create(shape []int, fillValue ArrayType, compress bool) error {
+	lockHDF5(h.Filename)
+	defer unlockHDF5(h.Filename)
+	// mu.Lock()
+	// defer mu.Unlock()
 	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue)
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue, compress)
 	if err == nil {
 		ds.Close()
 	}
@@ -140,8 +146,10 @@ func (h H5RefArrayType) Create(shape []int, fillValue ArrayType) error {
 }
 
 func (h H5RefArrayType) WriteSlice(data data.NDArrayType, loc []int) error {
-	mu.Lock()
-	defer mu.Unlock()
+	lockHDF5(h.Filename)
+	defer unlockHDF5(h.Filename)
+	// mu.Lock()
+	// defer mu.Unlock()
 	f, err := openWriteOrCreate(h.Filename, false)
 	if err != nil {
 		return err
@@ -177,8 +185,10 @@ func (h H5RefArrayType) WriteSlice(data data.NDArrayType, loc []int) error {
 }
 
 func (h H5RefArrayType) LoadText() ([]string, error) {
-	mu.RLock()
-	defer mu.RUnlock()
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
 
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
@@ -227,8 +237,10 @@ func (h H5RefArrayType) LoadText() ([]string, error) {
 }
 
 func (h H5RefArrayType) GetDatasets() ([]string, error) {
-	mu.RLock()
-	defer mu.RUnlock()
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
 
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {

@@ -14,6 +14,8 @@ import (
 )
 
 var mu sync.RWMutex
+var masterMU sync.RWMutex
+// var mus = make(map[string]*sync.RWMutex)
 
 // errorString is a trivial implementation of error.
 type errorString struct {
@@ -22,6 +24,50 @@ type errorString struct {
 
 func (e *errorString) Error() string {
 	return e.s
+}
+
+func rLockHDF5(fn string) {
+	// masterMU.Lock()
+	// defer masterMU.Unlock()
+
+	mu.RLock()
+	// mutex,ok := mus[fn]
+	// if !ok {
+	// 	newMutex := &sync.RWMutex{}
+	// 	mus[fn] = newMutex
+	// 	mutex = newMutex
+	// }
+	// mutex.RLock()
+}
+
+func rUnlockHDF5(fn string) {
+	// masterMU.Lock()
+	// defer masterMU.Unlock()
+
+	mu.RUnlock()
+	// mus[fn].RUnlock()
+}
+
+func lockHDF5(fn string) {
+	// masterMU.Lock()
+	// defer masterMU.Unlock()
+
+	mu.Lock()
+	// mutex,ok := mus[fn]
+	// if !ok {
+	// 	newMutex := &sync.RWMutex{}
+	// 	mus[fn] = newMutex
+	// 	mutex = newMutex
+	// }
+	// mutex.Lock()
+}
+
+func unlockHDF5(fn string) {
+	// masterMU.Lock()
+	// defer masterMU.Unlock()
+
+	mu.Unlock()
+	// mus[fn].Unlock()
 }
 
 func prefix(msg string, e error) error {
@@ -84,7 +130,7 @@ func shapesMatch(ds *hdf5.Dataset, shape []int) bool {
 	return slice.Equal(dsShape, shape)
 }
 
-func openOrCreateDataset(f *hdf5.File, path string, shape []int, exampleValue interface{}) (*hdf5.Dataset, error) {
+func openOrCreateDataset(f *hdf5.File, path string, shape []int, exampleValue interface{}, compress bool) (*hdf5.Dataset, error) {
 	ds, err := f.OpenDataset(path)
 	if err == nil {
 		if !shapesMatch(ds, shape) {
@@ -99,10 +145,10 @@ func openOrCreateDataset(f *hdf5.File, path string, shape []int, exampleValue in
 		return nil, prefix("Cannot open root group in file "+f.FileName()+": ", err)
 	}
 	defer rootGroup.Close()
-	return createDataset(rootGroup, path, shape, exampleValue)
+	return createDataset(rootGroup, path, shape, exampleValue, compress)
 }
 
-func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interface{}) (*hdf5.Dataset, error) {
+func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interface{}, compress bool) (*hdf5.Dataset, error) {
 	paths := strings.Split(path, "/")
 	if paths[0] == "" {
 		paths = paths[1:]
@@ -121,6 +167,22 @@ func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interfa
 		}
 		defer space.Close()
 
+		if compress {
+			dcpl, err := hdf5.NewPropList(hdf5.P_DATASET_CREATE);
+			if err != nil {
+				return nil, prefix("Cannot create property list",err)
+			}
+			defer dcpl.Close()
+
+			dcpl.SetDeflate(hdf5.DefaultCompression)
+
+			ds, err := g.CreateDatasetWith(paths[0], dtype, space,dcpl)
+			if err != nil {
+				return nil, prefix("Cannot create dataset  "+path+": ", err)
+			}
+			return ds, nil
+		}
+
 		ds, err := g.CreateDataset(paths[0], dtype, space)
 		if err != nil {
 			return nil, prefix("Cannot create dataset  "+path+": ", err)
@@ -136,7 +198,7 @@ func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interfa
 		}
 	}
 	defer group.Close()
-	ds, err := createDataset(group, strings.Join(paths[1:], "/"), shape, exampleValue)
+	ds, err := createDataset(group, strings.Join(paths[1:], "/"), shape, exampleValue, compress)
 	if err != nil {
 		return nil, prefix(paths[0]+": ", err)
 	}
