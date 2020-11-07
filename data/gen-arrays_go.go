@@ -229,17 +229,36 @@ func NewArrayFloat64(dims []int) NDFloat64 {
 	return newArrayfloat64(dims)
 }
 
-func newArrayfloat64(dims []int) *ndfloat64 {
+func ArrayFromSliceFloat64(data []float64, dims []int) NDFloat64 {
+	return arrayFromSlicefloat64(data, dims)
+}
+
+func arrayFromSlicefloat64(data []float64, dims []int) *ndfloat64 {
 	result := ndfloat64{}
-	size := Product(dims)
+	// size := Product(dims)
 	result.Start = 0
-	result.Impl = make([]float64, size)
+	result.Impl = data
 	result.OriginalDims = dims
 	result.Dims = dims
 	result.Step = slice.Ones(len(dims))
 	result.Offset = Offsets(dims)
 	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result
+}
+
+func newArrayfloat64(dims []int) *ndfloat64 {
+	size := Product(dims)
+	impl := make([]float64, size)
+	return arrayFromSlicefloat64(impl, dims)
+	// result := ndfloat64{}
+	// result.Start = 0
+	// result.Impl = impl
+	// result.OriginalDims = dims
+	// result.Dims = dims
+	// result.Step = slice.Ones(len(dims))
+	// result.Offset = Offsets(dims)
+	// result.OffsetStep = Multiply(result.Step, result.Offset)
+	// return &result
 }
 
 func NewArray1DFloat64(dim int) ND1Float64 {
@@ -482,17 +501,36 @@ func NewArrayFloat32(dims []int) NDFloat32 {
 	return newArrayfloat32(dims)
 }
 
-func newArrayfloat32(dims []int) *ndfloat32 {
+func ArrayFromSliceFloat32(data []float32, dims []int) NDFloat32 {
+	return arrayFromSlicefloat32(data, dims)
+}
+
+func arrayFromSlicefloat32(data []float32, dims []int) *ndfloat32 {
 	result := ndfloat32{}
-	size := Product(dims)
+	// size := Product(dims)
 	result.Start = 0
-	result.Impl = make([]float32, size)
+	result.Impl = data
 	result.OriginalDims = dims
 	result.Dims = dims
 	result.Step = slice.Ones(len(dims))
 	result.Offset = Offsets(dims)
 	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result
+}
+
+func newArrayfloat32(dims []int) *ndfloat32 {
+	size := Product(dims)
+	impl := make([]float32, size)
+	return arrayFromSlicefloat32(impl, dims)
+	// result := ndfloat32{}
+	// result.Start = 0
+	// result.Impl = impl
+	// result.OriginalDims = dims
+	// result.Dims = dims
+	// result.Step = slice.Ones(len(dims))
+	// result.Offset = Offsets(dims)
+	// result.OffsetStep = Multiply(result.Step, result.Offset)
+	// return &result
 }
 
 func NewArray1DFloat32(dim int) ND1Float32 {
@@ -735,17 +773,36 @@ func NewArrayInt32(dims []int) NDInt32 {
 	return newArrayint32(dims)
 }
 
-func newArrayint32(dims []int) *ndint32 {
+func ArrayFromSliceInt32(data []int32, dims []int) NDInt32 {
+	return arrayFromSliceint32(data, dims)
+}
+
+func arrayFromSliceint32(data []int32, dims []int) *ndint32 {
 	result := ndint32{}
-	size := Product(dims)
+	// size := Product(dims)
 	result.Start = 0
-	result.Impl = make([]int32, size)
+	result.Impl = data
 	result.OriginalDims = dims
 	result.Dims = dims
 	result.Step = slice.Ones(len(dims))
 	result.Offset = Offsets(dims)
 	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result
+}
+
+func newArrayint32(dims []int) *ndint32 {
+	size := Product(dims)
+	impl := make([]int32, size)
+	return arrayFromSliceint32(impl, dims)
+	// result := ndint32{}
+	// result.Start = 0
+	// result.Impl = impl
+	// result.OriginalDims = dims
+	// result.Dims = dims
+	// result.Step = slice.Ones(len(dims))
+	// result.Offset = Offsets(dims)
+	// result.OffsetStep = Multiply(result.Step, result.Offset)
+	// return &result
 }
 
 func NewArray1DInt32(dim int) ND1Int32 {
@@ -988,17 +1045,36 @@ func NewArrayUint32(dims []int) NDUint32 {
 	return newArrayuint32(dims)
 }
 
-func newArrayuint32(dims []int) *nduint32 {
+func ArrayFromSliceUint32(data []uint32, dims []int) NDUint32 {
+	return arrayFromSliceuint32(data, dims)
+}
+
+func arrayFromSliceuint32(data []uint32, dims []int) *nduint32 {
 	result := nduint32{}
-	size := Product(dims)
+	// size := Product(dims)
 	result.Start = 0
-	result.Impl = make([]uint32, size)
+	result.Impl = data
 	result.OriginalDims = dims
 	result.Dims = dims
 	result.Step = slice.Ones(len(dims))
 	result.Offset = Offsets(dims)
 	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result
+}
+
+func newArrayuint32(dims []int) *nduint32 {
+	size := Product(dims)
+	impl := make([]uint32, size)
+	return arrayFromSliceuint32(impl, dims)
+	// result := nduint32{}
+	// result.Start = 0
+	// result.Impl = impl
+	// result.OriginalDims = dims
+	// result.Dims = dims
+	// result.Step = slice.Ones(len(dims))
+	// result.Offset = Offsets(dims)
+	// result.OffsetStep = Multiply(result.Step, result.Offset)
+	// return &result
 }
 
 func NewArray1DUint32(dim int) ND1Uint32 {
@@ -1241,17 +1317,36 @@ func NewArrayInt64(dims []int) NDInt64 {
 	return newArrayint64(dims)
 }
 
-func newArrayint64(dims []int) *ndint64 {
+func ArrayFromSliceInt64(data []int64, dims []int) NDInt64 {
+	return arrayFromSliceint64(data, dims)
+}
+
+func arrayFromSliceint64(data []int64, dims []int) *ndint64 {
 	result := ndint64{}
-	size := Product(dims)
+	// size := Product(dims)
 	result.Start = 0
-	result.Impl = make([]int64, size)
+	result.Impl = data
 	result.OriginalDims = dims
 	result.Dims = dims
 	result.Step = slice.Ones(len(dims))
 	result.Offset = Offsets(dims)
 	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result
+}
+
+func newArrayint64(dims []int) *ndint64 {
+	size := Product(dims)
+	impl := make([]int64, size)
+	return arrayFromSliceint64(impl, dims)
+	// result := ndint64{}
+	// result.Start = 0
+	// result.Impl = impl
+	// result.OriginalDims = dims
+	// result.Dims = dims
+	// result.Step = slice.Ones(len(dims))
+	// result.Offset = Offsets(dims)
+	// result.OffsetStep = Multiply(result.Step, result.Offset)
+	// return &result
 }
 
 func NewArray1DInt64(dim int) ND1Int64 {
@@ -1494,17 +1589,36 @@ func NewArrayUint64(dims []int) NDUint64 {
 	return newArrayuint64(dims)
 }
 
-func newArrayuint64(dims []int) *nduint64 {
+func ArrayFromSliceUint64(data []uint64, dims []int) NDUint64 {
+	return arrayFromSliceuint64(data, dims)
+}
+
+func arrayFromSliceuint64(data []uint64, dims []int) *nduint64 {
 	result := nduint64{}
-	size := Product(dims)
+	// size := Product(dims)
 	result.Start = 0
-	result.Impl = make([]uint64, size)
+	result.Impl = data
 	result.OriginalDims = dims
 	result.Dims = dims
 	result.Step = slice.Ones(len(dims))
 	result.Offset = Offsets(dims)
 	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result
+}
+
+func newArrayuint64(dims []int) *nduint64 {
+	size := Product(dims)
+	impl := make([]uint64, size)
+	return arrayFromSliceuint64(impl, dims)
+	// result := nduint64{}
+	// result.Start = 0
+	// result.Impl = impl
+	// result.OriginalDims = dims
+	// result.Dims = dims
+	// result.Step = slice.Ones(len(dims))
+	// result.Offset = Offsets(dims)
+	// result.OffsetStep = Multiply(result.Step, result.Offset)
+	// return &result
 }
 
 func NewArray1DUint64(dim int) ND1Uint64 {
@@ -1747,17 +1861,36 @@ func NewArrayInt(dims []int) NDInt {
 	return newArrayint(dims)
 }
 
-func newArrayint(dims []int) *ndint {
+func ArrayFromSliceInt(data []int, dims []int) NDInt {
+	return arrayFromSliceint(data, dims)
+}
+
+func arrayFromSliceint(data []int, dims []int) *ndint {
 	result := ndint{}
-	size := Product(dims)
+	// size := Product(dims)
 	result.Start = 0
-	result.Impl = make([]int, size)
+	result.Impl = data
 	result.OriginalDims = dims
 	result.Dims = dims
 	result.Step = slice.Ones(len(dims))
 	result.Offset = Offsets(dims)
 	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result
+}
+
+func newArrayint(dims []int) *ndint {
+	size := Product(dims)
+	impl := make([]int, size)
+	return arrayFromSliceint(impl, dims)
+	// result := ndint{}
+	// result.Start = 0
+	// result.Impl = impl
+	// result.OriginalDims = dims
+	// result.Dims = dims
+	// result.Step = slice.Ones(len(dims))
+	// result.Offset = Offsets(dims)
+	// result.OffsetStep = Multiply(result.Step, result.Offset)
+	// return &result
 }
 
 func NewArray1DInt(dim int) ND1Int {
@@ -2000,17 +2133,36 @@ func NewArrayUint(dims []int) NDUint {
 	return newArrayuint(dims)
 }
 
-func newArrayuint(dims []int) *nduint {
+func ArrayFromSliceUint(data []uint, dims []int) NDUint {
+	return arrayFromSliceuint(data, dims)
+}
+
+func arrayFromSliceuint(data []uint, dims []int) *nduint {
 	result := nduint{}
-	size := Product(dims)
+	// size := Product(dims)
 	result.Start = 0
-	result.Impl = make([]uint, size)
+	result.Impl = data
 	result.OriginalDims = dims
 	result.Dims = dims
 	result.Step = slice.Ones(len(dims))
 	result.Offset = Offsets(dims)
 	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result
+}
+
+func newArrayuint(dims []int) *nduint {
+	size := Product(dims)
+	impl := make([]uint, size)
+	return arrayFromSliceuint(impl, dims)
+	// result := nduint{}
+	// result.Start = 0
+	// result.Impl = impl
+	// result.OriginalDims = dims
+	// result.Dims = dims
+	// result.Step = slice.Ones(len(dims))
+	// result.Offset = Offsets(dims)
+	// result.OffsetStep = Multiply(result.Step, result.Offset)
+	// return &result
 }
 
 func NewArray1DUint(dim int) ND1Uint {

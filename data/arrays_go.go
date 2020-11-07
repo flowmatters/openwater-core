@@ -227,17 +227,36 @@ func NewArrayArrayType(dims []int) NDArrayType {
 	return newArrayArrayType(dims)
 }
 
-func newArrayArrayType(dims []int) *ndArrayType {
+func ArrayFromSliceArrayType(data []ArrayType, dims []int) NDArrayType {
+	return arrayFromSliceArrayType(data,dims)
+}
+
+func arrayFromSliceArrayType(data []ArrayType, dims []int) *ndArrayType {
 	result := ndArrayType{}
-	size := Product(dims)
+	// size := Product(dims)
 	result.Start = 0
-	result.Impl = make([]ArrayType, size)
+	result.Impl = data
 	result.OriginalDims = dims
 	result.Dims = dims
 	result.Step = slice.Ones(len(dims))
 	result.Offset = Offsets(dims)
 	result.OffsetStep = Multiply(result.Step, result.Offset)
 	return &result
+}
+	
+func newArrayArrayType(dims []int) *ndArrayType {
+	size := Product(dims)
+	impl := make([]ArrayType, size)
+	return arrayFromSliceArrayType(impl,dims)
+	// result := ndArrayType{}
+	// result.Start = 0
+	// result.Impl = impl
+	// result.OriginalDims = dims
+	// result.Dims = dims
+	// result.Step = slice.Ones(len(dims))
+	// result.Offset = Offsets(dims)
+	// result.OffsetStep = Multiply(result.Step, result.Offset)
+	// return &result
 }
 
 func NewArray1DArrayType(dim int) ND1ArrayType {
