@@ -42,6 +42,7 @@ type modelReference struct {
 	WriteOutputs       bool
 	ModelName          string
 	Batches            []int32
+	SimLength          int
 	Generations        []*modelGeneration
 	OutputWriter       *gio.PipeWriter
 	OutputProcess      *exec.Cmd
@@ -105,10 +106,13 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 
 		inputRef := mr.GetReference(genSlice, "inputs")
 		inputs, err := inputRef.Load()
-		if err != nil {
-			return nil, err
+		if err == nil {
+			gen.Inputs = inputs.(data.ND3Float64)
+			mr.SimLength = inputs.Len(sim.DIMI_TIMESTEP)
+		} else {
+			verbosePrintf("No inputs saved for %s. Initialising\n",mr.ModelName)
+			gen.Inputs = data.NewArray3DFloat64(gen.Count,len(gen.Model.Description().Inputs),mr.SimLength)
 		}
-		gen.Inputs = inputs.(data.ND3Float64)
 
 		paramRef := mr.GetReference(genSlice, "parameters")
 		parameters, err := paramRef.Load()
@@ -291,6 +295,8 @@ func (mr *modelReference) WriteData(generation int) error {
 
 func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models map[string]*modelReference, genCount int) {
 
+	simLength := 0
+
 	outputPaths := make(map[string]string)
 	if *splitOutputs != "" {
 		pairs := strings.Split(*splitOutputs,",")
@@ -307,6 +313,23 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 			fmt.Println("Couldn't initialise model", modelName)
 			fmt.Println(err)
 			os.Exit(1)
+		}
+
+		if simLength == 0 {
+			verbosePrintln("Trying to establish simulation length...")
+			inputRef := io.H5RefFloat64{}
+			inputRef.Filename = inputFn
+			inputRef.Dataset = "/MODELS/" + modelName + "/inputs"
+			if inputRef.Exists() {
+				inputShp, err := inputRef.Shape()
+				if err != nil {
+					fmt.Println("Couldn't query input dimensions",modelName)
+					fmt.Println(err)
+					os.Exit(1)
+				}
+				simLength = inputShp[sim.DIMI_TIMESTEP]
+			}
+			verbosePrintf("Simulation has %d timesteps",simLength)q
 		}
 
 		destFn := outputPaths[modelName]
@@ -340,6 +363,10 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 		verbosePrintln("Generations for ", ref.ModelName, ref.Generations)
 		models[modelName] = ref
 		genCount = len(ref.Generations)
+	}
+
+	for _,r := range(models) {
+		r.SimLength = simLength
 	}
 
 	return
