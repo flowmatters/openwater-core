@@ -31,6 +31,10 @@ func depthToRate(inputs data.ND1Float64,
 	deltaT, area float64,
 	outflows data.ND1Float64) {
 
+	if area == 0.0 {
+		return
+	}
+
 	conversion := units.MILLIMETRES_TO_METRES * area / deltaT
 	nDays := inputs.Len1()
 	idx := []int{0}

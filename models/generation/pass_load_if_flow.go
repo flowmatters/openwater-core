@@ -32,6 +32,10 @@ func passLoadIfFlow(flow, inputLoad data.ND1Float64,
 	scalingFactor float64,
 	outputLoad data.ND1Float64) {
 
+	if scalingFactor == 0.0 {
+		return
+	}
+
 	n := flow.Len1()
 	idx := []int{0}
 

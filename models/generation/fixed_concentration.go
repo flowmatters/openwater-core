@@ -29,6 +29,10 @@ func fixedConcentration(flow data.ND1Float64, conc float64, load data.ND1Float64
 	nDays := flow.Len1()
 	idx := []int{0}
 
+	if conc == 0.0 {
+		return
+	}
+
 	for i := 0; i < nDays; i++ {
 		idx[0] = i
 		f := flow.Get(idx)

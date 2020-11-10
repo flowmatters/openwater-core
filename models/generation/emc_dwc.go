@@ -33,6 +33,10 @@ func emcDWC(quickflow, slowflow data.ND1Float64, emc, dwc float64, quickLoad, sl
 	nDays := quickflow.Len1()
 	idx := []int{0}
 
+	if (emc==0.0) && (dwc==0.0) {
+		return
+	}
+
 	for i := 0; i < nDays; i++ {
 		idx[0] = i
 		qf := quickflow.Get(idx)

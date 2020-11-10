@@ -29,6 +29,11 @@ func applyScaling(input data.ND1Float64,
 	scale float64,
 	output data.ND1Float64) {
 
+	if scale == 0.0 {
+		return
+	}
+	
+	
 	nDays := input.Len1()
 	idx := []int{0}
 
