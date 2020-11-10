@@ -278,6 +278,57 @@ func ParseH5RefFloat64(path string) H5RefFloat64 {
 	return H5RefFloat64{components[0], components[1], nil}
 }
 
+func (h H5RefFloat64) Exists() bool {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return false
+	}
+	defer ds.Close()
+
+	return true
+}
+
+func (h H5RefFloat64) Shape() ([]int, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer ds.Close()
+
+	space := ds.Space()
+	defer space.Close()
+
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+
+	shape := conv.UintsToInts(dims)
+	return shape, nil
+}
+
 type H5RefFloat32 struct {
 	Filename string
 	Dataset  string
@@ -538,6 +589,57 @@ func (h H5RefFloat32) GetDatasets() ([]string, error) {
 func ParseH5RefFloat32(path string) H5RefFloat32 {
 	components := strings.Split(path, ":")
 	return H5RefFloat32{components[0], components[1], nil}
+}
+
+func (h H5RefFloat32) Exists() bool {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return false
+	}
+	defer ds.Close()
+
+	return true
+}
+
+func (h H5RefFloat32) Shape() ([]int, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer ds.Close()
+
+	space := ds.Space()
+	defer space.Close()
+
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+
+	shape := conv.UintsToInts(dims)
+	return shape, nil
 }
 
 type H5RefInt32 struct {
@@ -802,6 +904,57 @@ func ParseH5RefInt32(path string) H5RefInt32 {
 	return H5RefInt32{components[0], components[1], nil}
 }
 
+func (h H5RefInt32) Exists() bool {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return false
+	}
+	defer ds.Close()
+
+	return true
+}
+
+func (h H5RefInt32) Shape() ([]int, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer ds.Close()
+
+	space := ds.Space()
+	defer space.Close()
+
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+
+	shape := conv.UintsToInts(dims)
+	return shape, nil
+}
+
 type H5RefUint32 struct {
 	Filename string
 	Dataset  string
@@ -1062,6 +1215,57 @@ func (h H5RefUint32) GetDatasets() ([]string, error) {
 func ParseH5RefUint32(path string) H5RefUint32 {
 	components := strings.Split(path, ":")
 	return H5RefUint32{components[0], components[1], nil}
+}
+
+func (h H5RefUint32) Exists() bool {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return false
+	}
+	defer ds.Close()
+
+	return true
+}
+
+func (h H5RefUint32) Shape() ([]int, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer ds.Close()
+
+	space := ds.Space()
+	defer space.Close()
+
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+
+	shape := conv.UintsToInts(dims)
+	return shape, nil
 }
 
 type H5RefInt64 struct {
@@ -1326,6 +1530,57 @@ func ParseH5RefInt64(path string) H5RefInt64 {
 	return H5RefInt64{components[0], components[1], nil}
 }
 
+func (h H5RefInt64) Exists() bool {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return false
+	}
+	defer ds.Close()
+
+	return true
+}
+
+func (h H5RefInt64) Shape() ([]int, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer ds.Close()
+
+	space := ds.Space()
+	defer space.Close()
+
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+
+	shape := conv.UintsToInts(dims)
+	return shape, nil
+}
+
 type H5RefUint64 struct {
 	Filename string
 	Dataset  string
@@ -1586,6 +1841,57 @@ func (h H5RefUint64) GetDatasets() ([]string, error) {
 func ParseH5RefUint64(path string) H5RefUint64 {
 	components := strings.Split(path, ":")
 	return H5RefUint64{components[0], components[1], nil}
+}
+
+func (h H5RefUint64) Exists() bool {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return false
+	}
+	defer ds.Close()
+
+	return true
+}
+
+func (h H5RefUint64) Shape() ([]int, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer ds.Close()
+
+	space := ds.Space()
+	defer space.Close()
+
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+
+	shape := conv.UintsToInts(dims)
+	return shape, nil
 }
 
 type H5RefInt struct {
@@ -1850,6 +2156,57 @@ func ParseH5RefInt(path string) H5RefInt {
 	return H5RefInt{components[0], components[1], nil}
 }
 
+func (h H5RefInt) Exists() bool {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return false
+	}
+	defer ds.Close()
+
+	return true
+}
+
+func (h H5RefInt) Shape() ([]int, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer ds.Close()
+
+	space := ds.Space()
+	defer space.Close()
+
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+
+	shape := conv.UintsToInts(dims)
+	return shape, nil
+}
+
 type H5RefUint struct {
 	Filename string
 	Dataset  string
@@ -2110,4 +2467,55 @@ func (h H5RefUint) GetDatasets() ([]string, error) {
 func ParseH5RefUint(path string) H5RefUint {
 	components := strings.Split(path, ":")
 	return H5RefUint{components[0], components[1], nil}
+}
+
+func (h H5RefUint) Exists() bool {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return false
+	}
+	defer ds.Close()
+
+	return true
+}
+
+func (h H5RefUint) Shape() ([]int, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer ds.Close()
+
+	space := ds.Space()
+	defer space.Close()
+
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+
+	shape := conv.UintsToInts(dims)
+	return shape, nil
 }

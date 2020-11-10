@@ -279,3 +279,54 @@ func ParseH5RefArrayType(path string) H5RefArrayType {
 	components := strings.Split(path, ":")
 	return H5RefArrayType{components[0], components[1], nil}
 }
+
+func (h H5RefArrayType) Exists() bool {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return false
+	}
+	defer ds.Close()
+
+	return true
+}
+
+func (h H5RefArrayType) Shape() ([]int,error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	ds, err := f.OpenDataset(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer ds.Close()
+
+	space := ds.Space()
+	defer space.Close()
+
+	dims, _, err := space.SimpleExtentDims()
+	if err != nil {
+		return nil, err
+	}
+
+	shape := conv.UintsToInts(dims)
+	return shape,nil
+}
