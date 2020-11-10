@@ -329,7 +329,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 				}
 				simLength = inputShp[sim.DIMI_TIMESTEP]
 			}
-			verbosePrintf("Simulation has %d timesteps",simLength)q
+			verbosePrintf("Simulation has %d timesteps",simLength)
 		}
 
 		destFn := outputPaths[modelName]
