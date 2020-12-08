@@ -34,6 +34,7 @@ InstreamFineSediment:
 		loadDownstream:
 		loadToFloodplain:
 		floodplainDepositionFraction:
+		channelDepositionFraction:
 	implementation:
 		function: instreamFineSediment
 		type: scalar
@@ -52,7 +53,7 @@ func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
 	linkWidth, linkLength, linkSlope, bankHeight,
 	propBankHeightForFineDep, sedBulkDensity, manningsN,
 	fineSedSettVelocity, fineSedReMobVelocity, durationInSeconds float64,
-	loadDownstream, loadToFloodplain, floodplainDepositionFraction data.ND1Float64) (float64, float64) {
+	loadDownstream, loadToFloodplain, floodplainDepositionFraction, channelDepositionFraction data.ND1Float64) (float64, float64) {
 	n := reachVolume.Len1()
 	idx := []int{0}
 
@@ -115,6 +116,12 @@ func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
 		netStreamDepositionFineSed := inChannelStorage(outflowRate, totalVolume, totalDailyConstsituentMass, channelStoreFine,
 			linkWidth, linkSlope, manningsN, fineSedSettVelocity, fineSedReMobVelocity, maxStorage)
 
+		proportionDepositedChannel := 0.0
+		//Stop division by zero
+		if combinedConstituentStorageBeforeDeposition > 0 {
+			proportionDepositedChannel = netStreamDepositionFineSed / combinedConstituentStorageBeforeDeposition
+		}
+	
 		channelStoreFine += netStreamDepositionFineSed
 		totalDailyConstsituentMass -= netStreamDepositionFineSed
 
@@ -138,6 +145,7 @@ func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
 		loadDownstream.Set(idx, outflowLoad)
 		loadToFloodplain.Set(idx, floodPlainDepositionFine_Kg_per_Day/durationInSeconds)
 		floodplainDepositionFraction.Set(idx, proportionDepositedFloodplain)
+		channelDepositionFraction.Set(idx,proportionDepositedChannel)
 	}
 
 	return channelStoreFine, totalStoredMass
@@ -146,7 +154,7 @@ func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
 func floodPlainDepositionEmperical(outflow, totalDailyConstsituentMass,
 	bankFullFlow, fineSedSettVelocityFlood, floodPlainArea float64) float64 {
 
-	if outflow < bankFullFlow {
+	if (outflow < bankFullFlow) || (bankFullFlow==0.0) {
 		return 0.0
 	}
 
