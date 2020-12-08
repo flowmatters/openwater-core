@@ -33,7 +33,7 @@ func partitionDemand(input, demand data.ND1Float64,
 	idx := []int{0}
 
 	for i := 0; i < n; i++ {
-		idx[0] = n
+		idx[0] = i
 		dmd := demand.Get(idx)
 		inp := input.Get(idx)
 
