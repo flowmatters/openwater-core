@@ -10,7 +10,9 @@ import (
 /*OW-SPEC
 InstreamFineSediment:
 	inputs:
-		incomingMass:
+		upstreamMass:
+		lateralMass:
+		reachLocalMass:
 		reachVolume:
 		outflow:
   states:
@@ -47,7 +49,7 @@ InstreamFineSediment:
 		sediment transport
 */
 
-func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
+func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume, outflow data.ND1Float64,
 	channelStoreFine, totalStoredMass float64,
 	bankFullFlow, fineSedSettVelocityFlood, floodPlainArea,
 	linkWidth, linkLength, linkSlope, bankHeight,
@@ -89,7 +91,7 @@ func instreamFineSediment(incomingMass, reachVolume, outflow data.ND1Float64,
 
 		//		model.step(incomingMass.Get(idx), volumeAtEndTimestep.Get(idx), outflow.Get(idx))
 		//NOT USED: ChannelStoreAtStartOfTimeStep_Fine_kg := ism.channelStoreFine
-		incomingMassNow := incomingMass.Get(idx) * durationInSeconds
+		incomingMassNow := (upstreamMass.Get(idx)+lateralMass.Get(idx)+reachLocalMass.Get(idx)) * durationInSeconds
 		outflowRate := outflow.Get(idx)
 		outflowNow := outflowRate * durationInSeconds
 		reachVolumeNow := reachVolume.Get(idx)

@@ -39,7 +39,7 @@ func (m *InstreamCoarseSediment)  Description() sim.ModelDescription{
   }
 
   result.Inputs = []string{
-  "incomingMass",}
+  "upstreamMass","lateralMass","reachLocalMass",}
   result.Outputs = []string{
   "loadDownstream",}
 
@@ -139,8 +139,14 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3Float64, states data.ND2Floa
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{incomingMass <nil>}",tmpTS.Shape())
-      incomingmass := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+  //    fmt.Println("{upstreamMass <nil>}",tmpTS.Shape())
+      upstreammass := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{lateralMass <nil>}",tmpTS.Shape())
+      lateralmass := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{reachLocalMass <nil>}",tmpTS.Shape())
+      reachlocalmass := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
       
 
       
@@ -152,7 +158,7 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3Float64, states data.ND2Floa
       
       
 
-      totalstoredmass= instreamCoarseSediment(incomingmass,totalstoredmass,loaddownstream)
+      totalstoredmass= instreamCoarseSediment(upstreammass,lateralmass,reachlocalmass,totalstoredmass,loaddownstream)
 
       
       

@@ -148,7 +148,7 @@ func (m *InstreamFineSediment)  Description() sim.ModelDescription{
   sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," "),}
 
   result.Inputs = []string{
-  "incomingMass","reachVolume","outflow",}
+  "upstreamMass","lateralMass","reachLocalMass","reachVolume","outflow",}
   result.Outputs = []string{
   "loadDownstream","loadToFloodplain","floodplainDepositionFraction","channelDepositionFraction",}
 
@@ -265,14 +265,20 @@ func (m *InstreamFineSediment) Run(inputs data.ND3Float64, states data.ND2Float6
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{incomingMass <nil>}",tmpTS.Shape())
-      incomingmass := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+  //    fmt.Println("{upstreamMass <nil>}",tmpTS.Shape())
+      upstreammass := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{lateralMass <nil>}",tmpTS.Shape())
+      lateralmass := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{reachLocalMass <nil>}",tmpTS.Shape())
+      reachlocalmass := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
       
   //    fmt.Println("{reachVolume <nil>}",tmpTS.Shape())
-      reachvolume := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      reachvolume := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
       
   //    fmt.Println("{outflow <nil>}",tmpTS.Shape())
-      outflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      outflow := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
       
 
       
@@ -293,7 +299,7 @@ func (m *InstreamFineSediment) Run(inputs data.ND3Float64, states data.ND2Float6
       
       
 
-      channelstorefine,totalstoredmass= instreamFineSediment(incomingmass,reachvolume,outflow,channelstorefine,totalstoredmass,bankfullflow,finesedsettvelocityflood,floodplainarea,linkwidth,linklength,linkslope,bankheight,propbankheightforfinedep,sedbulkdensity,manningsn,finesedsettvelocity,finesedremobvelocity,durationinseconds,loaddownstream,loadtofloodplain,floodplaindepositionfraction,channeldepositionfraction)
+      channelstorefine,totalstoredmass= instreamFineSediment(upstreammass,lateralmass,reachlocalmass,reachvolume,outflow,channelstorefine,totalstoredmass,bankfullflow,finesedsettvelocityflood,floodplainarea,linkwidth,linklength,linkslope,bankheight,propbankheightforfinedep,sedbulkdensity,manningsn,finesedsettvelocity,finesedremobvelocity,durationinseconds,loaddownstream,loadtofloodplain,floodplaindepositionfraction,channeldepositionfraction)
 
       
       

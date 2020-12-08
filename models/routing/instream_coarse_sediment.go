@@ -7,7 +7,9 @@ import (
 /*OW-SPEC
 InstreamCoarseSediment:
 	inputs:
-		incomingMass:
+		upstreamMass:
+		lateralMass:
+		reachLocalMass:
   states:
 		totalStoredMass:
 	parameters:
@@ -25,10 +27,10 @@ InstreamCoarseSediment:
 		sediment transport
 */
 
-func instreamCoarseSediment(incomingMass data.ND1Float64,
+func instreamCoarseSediment(upstreamMass, lateralMass, reachLocalMass data.ND1Float64,
 	storedMass float64,
 	loadDownstream data.ND1Float64) float64 {
-	n := incomingMass.Len1()
+	n := upstreamMass.Len1()
 	idx := []int{0}
 
 	for i := 0; i < n; i++ {
@@ -52,7 +54,8 @@ func instreamCoarseSediment(incomingMass data.ND1Float64,
 		//ConstituentOutput divisionConstituents = Division.ConstituentOutputs.Get(Constituent);
 		//DivisionConstituentOutput divisionConstituents = divisionConstituents;
 		//totalDailyConstituentMass = ConstituentOutput.DownstreamFlowMass + ConstituentOutput.StoredMass;
-		totalDailyConstituentMass = storedMass + incomingMass.Get(idx)
+		incomingMass := upstreamMass.Get(idx) + lateralMass.Get(idx) + reachLocalMass.Get(idx)
+		totalDailyConstituentMass = storedMass + incomingMass
 
 		// NOT NEEDED		combinedCoarseSedInFlows_Kg_per_Day = (CatchmentInflowMass) + (UpstreamFlowMass)
 
