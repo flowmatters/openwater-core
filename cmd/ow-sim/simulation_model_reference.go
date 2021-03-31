@@ -40,6 +40,7 @@ type modelReference struct {
 	OutputFilename     string
 	WriteInputs        bool
 	WriteOutputs       bool
+	WriteStates        bool
 	ModelName          string
 	Batches            []int32
 	SimLength          int
@@ -140,12 +141,20 @@ func (mr *modelReference) TotalRuns() int {
 	return int(mr.Batches[len(mr.Batches)-1])
 }
 
-func (mr *modelReference) initialiseDataset(label string, refShape []int) error {
+func (mr *modelReference) initialiseTimeSeriesDataset(label string, refShape []int) error {
 	ref := io.H5RefFloat64{}
 	ref.Filename = mr.OutputFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	count := mr.TotalRuns()
 	return ref.Create([]int{count, refShape[1], refShape[2]}, math.NaN(),false)
+}
+
+func (mr *modelReference) initialiseStatesDataset(label string, refShape []int) error {
+	ref := io.H5RefFloat64{}
+	ref.Filename = mr.OutputFilename
+	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
+	count := mr.TotalRuns()
+	return ref.Create([]int{count, refShape[1]}, math.NaN(),false)
 }
 
 func (mr *modelReference) InitialiseOutputs(refGeneration int) error {
@@ -155,16 +164,23 @@ func (mr *modelReference) InitialiseOutputs(refGeneration int) error {
 	}
 
 	if mr.WriteOutputs {
-		err = mr.initialiseDataset("outputs", gen.Outputs.Shape())
+		err = mr.initialiseTimeSeriesDataset("outputs", gen.Outputs.Shape())
 		if err != nil {
 			return prefix("Couldn't init dataset for outputs: ", err)
 		}
 	}
 
 	if mr.WriteInputs {
-		err = mr.initialiseDataset("inputs", gen.Inputs.Shape())
+		err = mr.initialiseTimeSeriesDataset("inputs", gen.Inputs.Shape())
 		if err != nil {
 			return prefix("Couldn't init dataset for inputs: ", err)
+		}
+	}
+
+	if mr.WriteStates {
+		err = mr.initialiseStatesDataset("states", gen.States.Shape())
+		if err != nil {
+			return prefix("Couldn't init dataset for states: ", err)
 		}
 	}
 
@@ -172,11 +188,18 @@ func (mr *modelReference) InitialiseOutputs(refGeneration int) error {
 	return nil
 }
 
-func (mr *modelReference) writeData(label string, data data.ND3Float64, loc int32) error {
+func (mr *modelReference) writeTimeSeries(label string, data data.ND3Float64, loc int32) error {
 	ref := io.H5RefFloat64{}
 	ref.Filename = mr.OutputFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	return ref.WriteSlice(data, []int{int(loc), 0, 0})
+}
+
+func (mr *modelReference) writeStates(label string, data data.ND2Float64, loc int32) error {
+	ref := io.H5RefFloat64{}
+	ref.Filename = mr.OutputFilename
+	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
+	return ref.WriteSlice(data, []int{int(loc), 0})
 }
 
 func (mr *modelReference) writeProtobuf(generation int) error {
@@ -277,16 +300,23 @@ func (mr *modelReference) WriteData(generation int) error {
 	}
 
 	if mr.WriteInputs {
-		err = mr.writeData("inputs", gen.Inputs, loc)
+		err = mr.writeTimeSeries("inputs", gen.Inputs, loc)
 		if err != nil {
 			return prefix("Writing inputs ", err)
 		}
 	}
 
 	if mr.WriteOutputs {
-		err = mr.writeData("outputs", gen.Outputs, loc)
+		err = mr.writeTimeSeries("outputs", gen.Outputs, loc)
 		if err != nil {
 			return prefix("Writing outputs ", err)
+		}
+	}
+
+	if mr.WriteStates {
+		err = mr.writeStates("states", gen.States, loc)
+		if err != nil {
+			return prefix("Writing states", err)
 		}
 	}
 
@@ -340,6 +370,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 		if destFn != "" {
 			ref.OutputFilename = destFn
 			ref.WriteOutputs = true
+			ref.WriteStates = true
 
 			if ref.Batches[0] == 0 {
 				ref.WriteInputs = true
