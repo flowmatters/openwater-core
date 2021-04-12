@@ -56,6 +56,11 @@ func lag(inflow data.ND1Float64,
 
 	lagSteps := int(timeLag)
 
+	if lagSteps == 0 {
+		outflow.CopyFrom(inflow)
+		return lagged
+	}
+
 	idx := []int{0}
 	for i := 0; i < m.MinInt(lagSteps, outflow.Len1()); i++ {
 		idx[0] = i
