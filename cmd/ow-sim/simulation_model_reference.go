@@ -1,19 +1,20 @@
 package main
 
 import (
-	"fmt"
-	"math"
-	"strings"
-	"os"
-	gio "io"
-	"os/exec"
-	"github.com/kardianos/osext"
 	"encoding/binary"
-	"github.com/flowmatters/openwater-core/io/protobuf"
-	"github.com/golang/protobuf/proto"
-	"github.com/flowmatters/openwater-core/sim"
+	"fmt"
+	gio "io"
+	"math"
+	"os"
+	"os/exec"
+	"strings"
+
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
+	"github.com/flowmatters/openwater-core/io/protobuf"
+	"github.com/flowmatters/openwater-core/sim"
+	"github.com/golang/protobuf/proto"
+	"github.com/kardianos/osext"
 )
 
 type modelGeneration struct {
@@ -82,7 +83,7 @@ func (mr *modelReference) GetReference(genSlice []int, element string) io.H5RefF
 
 func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 	if mr.Generations[i] == nil {
-		verbosePrintf("Initialising Generation %d for %s\n",i,mr.ModelName)
+		verbosePrintf("Initialising Generation %d for %s\n", i, mr.ModelName)
 		gen := modelGeneration{}
 		modelRef := sim.Catalog[mr.ModelName]
 		if modelRef == nil {
@@ -111,8 +112,8 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 			gen.Inputs = inputs.(data.ND3Float64)
 			mr.SimLength = inputs.Len(sim.DIMI_TIMESTEP)
 		} else {
-			verbosePrintf("No inputs saved for %s. Initialising\n",mr.ModelName)
-			gen.Inputs = data.NewArray3DFloat64(gen.Count,len(gen.Model.Description().Inputs),mr.SimLength)
+			verbosePrintf("No inputs saved for %s. Initialising\n", mr.ModelName)
+			gen.Inputs = data.NewArray3DFloat64(gen.Count, len(gen.Model.Description().Inputs), mr.SimLength)
 		}
 
 		paramRef := mr.GetReference(genSlice, "parameters")
@@ -133,7 +134,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 }
 
 func (mr *modelReference) PurgeGeneration(i int) {
-	verbosePrintf("Purging Generation %d for %s\n",i,mr.ModelName)
+	verbosePrintf("Purging Generation %d for %s\n", i, mr.ModelName)
 	mr.Generations[i] = nil
 }
 
@@ -146,7 +147,7 @@ func (mr *modelReference) initialiseTimeSeriesDataset(label string, refShape []i
 	ref.Filename = mr.OutputFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	count := mr.TotalRuns()
-	return ref.Create([]int{count, refShape[1], refShape[2]}, math.NaN(),false)
+	return ref.Create([]int{count, refShape[1], refShape[2]}, math.NaN(), false)
 }
 
 func (mr *modelReference) initialiseStatesDataset(label string, refShape []int) error {
@@ -154,7 +155,7 @@ func (mr *modelReference) initialiseStatesDataset(label string, refShape []int) 
 	ref.Filename = mr.OutputFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	count := mr.TotalRuns()
-	return ref.Create([]int{count, refShape[1]}, math.NaN(),false)
+	return ref.Create([]int{count, refShape[1]}, math.NaN(), false)
 }
 
 func (mr *modelReference) InitialiseOutputs(refGeneration int) error {
@@ -214,9 +215,9 @@ func (mr *modelReference) writeProtobuf(generation int) error {
 		return err
 	}
 
-  data.Cells = int32(gen.Count);
-  data.TotalCells = int32(mr.TotalRuns())
-  data.StartingLocation = mr.generationLocation(generation)
+	data.Cells = int32(gen.Count)
+	data.TotalCells = int32(mr.TotalRuns())
+	data.StartingLocation = mr.generationLocation(generation)
 
 	if mr.WriteInputs {
 		shp := gen.Inputs.Shape()
@@ -240,21 +241,21 @@ func (mr *modelReference) writeProtobuf(generation int) error {
 
 	buf := make([]byte, 4)
 	binary.LittleEndian.PutUint32(buf, uint32(len(msg)))
-	fmt.Printf("Writing gen %d of %s\n",generation,mr.ModelName)
+	fmt.Printf("Writing gen %d of %s\n", generation, mr.ModelName)
 	if _, err := mr.OutputWriter.Write(buf); err != nil {
-			return err
+		return err
 	}
 
 	if _, err := mr.OutputWriter.Write(msg); err != nil {
-			return err
+		return err
 	}
-	fmt.Printf("Sent gen %d of %s\n",generation,mr.ModelName)
+	fmt.Printf("Sent gen %d of %s\n", generation, mr.ModelName)
 
 	if generation == len(mr.Batches)-1 {
-		fmt.Printf("Waiting for output writer for %s to close\n",mr.ModelName)
+		fmt.Printf("Waiting for output writer for %s to close\n", mr.ModelName)
 		mr.OutputWriter.Close()
 		mr.OutputProcess.Wait()
-		fmt.Printf("Output writer for %s closed\n",mr.ModelName)
+		fmt.Printf("Output writer for %s closed\n", mr.ModelName)
 	}
 
 	return nil
@@ -329,9 +330,9 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 
 	outputPaths := make(map[string]string)
 	if *splitOutputs != "" {
-		pairs := strings.Split(*splitOutputs,",")
+		pairs := strings.Split(*splitOutputs, ",")
 		for _, pair := range pairs {
-			elements := strings.Split(pair,"=")
+			elements := strings.Split(pair, "=")
 			outputPaths[elements[0]] = elements[1]
 		}
 	}
@@ -339,6 +340,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 	models = make(map[string]*modelReference)
 	for _, modelName := range modelNames {
 		ref, err := initModel(inputFn, modelName)
+
 		if err != nil {
 			fmt.Println("Couldn't initialise model", modelName)
 			fmt.Println(err)
@@ -353,13 +355,13 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 			if inputRef.Exists() {
 				inputShp, err := inputRef.Shape()
 				if err != nil {
-					fmt.Println("Couldn't query input dimensions",modelName)
+					fmt.Println("Couldn't query input dimensions", modelName)
 					fmt.Println(err)
 					os.Exit(1)
 				}
 				simLength = inputShp[sim.DIMI_TIMESTEP]
 			}
-			verbosePrintf("Simulation has %d timesteps",simLength)
+			verbosePrintf("Simulation has %d timesteps", simLength)
 		}
 
 		destFn := outputPaths[modelName]
@@ -378,8 +380,8 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 
 			if destFn != defaultOutputFn {
 				exe_path, _ := osext.Executable()
-				fmt.Printf("Configuring external write process: %s\n",exe_path)
-				write_cmd := exec.Command(exe_path,"-writer",destFn)
+				fmt.Printf("Configuring external write process: %s\n", exe_path)
+				write_cmd := exec.Command(exe_path, "-writer", destFn)
 				reader, writer := gio.Pipe()
 				write_cmd.Stdin = reader
 				write_cmd.Stdout = os.Stdout
@@ -396,10 +398,9 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 		genCount = len(ref.Generations)
 	}
 
-	for _,r := range(models) {
+	for _, r := range models {
 		r.SimLength = simLength
 	}
 
 	return
 }
-

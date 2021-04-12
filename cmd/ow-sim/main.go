@@ -7,10 +7,11 @@ import (
 	"os"
 	"runtime/pprof"
 	"time"
-	"github.com/flowmatters/openwater-core/sim"
+
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
 	_ "github.com/flowmatters/openwater-core/models"
+	"github.com/flowmatters/openwater-core/sim"
 )
 
 const (
@@ -47,7 +48,7 @@ func main() {
 	}
 }
 
-func run_simulation(args []string){
+func run_simulation(args []string) {
 
 	fn := args[0]
 	var outputFn string = ""
@@ -98,14 +99,15 @@ func run_simulation(args []string){
 	var genCount int
 	writingDone := make(chan int)
 
-	models, genCount := makeModelRefs(modelNames,fn,outputFn)
+	models, genCount := makeModelRefs(modelNames, fn, outputFn)
 
 	fmt.Println()
 	for i := 0; i < genCount; i++ {
+		fmt.Printf("==== Generation %d / %d ====\n", i+1, genCount)
 
 		// === RUN GENERATION ===
-		 genSimulationTime := runGeneration(i,models,modelNames) // synchronous
-		 totalTimeSimulation += genSimulationTime
+		genSimulationTime := runGeneration(i, models, modelNames) // synchronous
+		totalTimeSimulation += genSimulationTime
 		// === /RUN GENERATION ===
 
 		// === WRITE GENERATION OUTPUTS ===
@@ -131,7 +133,7 @@ func run_simulation(args []string){
 					}
 				}
 
-				writeGeneration(g,models,modelNames)
+				writeGeneration(g, models, modelNames)
 				writingDone <- g
 			}(i)
 		}

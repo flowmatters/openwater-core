@@ -2,14 +2,12 @@ package main
 
 import (
 	"fmt"
-	"time"
 	"os"
+	"time"
 )
-
 
 func runGeneration(i int, models map[string]*modelReference, modelNames []string) float64 {
 	genTotal := 0
-	fmt.Printf("==== Generation %d ====\n", i)
 	simulationDone := make(chan string)
 	genStart := time.Now()
 	modelCount := 0
@@ -52,7 +50,6 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 	return genSimulationElapsed
 }
 
-
 func writeGeneration(g int, models map[string]*modelReference, modelNames []string) {
 	genWriteStart := time.Now()
 	verbosePrintf("Writing results for generation %d...\n", g)
@@ -68,4 +65,3 @@ func writeGeneration(g int, models map[string]*modelReference, modelNames []stri
 	genWriteElapsed := genWriteEnd.Sub(genWriteStart)
 	verbosePrintf("Results for generation %d written in %f seconds\n", g, genWriteElapsed.Seconds())
 }
-
