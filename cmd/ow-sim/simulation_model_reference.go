@@ -324,8 +324,38 @@ func (mr *modelReference) WriteData(generation int) error {
 	return nil
 }
 
-func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models map[string]*modelReference, genCount int) {
+func writeFor(modelName, includeFlag, excludeFlag string) bool {
+	if includeFlag != "" {
+		includedModels := strings.Split(includeFlag, ",")
+		for _, im := range includedModels {
+			if im == modelName {
+				return true
+			}
+		}
+		return false
+	}
 
+	if excludeFlag != "" {
+		excludedModels := strings.Split(excludeFlag, ",")
+		for _, exm := range excludedModels {
+			if exm == modelName {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func writeInputs(modelName string) bool {
+	return writeFor(modelName, *inputsFor, *noInputsFor)
+}
+
+func writeOutputs(modelName string) bool {
+	return writeFor(modelName, *outputsFor, *noOutputsFor)
+}
+
+func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models map[string]*modelReference, genCount int) {
 	simLength := 0
 
 	outputPaths := make(map[string]string)
@@ -371,11 +401,11 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 
 		if destFn != "" {
 			ref.OutputFilename = destFn
-			ref.WriteOutputs = true
+			ref.WriteOutputs = writeOutputs(modelName)
 			ref.WriteStates = true
 
 			if ref.Batches[0] == 0 {
-				ref.WriteInputs = true
+				ref.WriteInputs = writeInputs(modelName)
 			}
 
 			if destFn != defaultOutputFn {
