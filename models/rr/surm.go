@@ -39,6 +39,7 @@ Surm:
 
 import (
 	"math"
+
 	"github.com/flowmatters/openwater-core/data"
 )
 
@@ -57,7 +58,7 @@ func surm(rainfall, pet data.ND1Float64,
 	gw := initialGW
 	totalStore := initialTotalStore
 	idx := []int{0}
-	fperv := 1-fimp
+	fperv := 1 - fimp
 
 	for i := 0; i < nTimesteps; i++ {
 		idx[0] = i
@@ -65,32 +66,32 @@ func surm(rainfall, pet data.ND1Float64,
 		petThisTS := pet.Get(idx)
 		quickflow := 0.0
 
-		imperviousRunoff := math.Max(rainThisTS-thres,0.0)
+		imperviousRunoff := math.Max(rainThisTS-thres, 0.0)
 		quickflow += imperviousRunoff * fimp
 
-		maxInfiltration := fperv * coeff * math.Exp(-sq * soilMoistureStore / smax)
-		infiltration := math.Min(maxInfiltration,rainThisTS) 
+		maxInfiltration := fperv * coeff * math.Exp(-sq*soilMoistureStore/smax)
+		infiltration := math.Min(maxInfiltration, rainThisTS)
 		infiltrationExcess := rainThisTS - infiltration
 		soilMoistureStore += infiltration
 
-		saturationExcess := math.Max(soilMoistureStore - smax, 0.0)
+		et := math.Max(math.Min(10*soilMoistureStore/smax, petThisTS), 0.0) //* fperv
+		soilMoistureStore -= et
+
+		saturationExcess := math.Max(soilMoistureStore-smax, 0.0) * fperv
 		if soilMoistureStore > smax {
 			soilMoistureStore = smax
 		}
 		perviousQuickflow := infiltrationExcess + saturationExcess
 		quickflow += perviousQuickflow
 
-		et := math.Max(math.Min(10*soilMoistureStore/smax,petThisTS*fperv),0.0)
-		soilMoistureStore -= et
-
-		recharge := math.Max(rfac*(soilMoistureStore/smax-fcFrac),0.0) * fperv
+		recharge := math.Max(rfac*(soilMoistureStore/smax-fcFrac), 0.0) * fperv
 		gw += recharge
 		soilMoistureStore -= recharge
 
 		baseflow := bfac * gw
 		seep := dseep * gw
-		gw = math.Max(gw - baseflow - seep,0.0)
-		// baseflow = baseflow 
+		gw = math.Max(gw-baseflow-seep, 0.0)
+		// baseflow = baseflow
 		baseflow = baseflow * fperv
 
 		runoff := quickflow + baseflow
@@ -98,9 +99,9 @@ func surm(rainfall, pet data.ND1Float64,
 		totalStore = soilMoistureStore + gw
 
 		runoffTS.Set(idx, runoff)
-		quickflowTS.Set(idx,quickflow)
-		baseflowTS.Set(idx,baseflow)
-		storeTS.Set(idx,totalStore)
+		quickflowTS.Set(idx, quickflow)
+		baseflowTS.Set(idx, baseflow)
+		storeTS.Set(idx, totalStore)
 	}
 
 	return soilMoistureStore, gw, totalStore
