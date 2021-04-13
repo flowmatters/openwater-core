@@ -37,18 +37,22 @@ func (g *modelGeneration) Run() {
 }
 
 type modelReference struct {
-	Filename           string
-	OutputFilename     string
-	WriteInputs        bool
-	WriteOutputs       bool
-	WriteStates        bool
-	ModelName          string
-	Batches            []int32
-	SimLength          int
-	Generations        []*modelGeneration
-	OutputWriter       *gio.PipeWriter
-	OutputProcess      *exec.Cmd
-	outputsInitialised bool
+	StructureFilename     string
+	TimeSeriesFilename    string
+	ParametersFilename    string
+	InitialStatesFilename string
+	OutputFilename        string
+	FinalStatesFilename   string
+	WriteInputs           bool
+	WriteOutputs          bool
+	WriteStates           bool
+	ModelName             string
+	Batches               []int32
+	SimLength             int
+	Generations           []*modelGeneration
+	OutputWriter          *gio.PipeWriter
+	OutputProcess         *exec.Cmd
+	outputsInitialised    bool
 }
 
 func initModel(fn, model string) (*modelReference, error) {
@@ -58,24 +62,30 @@ func initModel(fn, model string) (*modelReference, error) {
 		return nil, err
 	}
 	batches := batchesArray.Unroll()
-	result := modelReference{Filename: fn, ModelName: model, Batches: batches}
+	result := modelReference{StructureFilename: fn, ModelName: model, Batches: batches}
+	result.TimeSeriesFilename = fn
+	result.ParametersFilename = fn
+	result.InitialStatesFilename = fn
+
 	result.Generations = make([]*modelGeneration, len(batches))
 	return &result, nil
 }
 
 func (mr *modelReference) GetReference(genSlice []int, element string) io.H5RefFloat64 {
 	result := io.H5RefFloat64{}
-	result.Filename = mr.Filename
 	result.Dataset = "/MODELS/" + mr.ModelName + "/" + element
 
 	if element == "parameters" {
 		result.Slice = [][]int{nil, genSlice}
+		result.Filename = mr.ParametersFilename
 	} else {
 		result.Slice = [][]int{genSlice, nil}
+		result.Filename = mr.InitialStatesFilename
 	}
 
 	if element == "inputs" {
 		result.Slice = append(result.Slice, nil)
+		result.Filename = mr.TimeSeriesFilename
 	}
 
 	return result
@@ -152,7 +162,7 @@ func (mr *modelReference) initialiseTimeSeriesDataset(label string, refShape []i
 
 func (mr *modelReference) initialiseStatesDataset(label string, refShape []int) error {
 	ref := io.H5RefFloat64{}
-	ref.Filename = mr.OutputFilename
+	ref.Filename = mr.FinalStatesFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	count := mr.TotalRuns()
 	return ref.Create([]int{count, refShape[1]}, math.NaN(), false)
@@ -198,7 +208,7 @@ func (mr *modelReference) writeTimeSeries(label string, data data.ND3Float64, lo
 
 func (mr *modelReference) writeStates(label string, data data.ND2Float64, loc int32) error {
 	ref := io.H5RefFloat64{}
-	ref.Filename = mr.OutputFilename
+	ref.Filename = mr.FinalStatesFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	return ref.WriteSlice(data, []int{int(loc), 0})
 }
@@ -355,6 +365,14 @@ func writeOutputs(modelName string) bool {
 	return writeFor(modelName, *outputsFor, *noOutputsFor)
 }
 
+func filenameOrDefault(flag *string, defaultFn string) string {
+	if (flag == nil) || (*flag == "") {
+		return defaultFn
+	}
+
+	return *flag
+}
+
 func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models map[string]*modelReference, genCount int) {
 	simLength := 0
 
@@ -367,9 +385,16 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 		}
 	}
 
+	tsFilename := filenameOrDefault(timeseriesInputFile, inputFn)
+	paramFilename := filenameOrDefault(parameterInputFile, inputFn)
+	initStatesFilename := filenameOrDefault(statesInputFile, inputFn)
+
 	models = make(map[string]*modelReference)
 	for _, modelName := range modelNames {
 		ref, err := initModel(inputFn, modelName)
+		ref.TimeSeriesFilename = tsFilename
+		ref.ParametersFilename = paramFilename
+		ref.InitialStatesFilename = initStatesFilename
 
 		if err != nil {
 			fmt.Println("Couldn't initialise model", modelName)
@@ -380,7 +405,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 		if simLength == 0 {
 			verbosePrintln("Trying to establish simulation length...")
 			inputRef := io.H5RefFloat64{}
-			inputRef.Filename = inputFn
+			inputRef.Filename = tsFilename
 			inputRef.Dataset = "/MODELS/" + modelName + "/inputs"
 			if inputRef.Exists() {
 				inputShp, err := inputRef.Shape()
@@ -400,6 +425,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 		}
 
 		if destFn != "" {
+			ref.FinalStatesFilename = filenameOrDefault(statesOutputFile, destFn)
 			ref.OutputFilename = destFn
 			ref.WriteOutputs = writeOutputs(modelName)
 			ref.WriteStates = true

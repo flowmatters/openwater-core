@@ -13,6 +13,11 @@ var inputsFor = flag.String("inputs-for", "", "only write final model inputs for
 var noOutputsFor = flag.String("no-outputs-for", "", "do not write model outputs for specified models. Specify as command separated list of model names")
 var noInputsFor = flag.String("no-inputs-for", "", "do not write final model inputs for specified models. Specify as command separated list of model names")
 
+var parameterInputFile = flag.String("parameters", "", "specify file for model parameters")
+var statesInputFile = flag.String("initial-states", "", "specify file for initial states")
+var timeseriesInputFile = flag.String("input-timeseries", "", "specify file for input timeseries")
+var statesOutputFile = flag.String("final-states", "", "specify file for final states")
+
 var splitOutputs = flag.String("outputs", "", "split output files by model type. Specify as <model>:<fn>,<model>:<fn>,...")
 var writerMode = flag.Bool("writer", false, "operate as an output writer for another simulation process")
 
