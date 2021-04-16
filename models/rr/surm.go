@@ -59,6 +59,7 @@ func surm(rainfall, pet data.ND1Float64,
 	totalStore := initialTotalStore
 	idx := []int{0}
 	fperv := 1 - fimp
+	fieldCapacity := fcFrac * smax
 
 	for i := 0; i < nTimesteps; i++ {
 		idx[0] = i
@@ -69,13 +70,10 @@ func surm(rainfall, pet data.ND1Float64,
 		imperviousRunoff := math.Max(rainThisTS-thres, 0.0)
 		quickflow += imperviousRunoff * fimp
 
-		maxInfiltration := fperv * coeff * math.Exp(-sq*soilMoistureStore/smax)
+		maxInfiltration := coeff * math.Exp(-sq*soilMoistureStore/smax)
 		infiltration := math.Min(maxInfiltration, rainThisTS)
-		infiltrationExcess := rainThisTS - infiltration
+		infiltrationExcess := fperv * (rainThisTS - infiltration)
 		soilMoistureStore += infiltration
-
-		et := math.Max(math.Min(10*soilMoistureStore/smax, petThisTS), 0.0) //* fperv
-		soilMoistureStore -= et
 
 		saturationExcess := math.Max(soilMoistureStore-smax, 0.0) * fperv
 		if soilMoistureStore > smax {
@@ -84,9 +82,12 @@ func surm(rainfall, pet data.ND1Float64,
 		perviousQuickflow := infiltrationExcess + saturationExcess
 		quickflow += perviousQuickflow
 
-		recharge := math.Max(rfac*(soilMoistureStore/smax-fcFrac), 0.0) * fperv
+		recharge := rfac * math.Max(soilMoistureStore-fieldCapacity, 0.0) //* fperv
 		gw += recharge
 		soilMoistureStore -= recharge
+
+		et := math.Max(math.Min(10*soilMoistureStore/smax, petThisTS), 0.0) //* fperv
+		soilMoistureStore -= et
 
 		baseflow := bfac * gw
 		seep := dseep * gw
