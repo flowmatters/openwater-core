@@ -1,5 +1,5 @@
 #!/bin/bash
 
 sudo apt-get update
-sudo apt-get install -y libhdf5-serial-dev python3-venv
+sudo apt-get install -y python3 libhdf5-serial-dev python3-venv
 
