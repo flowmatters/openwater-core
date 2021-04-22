@@ -392,15 +392,16 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 	models = make(map[string]*modelReference)
 	for _, modelName := range modelNames {
 		ref, err := initModel(inputFn, modelName)
-		ref.TimeSeriesFilename = tsFilename
-		ref.ParametersFilename = paramFilename
-		ref.InitialStatesFilename = initStatesFilename
 
 		if err != nil {
 			fmt.Println("Couldn't initialise model", modelName)
 			fmt.Println(err)
 			os.Exit(1)
 		}
+
+		ref.TimeSeriesFilename = tsFilename
+		ref.ParametersFilename = paramFilename
+		ref.InitialStatesFilename = initStatesFilename
 
 		if simLength == 0 {
 			verbosePrintln("Trying to establish simulation length...")
