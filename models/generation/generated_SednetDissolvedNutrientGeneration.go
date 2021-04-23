@@ -17,6 +17,8 @@ type SednetDissolvedNutrientGeneration struct {
   dissConst_EMC data.ND1Float64
   dissConst_DWC data.ND1Float64
   
+
+  
 }
 
 func (m *SednetDissolvedNutrientGeneration) ApplyParameters(parameters data.ND2Float64) {
@@ -54,10 +56,17 @@ func init() {
 
 func (m *SednetDissolvedNutrientGeneration)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  dissConst_EMCDims := []string{
+      }
+  
+  dissConst_DWCDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("dissConst_EMC",0,"mg.L^-1",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("dissConst_DWC",0,"mg.L^-1",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("dissConst_EMC",0,"mg.L^-1",[]float64{ 0, 0 },"",dissConst_EMCDims),
+  sim.DescribeParameter("dissConst_DWC",0,"mg.L^-1",[]float64{ 0, 0 },"",dissConst_DWCDims),}
 
   result.Inputs = []string{
   "quickflow","slowflow",}
@@ -67,7 +76,19 @@ func (m *SednetDissolvedNutrientGeneration)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *SednetDissolvedNutrientGeneration) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *SednetDissolvedNutrientGeneration) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

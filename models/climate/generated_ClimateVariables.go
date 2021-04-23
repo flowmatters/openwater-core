@@ -16,6 +16,8 @@ import (
 type ClimateVariables struct {
   elevation data.ND1Float64
   
+
+  
 }
 
 func (m *ClimateVariables) ApplyParameters(parameters data.ND2Float64) {
@@ -47,9 +49,13 @@ func init() {
 
 func (m *ClimateVariables)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  elevationDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("elevation",0,"m Elevation above sea level",[]float64{ 0, 10000 },""),}
+  sim.DescribeParameter("elevation",0,"m Elevation above sea level",[]float64{ 0, 10000 },"",elevationDims),}
 
   result.Inputs = []string{
   "dryBulb","humidity",}
@@ -59,7 +65,19 @@ func (m *ClimateVariables)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *ClimateVariables) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *ClimateVariables) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

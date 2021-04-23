@@ -18,6 +18,8 @@ type DateGenerator struct {
   startMonth data.ND1Float64
   startYear data.ND1Float64
   
+
+  
 }
 
 func (m *DateGenerator) ApplyParameters(parameters data.ND2Float64) {
@@ -61,11 +63,21 @@ func init() {
 
 func (m *DateGenerator)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  startDateDims := []string{
+      }
+  
+  startMonthDims := []string{
+      }
+  
+  startYearDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("startDate",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("startMonth",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("startYear",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("startDate",0,"",[]float64{ 0, 0 },"",startDateDims),
+  sim.DescribeParameter("startMonth",0,"",[]float64{ 0, 0 },"",startMonthDims),
+  sim.DescribeParameter("startYear",0,"",[]float64{ 0, 0 },"",startYearDims),}
 
   result.Inputs = []string{
   "tick",}
@@ -75,7 +87,19 @@ func (m *DateGenerator)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *DateGenerator) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *DateGenerator) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

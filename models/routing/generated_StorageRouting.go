@@ -21,6 +21,8 @@ type StorageRouting struct {
   deadStorage data.ND1Float64
   DeltaT data.ND1Float64
   
+
+  
 }
 
 func (m *StorageRouting) ApplyParameters(parameters data.ND2Float64) {
@@ -82,14 +84,33 @@ func init() {
 
 func (m *StorageRouting)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  InflowBiasDims := []string{
+      }
+  
+  RoutingConstantDims := []string{
+      }
+  
+  RoutingPowerDims := []string{
+      }
+  
+  areaDims := []string{
+      }
+  
+  deadStorageDims := []string{
+      }
+  
+  DeltaTDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("InflowBias",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("RoutingConstant",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("RoutingPower",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("area",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("deadStorage",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),}
+  sim.DescribeParameter("InflowBias",0,"",[]float64{ 0, 0 },"",InflowBiasDims),
+  sim.DescribeParameter("RoutingConstant",0,"",[]float64{ 0, 0 },"",RoutingConstantDims),
+  sim.DescribeParameter("RoutingPower",0,"",[]float64{ 0, 0 },"",RoutingPowerDims),
+  sim.DescribeParameter("area",0,"",[]float64{ 0, 0 },"",areaDims),
+  sim.DescribeParameter("deadStorage",0,"",[]float64{ 0, 0 },"",deadStorageDims),
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," ",DeltaTDims),}
 
   result.Inputs = []string{
   "inflow","lateral","rainfall","evap",}
@@ -99,7 +120,19 @@ func (m *StorageRouting)  Description() sim.ModelDescription{
   result.States = []string{
   "S","prevInflow","prevOutflow",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *StorageRouting) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *StorageRouting) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

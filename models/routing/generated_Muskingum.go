@@ -18,6 +18,8 @@ type Muskingum struct {
   X data.ND1Float64
   DeltaT data.ND1Float64
   
+
+  
 }
 
 func (m *Muskingum) ApplyParameters(parameters data.ND2Float64) {
@@ -61,11 +63,21 @@ func init() {
 
 func (m *Muskingum)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  KDims := []string{
+      }
+  
+  XDims := []string{
+      }
+  
+  DeltaTDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("K",0,"s Constant",[]float64{ 0, 200000 },""),
-  sim.DescribeParameter("X",0,"Weighting",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),}
+  sim.DescribeParameter("K",0,"s Constant",[]float64{ 0, 200000 },"",KDims),
+  sim.DescribeParameter("X",0,"Weighting",[]float64{ 0, 1 }," ",XDims),
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," ",DeltaTDims),}
 
   result.Inputs = []string{
   "inflow","lateral",}
@@ -75,7 +87,19 @@ func (m *Muskingum)  Description() sim.ModelDescription{
   result.States = []string{
   "S","prevInflow","prevOutflow",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *Muskingum) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *Muskingum) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

@@ -15,6 +15,8 @@ import (
 
 type Input struct {
   
+
+  
 }
 
 func (m *Input) ApplyParameters(parameters data.ND2Float64) {
@@ -35,6 +37,7 @@ func init() {
 
 func (m *Input)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
 	result.Parameters = []sim.ParameterDescription{
   }
 
@@ -46,7 +49,19 @@ func (m *Input)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *Input) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *Input) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

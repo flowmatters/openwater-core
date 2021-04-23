@@ -39,6 +39,7 @@ type ModelSpec struct {
 	Package        string
 	Inputs         yaml.MapSlice
 	States         yaml.MapSlice
+	Dimensions     []string
 	Parameters     yaml.MapSlice
 	ParameterSpecs []VariableSpec
 	Outputs        yaml.MapSlice
@@ -80,6 +81,9 @@ func processDirectory(path string) {
 
 func transform(spec ModelSpec) ModelSpec {
 	spec.ParameterSpecs = make([]VariableSpec, len(spec.Parameters))
+	spec.Dimensions = make([]string,0)
+	dims := make(map[string]struct{})
+
 	for i, v := range spec.Parameters {
 		paramName := fmt.Sprint(v.Key)
 		var dimensions []string = nil
@@ -88,6 +92,9 @@ func transform(spec ModelSpec) ModelSpec {
 			nameComponents := strings.Split(cleanName,",")
 			paramName = nameComponents[0]
 			dimensions = nameComponents[1:]
+			for _, d := range(dimensions) {
+				dims[d] = struct{}{}
+			}
 			fmt.Println(paramName,dimensions)
 		}
 
@@ -142,6 +149,10 @@ func transform(spec ModelSpec) ModelSpec {
 				}
 			}
 		}
+	}
+
+	for k := range dims {
+		spec.Dimensions = append(spec.Dimensions,k)
 	}
 
 	for _,v := range spec.ParameterSpecs {

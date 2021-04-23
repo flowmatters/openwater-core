@@ -22,6 +22,8 @@ type StorageParticulateTrapping struct {
   lengthDischargeFactor data.ND1Float64
   lengthDischargePower data.ND1Float64
   
+
+  
 }
 
 func (m *StorageParticulateTrapping) ApplyParameters(parameters data.ND2Float64) {
@@ -89,15 +91,37 @@ func init() {
 
 func (m *StorageParticulateTrapping)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  DeltaTDims := []string{
+      }
+  
+  reservoirCapacityDims := []string{
+      }
+  
+  reservoirLengthDims := []string{
+      }
+  
+  subtractorDims := []string{
+      }
+  
+  multiplierDims := []string{
+      }
+  
+  lengthDischargeFactorDims := []string{
+      }
+  
+  lengthDischargePowerDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),
-  sim.DescribeParameter("reservoirCapacity",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("reservoirLength",0,"Length (m) of reservoir from dam wall to longest impounded water at dam capacity",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("subtractor",0,"default=112",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("multiplier",0,"default=800",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("lengthDischargeFactor",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("lengthDischargePower",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," ",DeltaTDims),
+  sim.DescribeParameter("reservoirCapacity",0,"",[]float64{ 0, 0 },"",reservoirCapacityDims),
+  sim.DescribeParameter("reservoirLength",0,"Length (m) of reservoir from dam wall to longest impounded water at dam capacity",[]float64{ 0, 0 },"",reservoirLengthDims),
+  sim.DescribeParameter("subtractor",0,"default=112",[]float64{ 0, 0 },"",subtractorDims),
+  sim.DescribeParameter("multiplier",0,"default=800",[]float64{ 0, 0 },"",multiplierDims),
+  sim.DescribeParameter("lengthDischargeFactor",0,"",[]float64{ 0, 0 },"",lengthDischargeFactorDims),
+  sim.DescribeParameter("lengthDischargePower",0,"",[]float64{ 0, 0 },"",lengthDischargePowerDims),}
 
   result.Inputs = []string{
   "inflowLoad","inflow","outflow","storage",}
@@ -107,7 +131,19 @@ func (m *StorageParticulateTrapping)  Description() sim.ModelDescription{
   result.States = []string{
   "storedMass",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *StorageParticulateTrapping) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *StorageParticulateTrapping) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

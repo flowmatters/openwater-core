@@ -24,6 +24,8 @@ type Surm struct {
   sq data.ND1Float64
   thres data.ND1Float64
   
+
+  
 }
 
 func (m *Surm) ApplyParameters(parameters data.ND2Float64) {
@@ -103,17 +105,45 @@ func init() {
 
 func (m *Surm)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  bfacDims := []string{
+      }
+  
+  coeffDims := []string{
+      }
+  
+  dseepDims := []string{
+      }
+  
+  fcFracDims := []string{
+      }
+  
+  fimpDims := []string{
+      }
+  
+  rfacDims := []string{
+      }
+  
+  smaxDims := []string{
+      }
+  
+  sqDims := []string{
+      }
+  
+  thresDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("bfac",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("coeff",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("dseep",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("fcFrac",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("fimp",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("rfac",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("smax",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("sq",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("thres",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("bfac",0,"",[]float64{ 0, 0 },"",bfacDims),
+  sim.DescribeParameter("coeff",0,"",[]float64{ 0, 0 },"",coeffDims),
+  sim.DescribeParameter("dseep",0,"",[]float64{ 0, 0 },"",dseepDims),
+  sim.DescribeParameter("fcFrac",0,"",[]float64{ 0, 0 },"",fcFracDims),
+  sim.DescribeParameter("fimp",0,"",[]float64{ 0, 0 },"",fimpDims),
+  sim.DescribeParameter("rfac",0,"",[]float64{ 0, 0 },"",rfacDims),
+  sim.DescribeParameter("smax",0,"",[]float64{ 0, 0 },"",smaxDims),
+  sim.DescribeParameter("sq",0,"",[]float64{ 0, 0 },"",sqDims),
+  sim.DescribeParameter("thres",0,"",[]float64{ 0, 0 },"",thresDims),}
 
   result.Inputs = []string{
   "rainfall","pet",}
@@ -123,7 +153,19 @@ func (m *Surm)  Description() sim.ModelDescription{
   result.States = []string{
   "SoilMoistureStore","Groundwater","TotalStore",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *Surm) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *Surm) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

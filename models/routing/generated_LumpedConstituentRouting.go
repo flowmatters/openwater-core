@@ -18,6 +18,8 @@ type LumpedConstituentRouting struct {
   pointInput data.ND1Float64
   DeltaT data.ND1Float64
   
+
+  
 }
 
 func (m *LumpedConstituentRouting) ApplyParameters(parameters data.ND2Float64) {
@@ -61,11 +63,21 @@ func init() {
 
 func (m *LumpedConstituentRouting)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  XDims := []string{
+      }
+  
+  pointInputDims := []string{
+      }
+  
+  DeltaTDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("X",0,"Weighting",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("pointInput",0,"kg.s^-1",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),}
+  sim.DescribeParameter("X",0,"Weighting",[]float64{ 0, 1 }," ",XDims),
+  sim.DescribeParameter("pointInput",0,"kg.s^-1",[]float64{ 0, 0 },"",pointInputDims),
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," ",DeltaTDims),}
 
   result.Inputs = []string{
   "inflowLoad","lateralLoad","outflow","storage",}
@@ -75,7 +87,19 @@ func (m *LumpedConstituentRouting)  Description() sim.ModelDescription{
   result.States = []string{
   "storedMass",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *LumpedConstituentRouting) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *LumpedConstituentRouting) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

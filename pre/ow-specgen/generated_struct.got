@@ -17,6 +17,10 @@ type {{.Name}} struct {
   {{range $v := .ParameterSpecs -}}
   {{$v.Name}} data.ND{{$v.Dimensionality}}Float64
   {{end}}
+
+  {{range $ix, $d := .Dimensions -}}
+  max{{- $d }} int
+  {{end}}
 }
 
 func (m *{{.Name}}) ApplyParameters(parameters data.ND2Float64) {
@@ -31,13 +35,13 @@ func (m *{{.Name}}) ApplyParameters(parameters data.ND2Float64) {
   paramSize = 1
     {{- if $v.Dimensions -}}
       {{- range $d := $v.Dimensions -}}
-   + int(m.{{$d}}.Maximum())
+   * m.max{{$d}}
       {{- end}}
     {{- end}}
   newShape = []int{
     {{- if $v.Dimensions -}}
       {{- range $d := $v.Dimensions -}}
-   int(m.{{$d}}.Maximum()),
+   m.max{{$d}},
       {{- end}}
     {{- end}} nSets}
 
@@ -59,9 +63,13 @@ func init() {
 
 func (m *{{.Name}})  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  {{range $v := .ParameterSpecs }}
+  {{$v.Name}}Dims := []string{
+    {{ if $v.Dimensions }}{{ range $d := $v.Dimensions }}"{{$d}}",{{end}}{{end}}  }
+  {{end}}
 	result.Parameters = []sim.ParameterDescription{
   {{range $v := .ParameterSpecs }}
-  sim.DescribeParameter("{{$v.Name}}",{{$v.Default}},"{{$v.Description}}",[]float64{ {{index $v.Range 0}}, {{index $v.Range 1}} },"{{$v.Units}}"),
+  sim.DescribeParameter("{{$v.Name}}",{{$v.Default}},"{{$v.Description}}",[]float64{ {{index $v.Range 0}}, {{index $v.Range 1}} },"{{$v.Units}}",{{$v.Name}}Dims),
   {{- end -}} }
 
   result.Inputs = []string{
@@ -72,7 +80,46 @@ func (m *{{.Name}})  Description() sim.ModelDescription{
   result.States = []string{
   {{range $k,$v := .States }}"{{$v.Key}}",{{- end -}} }
 
+  result.Dimensions = []string{
+    {{range $ix, $d := .Dimensions -}}"{{ $d }}",{{end}}  }
 	return result
+}
+
+func (m *{{.Name}}) InitialiseDimensions(dims []int) {
+  {{range $ix, $d := .Dimensions -}}
+  m.max{{$d}} = dims[{{$ix}}]
+  {{end}}
+}
+
+func (m *{{.Name}}) FindDimensions(parameters data.ND2Float64) []int {
+  {{if .Dimensions }}
+  nSets := parameters.Len(sim.DIMP_CELL)
+  paramIdx := 0
+  paramSize := 1
+  maxValues := make(map[string]float64)
+
+  {{range $i, $v := .ParameterSpecs -}}
+  paramSize = 1
+    {{- if $v.Dimensions -}}
+      {{- range $d := $v.Dimensions -}}
+   * int(maxValues["{{$d}}"])
+      {{- end}}
+    {{- end}}
+
+  maxValues["{{$v.Name}}"] = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).Maximum()
+  paramIdx += paramSize
+
+  {{end}}
+  dims := []int{
+    {{range $ix, $d := .Dimensions -}}
+    int(maxValues["{{$d}}"]),
+    {{end}}
+  }
+  
+  return dims
+  {{else}}
+  return []int{}
+  {{end}}
 }
 
 {{if .Flags.GenerateInit}}
@@ -173,7 +220,7 @@ func (m *{{.Name}}) Run(inputs data.ND3Float64, states data.ND2Float64, outputs 
       {{lower $v.Name}}Shape := m.{{$v.Name}}.Shape()
       {{lower $v.Name}}NSets := {{lower $v.Name}}Shape[len({{lower $v.Name}}Shape)-1]
       {{lower $v.Name}}From := []int{ {{range $d := $v.Dimensions}} 0, {{end}} i%{{lower $v.Name}}NSets }
-      {{lower $v.Name}}SliceShape := []int{ {{range $d := $v.Dimensions}} int(m.{{ $d }}.Maximum()), {{end}} }
+      {{lower $v.Name}}SliceShape := []int{ {{range $d := $v.Dimensions}} m.max{{ $d }}, {{end}} }
       {{lower $v.Name}} := m.{{$v.Name}}.Slice({{lower $v.Name}}From, {{lower $v.Name}}SliceShape, nil).(data.ND{{len $v.Dimensions}}Float64)
       {{- else -}}
       {{- if $v.IsDimension -}}

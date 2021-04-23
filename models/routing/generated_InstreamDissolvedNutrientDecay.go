@@ -22,6 +22,8 @@ type InstreamDissolvedNutrientDecay struct {
   uptakeVelocity data.ND1Float64
   durationInSeconds data.ND1Float64
   
+
+  
 }
 
 func (m *InstreamDissolvedNutrientDecay) ApplyParameters(parameters data.ND2Float64) {
@@ -89,15 +91,37 @@ func init() {
 
 func (m *InstreamDissolvedNutrientDecay)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  doDecayDims := []string{
+      }
+  
+  pointSourceLoadDims := []string{
+      }
+  
+  linkHeightDims := []string{
+      }
+  
+  linkWidthDims := []string{
+      }
+  
+  linkLengthDims := []string{
+      }
+  
+  uptakeVelocityDims := []string{
+      }
+  
+  durationInSecondsDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("doDecay",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("pointSourceLoad",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("linkHeight",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("linkWidth",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("linkLength",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("uptakeVelocity",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," "),}
+  sim.DescribeParameter("doDecay",0,"",[]float64{ 0, 0 },"",doDecayDims),
+  sim.DescribeParameter("pointSourceLoad",0,"",[]float64{ 0, 0 },"",pointSourceLoadDims),
+  sim.DescribeParameter("linkHeight",0,"",[]float64{ 0, 0 },"",linkHeightDims),
+  sim.DescribeParameter("linkWidth",0,"",[]float64{ 0, 0 },"",linkWidthDims),
+  sim.DescribeParameter("linkLength",0,"",[]float64{ 0, 0 },"",linkLengthDims),
+  sim.DescribeParameter("uptakeVelocity",0,"",[]float64{ 0, 0 },"",uptakeVelocityDims),
+  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," ",durationInSecondsDims),}
 
   result.Inputs = []string{
   "incomingMassUpstream","incomingMassLateral","reachVolume","outflow","floodplainDepositionFraction",}
@@ -107,7 +131,19 @@ func (m *InstreamDissolvedNutrientDecay)  Description() sim.ModelDescription{
   result.States = []string{
   "totalStoredMass",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *InstreamDissolvedNutrientDecay) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *InstreamDissolvedNutrientDecay) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

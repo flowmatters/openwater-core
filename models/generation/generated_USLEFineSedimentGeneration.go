@@ -33,6 +33,8 @@ type USLEFineSedimentGeneration struct {
   usleHSDRCoarse data.ND1Float64
   timeStepInSeconds data.ND1Float64
   
+
+  
 }
 
 func (m *USLEFineSedimentGeneration) ApplyParameters(parameters data.ND2Float64) {
@@ -166,26 +168,81 @@ func init() {
 
 func (m *USLEFineSedimentGeneration)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  SDims := []string{
+      }
+  
+  PDims := []string{
+      }
+  
+  RainThresholdDims := []string{
+      }
+  
+  AlphaDims := []string{
+      }
+  
+  BetaDims := []string{
+      }
+  
+  EtaDims := []string{
+      }
+  
+  A1Dims := []string{
+      }
+  
+  A2Dims := []string{
+      }
+  
+  A3Dims := []string{
+      }
+  
+  DWCDims := []string{
+      }
+  
+  avKDims := []string{
+      }
+  
+  avLSDims := []string{
+      }
+  
+  avFinesDims := []string{
+      }
+  
+  areaDims := []string{
+      }
+  
+  maxConcDims := []string{
+      }
+  
+  usleHSDRFineDims := []string{
+      }
+  
+  usleHSDRCoarseDims := []string{
+      }
+  
+  timeStepInSecondsDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("S",0,"mm Mean Summer Rainfall",[]float64{ 0, 5000 },""),
-  sim.DescribeParameter("P",0,"mm Mean Annual Rainfall",[]float64{ 0, 5000 },""),
-  sim.DescribeParameter("RainThreshold",0,"mm R Factor Rainfall Threshold",[]float64{ 0, 12.7 },""),
-  sim.DescribeParameter("Alpha",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("Beta",0,"Monthly EI30 Parameter",[]float64{ 0.1, 10 }," "),
-  sim.DescribeParameter("Eta",0,"Monthly EI30 Parameter",[]float64{ 0.1, 10 }," "),
-  sim.DescribeParameter("A1",0,"Alpha term 1",[]float64{ 0.001, 10 }," "),
-  sim.DescribeParameter("A2",0,"Alpha term 2",[]float64{ 0.001, 10 }," "),
-  sim.DescribeParameter("A3",0,"Alpha term 3",[]float64{ 0.001, 100 }," "),
-  sim.DescribeParameter("DWC",0,"Dry Weather Concentration",[]float64{ 0.1, 10000 }," "),
-  sim.DescribeParameter("avK",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("avLS",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("avFines",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("area",0,"[0",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("maxConc",0,"mg.L^-1 USLE Maximum Fine Sediment Allowable Runoff Concentration",[]float64{ 0, 10000 },""),
-  sim.DescribeParameter("usleHSDRFine",0,"% Hillslope Fine Sediment Delivery Ratio",[]float64{ 0, 100 },""),
-  sim.DescribeParameter("usleHSDRCoarse",0,"% Hillslope Coarse Sediment Delivery Ratio",[]float64{ 0, 100 },""),
-  sim.DescribeParameter("timeStepInSeconds",86400,"s Duration of timestep in seconds",[]float64{ 0, 1e+08 },""),}
+  sim.DescribeParameter("S",0,"mm Mean Summer Rainfall",[]float64{ 0, 5000 },"",SDims),
+  sim.DescribeParameter("P",0,"mm Mean Annual Rainfall",[]float64{ 0, 5000 },"",PDims),
+  sim.DescribeParameter("RainThreshold",0,"mm R Factor Rainfall Threshold",[]float64{ 0, 12.7 },"",RainThresholdDims),
+  sim.DescribeParameter("Alpha",0,"",[]float64{ 0, 0 },"",AlphaDims),
+  sim.DescribeParameter("Beta",0,"Monthly EI30 Parameter",[]float64{ 0.1, 10 }," ",BetaDims),
+  sim.DescribeParameter("Eta",0,"Monthly EI30 Parameter",[]float64{ 0.1, 10 }," ",EtaDims),
+  sim.DescribeParameter("A1",0,"Alpha term 1",[]float64{ 0.001, 10 }," ",A1Dims),
+  sim.DescribeParameter("A2",0,"Alpha term 2",[]float64{ 0.001, 10 }," ",A2Dims),
+  sim.DescribeParameter("A3",0,"Alpha term 3",[]float64{ 0.001, 100 }," ",A3Dims),
+  sim.DescribeParameter("DWC",0,"Dry Weather Concentration",[]float64{ 0.1, 10000 }," ",DWCDims),
+  sim.DescribeParameter("avK",0,"",[]float64{ 0, 0 },"",avKDims),
+  sim.DescribeParameter("avLS",0,"",[]float64{ 0, 0 },"",avLSDims),
+  sim.DescribeParameter("avFines",0,"",[]float64{ 0, 0 },"",avFinesDims),
+  sim.DescribeParameter("area",0,"[0",[]float64{ 0, 0 },"",areaDims),
+  sim.DescribeParameter("maxConc",0,"mg.L^-1 USLE Maximum Fine Sediment Allowable Runoff Concentration",[]float64{ 0, 10000 },"",maxConcDims),
+  sim.DescribeParameter("usleHSDRFine",0,"% Hillslope Fine Sediment Delivery Ratio",[]float64{ 0, 100 },"",usleHSDRFineDims),
+  sim.DescribeParameter("usleHSDRCoarse",0,"% Hillslope Coarse Sediment Delivery Ratio",[]float64{ 0, 100 },"",usleHSDRCoarseDims),
+  sim.DescribeParameter("timeStepInSeconds",86400,"s Duration of timestep in seconds",[]float64{ 0, 1e+08 },"",timeStepInSecondsDims),}
 
   result.Inputs = []string{
   "quickflow","baseflow","rainfall","KLSC","KLSC_Fine","CovOrCFact","dayOfYear",}
@@ -195,7 +252,19 @@ func (m *USLEFineSedimentGeneration)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *USLEFineSedimentGeneration) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *USLEFineSedimentGeneration) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

@@ -24,6 +24,8 @@ type Simhyd struct {
   rechargeCoefficient data.ND1Float64
   soilMoistureStoreCapacity data.ND1Float64
   
+
+  
 }
 
 func (m *Simhyd) ApplyParameters(parameters data.ND2Float64) {
@@ -103,17 +105,45 @@ func init() {
 
 func (m *Simhyd)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  baseflowCoefficientDims := []string{
+      }
+  
+  imperviousThresholdDims := []string{
+      }
+  
+  infiltrationCoefficientDims := []string{
+      }
+  
+  infiltrationShapeDims := []string{
+      }
+  
+  interflowCoefficientDims := []string{
+      }
+  
+  perviousFractionDims := []string{
+      }
+  
+  rainfallInterceptionStoreCapacityDims := []string{
+      }
+  
+  rechargeCoefficientDims := []string{
+      }
+  
+  soilMoistureStoreCapacityDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("baseflowCoefficient",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("imperviousThreshold",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("infiltrationCoefficient",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("infiltrationShape",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("interflowCoefficient",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("perviousFraction",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("rainfallInterceptionStoreCapacity",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("rechargeCoefficient",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("soilMoistureStoreCapacity",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("baseflowCoefficient",0,"",[]float64{ 0, 0 },"",baseflowCoefficientDims),
+  sim.DescribeParameter("imperviousThreshold",0,"",[]float64{ 0, 0 },"",imperviousThresholdDims),
+  sim.DescribeParameter("infiltrationCoefficient",0,"",[]float64{ 0, 0 },"",infiltrationCoefficientDims),
+  sim.DescribeParameter("infiltrationShape",0,"",[]float64{ 0, 0 },"",infiltrationShapeDims),
+  sim.DescribeParameter("interflowCoefficient",0,"",[]float64{ 0, 0 },"",interflowCoefficientDims),
+  sim.DescribeParameter("perviousFraction",0,"",[]float64{ 0, 0 },"",perviousFractionDims),
+  sim.DescribeParameter("rainfallInterceptionStoreCapacity",0,"",[]float64{ 0, 0 },"",rainfallInterceptionStoreCapacityDims),
+  sim.DescribeParameter("rechargeCoefficient",0,"",[]float64{ 0, 0 },"",rechargeCoefficientDims),
+  sim.DescribeParameter("soilMoistureStoreCapacity",0,"",[]float64{ 0, 0 },"",soilMoistureStoreCapacityDims),}
 
   result.Inputs = []string{
   "rainfall","pet",}
@@ -123,7 +153,19 @@ func (m *Simhyd)  Description() sim.ModelDescription{
   result.States = []string{
   "SoilMoistureStore","Groundwater","TotalStore",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *Simhyd) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *Simhyd) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

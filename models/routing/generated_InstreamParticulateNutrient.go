@@ -18,6 +18,8 @@ type InstreamParticulateNutrient struct {
   soilPercentFine data.ND1Float64
   durationInSeconds data.ND1Float64
   
+
+  
 }
 
 func (m *InstreamParticulateNutrient) ApplyParameters(parameters data.ND2Float64) {
@@ -61,11 +63,21 @@ func init() {
 
 func (m *InstreamParticulateNutrient)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  particulateNutrientConcentrationDims := []string{
+      }
+  
+  soilPercentFineDims := []string{
+      }
+  
+  durationInSecondsDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("particulateNutrientConcentration",0,"Proportion of sediment mass",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("soilPercentFine",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," "),}
+  sim.DescribeParameter("particulateNutrientConcentration",0,"Proportion of sediment mass",[]float64{ 0, 1 }," ",particulateNutrientConcentrationDims),
+  sim.DescribeParameter("soilPercentFine",0,"",[]float64{ 0, 0 },"",soilPercentFineDims),
+  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," ",durationInSecondsDims),}
 
   result.Inputs = []string{
   "incomingMassUpstream","incomingMassLateral","reachVolume","outflow","streambankErosion","lateralSediment","floodplainDepositionFraction","channelDepositionFraction",}
@@ -75,7 +87,19 @@ func (m *InstreamParticulateNutrient)  Description() sim.ModelDescription{
   result.States = []string{
   "channelStoredMass",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *InstreamParticulateNutrient) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *InstreamParticulateNutrient) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

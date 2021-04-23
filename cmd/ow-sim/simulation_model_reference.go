@@ -49,6 +49,7 @@ type modelReference struct {
 	ModelName             string
 	Batches               []int32
 	SimLength             int
+	Dimensions            []int
 	Generations           []*modelGeneration
 	OutputWriter          *gio.PipeWriter
 	OutputProcess         *exec.Cmd
@@ -66,9 +67,52 @@ func initModel(fn, model string) (*modelReference, error) {
 	result.TimeSeriesFilename = fn
 	result.ParametersFilename = fn
 	result.InitialStatesFilename = fn
-
+	dimensions, err := result.initDimensions()
+	if err != nil {
+		return nil, err
+	}
+	result.Dimensions = dimensions
 	result.Generations = make([]*modelGeneration, len(batches))
 	return &result, nil
+}
+
+func (mr *modelReference) makeModel() (sim.TimeSteppingModel, error) {
+	modelRef := sim.Catalog[mr.ModelName]
+	if modelRef == nil {
+		errorMsg := fmt.Sprintf("Unknown model: %s", mr.ModelName)
+		return nil, &errorString{errorMsg}
+	}
+	return modelRef(), nil
+}
+
+func (mr *modelReference) initDimensions() ([]int, error) {
+	modelInstance, err := mr.makeModel()
+	if err != nil {
+		return nil, err
+	}
+
+	dims := modelInstance.Description().Dimensions
+	if len(dims) == 0 {
+		return []int{}, nil
+	}
+
+	h5Ref := io.H5RefFloat64{}
+	h5Ref.Dataset = "/MODELS/" + mr.ModelName + "/parameters"
+	h5Ref.Filename = mr.ParametersFilename
+
+	allParameters, err := h5Ref.Load()
+	if err != nil {
+		return nil, err
+	}
+	
+	dimSizes := modelInstance.FindDimensions(allParameters.(data.ND2Float64))
+
+	fmt.Printf("===== Simulation dimension sizes for %s =====\n",mr.ModelName)
+	for ix, dim := range(dims){
+		fmt.Printf("\t%s=%d\n",dim,dimSizes[ix])
+	}
+
+	return dimSizes,err
 }
 
 func (mr *modelReference) GetReference(genSlice []int, element string) io.H5RefFloat64 {
@@ -95,13 +139,14 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 	if mr.Generations[i] == nil {
 		verbosePrintf("Initialising Generation %d for %s\n", i, mr.ModelName)
 		gen := modelGeneration{}
-		modelRef := sim.Catalog[mr.ModelName]
-		if modelRef == nil {
-			errorMsg := fmt.Sprintf("Unknown model: %s", mr.ModelName)
-			return nil, &errorString{errorMsg}
+		modelInstance, err := mr.makeModel()
+		if err != nil {
+			return nil,err
 		}
-
-		gen.Model = modelRef()
+		gen.Model = modelInstance
+		if mr.Dimensions != nil {
+			gen.Model.InitialiseDimensions(mr.Dimensions)
+		}
 		mr.Generations[i] = &gen
 		genSlice := []int{0, int(mr.Batches[i]), 1}
 		if i > 0 {

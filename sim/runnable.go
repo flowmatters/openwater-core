@@ -25,6 +25,7 @@ type ModelDescription struct {
 	States     []string
 	Inputs     []string
 	Outputs    []string
+	Dimensions []string
 }
 
 type ParameterDescription struct {
@@ -34,11 +35,14 @@ type ParameterDescription struct {
 	Range       [2]float64
 	RangeOpen   [2]bool
 	Units       string
+	Dimensions  []string
 }
 
 type TimeSteppingModel interface {
 	Description() ModelDescription
 
+	InitialiseDimensions(dims []int)
+	FindDimensions(params data.ND2Float64) []int
 	ApplyParameters(params data.ND2Float64)
 	InitialiseStates(n int) data.ND2Float64
 	Run(inputs data.ND3Float64, states data.ND2Float64, outputs data.ND3Float64)
@@ -69,7 +73,7 @@ func DescribeParameters(names []string) []ParameterDescription {
 }
 
 func DescribeParameter(name string, defaultValue float64, description string,
-	paramRange []float64, units string) ParameterDescription {
+	paramRange []float64, units string, dims []string) ParameterDescription {
 	var result ParameterDescription
 	result.Name = name
 	result.Default = defaultValue
@@ -77,12 +81,13 @@ func DescribeParameter(name string, defaultValue float64, description string,
 	result.Range[0] = paramRange[0]
 	result.Range[1] = paramRange[1]
 	result.Units = units
+	result.Dimensions = dims
 	return result
 }
 
 func NewParameter(name string) ParameterDescription {
 	dummyRange := make([]float64, 2)
-	return DescribeParameter(name, 0, "", dummyRange, "")
+	return DescribeParameter(name, 0, "", dummyRange, "",[]string{})
 }
 
 func InitialiseOutputs(model TimeSteppingModel, nTimeSteps int, nCells int) data.ND3Float64 {

@@ -17,6 +17,8 @@ type EmcDwc struct {
   EMC data.ND1Float64
   DWC data.ND1Float64
   
+
+  
 }
 
 func (m *EmcDwc) ApplyParameters(parameters data.ND2Float64) {
@@ -54,10 +56,17 @@ func init() {
 
 func (m *EmcDwc)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  EMCDims := []string{
+      }
+  
+  DWCDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("EMC",0,"mg.L^-1 Event Mean Concentration",[]float64{ 0.1, 10000 },""),
-  sim.DescribeParameter("DWC",0,"mg.L^-1 Dry Weather Concentration",[]float64{ 0.1, 10000 },""),}
+  sim.DescribeParameter("EMC",0,"mg.L^-1 Event Mean Concentration",[]float64{ 0.1, 10000 },"",EMCDims),
+  sim.DescribeParameter("DWC",0,"mg.L^-1 Dry Weather Concentration",[]float64{ 0.1, 10000 },"",DWCDims),}
 
   result.Inputs = []string{
   "quickflow","baseflow",}
@@ -67,7 +76,19 @@ func (m *EmcDwc)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *EmcDwc) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *EmcDwc) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

@@ -20,6 +20,8 @@ type StorageDissolvedDecay struct {
   bankFullFlow data.ND1Float64
   medianFloodResidenceTime data.ND1Float64
   
+
+  
 }
 
 func (m *StorageDissolvedDecay) ApplyParameters(parameters data.ND2Float64) {
@@ -75,13 +77,29 @@ func init() {
 
 func (m *StorageDissolvedDecay)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  DeltaTDims := []string{
+      }
+  
+  doStorageDecayDims := []string{
+      }
+  
+  annualReturnIntervalDims := []string{
+      }
+  
+  bankFullFlowDims := []string{
+      }
+  
+  medianFloodResidenceTimeDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),
-  sim.DescribeParameter("doStorageDecay",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("annualReturnInterval",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("bankFullFlow",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("medianFloodResidenceTime",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," ",DeltaTDims),
+  sim.DescribeParameter("doStorageDecay",0,"",[]float64{ 0, 0 },"",doStorageDecayDims),
+  sim.DescribeParameter("annualReturnInterval",0,"",[]float64{ 0, 0 },"",annualReturnIntervalDims),
+  sim.DescribeParameter("bankFullFlow",0,"",[]float64{ 0, 0 },"",bankFullFlowDims),
+  sim.DescribeParameter("medianFloodResidenceTime",0,"",[]float64{ 0, 0 },"",medianFloodResidenceTimeDims),}
 
   result.Inputs = []string{
   "inflowMass","inflow","outflow","storageVolume",}
@@ -91,7 +109,19 @@ func (m *StorageDissolvedDecay)  Description() sim.ModelDescription{
   result.States = []string{
   "storedMass",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *StorageDissolvedDecay) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *StorageDissolvedDecay) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

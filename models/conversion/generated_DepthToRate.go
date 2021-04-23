@@ -17,6 +17,8 @@ type DepthToRate struct {
   DeltaT data.ND1Float64
   area data.ND1Float64
   
+
+  
 }
 
 func (m *DepthToRate) ApplyParameters(parameters data.ND2Float64) {
@@ -54,10 +56,17 @@ func init() {
 
 func (m *DepthToRate)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  DeltaTDims := []string{
+      }
+  
+  areaDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),
-  sim.DescribeParameter("area",0,"m^2",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," ",DeltaTDims),
+  sim.DescribeParameter("area",0,"m^2",[]float64{ 0, 0 },"",areaDims),}
 
   result.Inputs = []string{
   "input",}
@@ -67,7 +76,19 @@ func (m *DepthToRate)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *DepthToRate) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *DepthToRate) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

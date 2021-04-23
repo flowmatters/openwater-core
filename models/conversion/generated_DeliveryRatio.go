@@ -16,6 +16,8 @@ import (
 type DeliveryRatio struct {
   fraction data.ND1Float64
   
+
+  
 }
 
 func (m *DeliveryRatio) ApplyParameters(parameters data.ND2Float64) {
@@ -47,9 +49,13 @@ func init() {
 
 func (m *DeliveryRatio)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  fractionDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("fraction",0,"default=1",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("fraction",0,"default=1",[]float64{ 0, 0 },"",fractionDims),}
 
   result.Inputs = []string{
   "input",}
@@ -59,7 +65,19 @@ func (m *DeliveryRatio)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *DeliveryRatio) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *DeliveryRatio) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

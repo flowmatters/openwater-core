@@ -15,6 +15,8 @@ import (
 
 type Sum struct {
   
+
+  
 }
 
 func (m *Sum) ApplyParameters(parameters data.ND2Float64) {
@@ -35,6 +37,7 @@ func init() {
 
 func (m *Sum)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
 	result.Parameters = []sim.ParameterDescription{
   }
 
@@ -46,7 +49,19 @@ func (m *Sum)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *Sum) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *Sum) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

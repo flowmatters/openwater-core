@@ -15,6 +15,8 @@ import (
 
 type PartitionDemand struct {
   
+
+  
 }
 
 func (m *PartitionDemand) ApplyParameters(parameters data.ND2Float64) {
@@ -35,6 +37,7 @@ func init() {
 
 func (m *PartitionDemand)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
 	result.Parameters = []sim.ParameterDescription{
   }
 
@@ -46,7 +49,19 @@ func (m *PartitionDemand)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *PartitionDemand) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *PartitionDemand) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

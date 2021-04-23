@@ -15,6 +15,8 @@ import (
 
 type Gate struct {
   
+
+  
 }
 
 func (m *Gate) ApplyParameters(parameters data.ND2Float64) {
@@ -35,6 +37,7 @@ func init() {
 
 func (m *Gate)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
 	result.Parameters = []sim.ParameterDescription{
   }
 
@@ -46,7 +49,19 @@ func (m *Gate)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *Gate) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *Gate) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

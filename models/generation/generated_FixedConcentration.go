@@ -16,6 +16,8 @@ import (
 type FixedConcentration struct {
   concentration data.ND1Float64
   
+
+  
 }
 
 func (m *FixedConcentration) ApplyParameters(parameters data.ND2Float64) {
@@ -47,9 +49,13 @@ func init() {
 
 func (m *FixedConcentration)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  concentrationDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("concentration",0,"mg.L^-1 Event Mean Concentration",[]float64{ 0.1, 10000 },""),}
+  sim.DescribeParameter("concentration",0,"mg.L^-1 Event Mean Concentration",[]float64{ 0.1, 10000 },"",concentrationDims),}
 
   result.Inputs = []string{
   "flow",}
@@ -59,7 +65,19 @@ func (m *FixedConcentration)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *FixedConcentration) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *FixedConcentration) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

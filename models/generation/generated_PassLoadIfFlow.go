@@ -16,6 +16,8 @@ import (
 type PassLoadIfFlow struct {
   scalingFactor data.ND1Float64
   
+
+  
 }
 
 func (m *PassLoadIfFlow) ApplyParameters(parameters data.ND2Float64) {
@@ -47,9 +49,13 @@ func init() {
 
 func (m *PassLoadIfFlow)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  scalingFactorDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("scalingFactor",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("scalingFactor",0,"",[]float64{ 0, 0 },"",scalingFactorDims),}
 
   result.Inputs = []string{
   "flow","inputLoad",}
@@ -59,7 +65,19 @@ func (m *PassLoadIfFlow)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *PassLoadIfFlow) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *PassLoadIfFlow) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

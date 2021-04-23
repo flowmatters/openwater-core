@@ -27,6 +27,8 @@ type DynamicSednetGully struct {
   sdrCoarse data.ND1Float64
   timeStepInSeconds data.ND1Float64
   
+
+  
 }
 
 func (m *DynamicSednetGully) ApplyParameters(parameters data.ND2Float64) {
@@ -124,20 +126,57 @@ func init() {
 
 func (m *DynamicSednetGully)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  YearDisturbanceDims := []string{
+      }
+  
+  GullyEndYearDims := []string{
+      }
+  
+  AreaDims := []string{
+      }
+  
+  averageGullyActivityFactorDims := []string{
+      }
+  
+  GullyAnnualAverageSedimentSupplyDims := []string{
+      }
+  
+  GullyPercentFineDims := []string{
+      }
+  
+  managementPracticeFactorDims := []string{
+      }
+  
+  longtermRunoffFactorDims := []string{
+      }
+  
+  dailyRunoffPowerFactorDims := []string{
+      }
+  
+  sdrFineDims := []string{
+      }
+  
+  sdrCoarseDims := []string{
+      }
+  
+  timeStepInSecondsDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("YearDisturbance",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("GullyEndYear",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("Area",0,"m^2",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("averageGullyActivityFactor",0,"",[]float64{ 0, 3 },""),
-  sim.DescribeParameter("GullyAnnualAverageSedimentSupply",0,"t.yr^-1",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("GullyPercentFine",0,"Average clay + silt percentage of gully material",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("managementPracticeFactor",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("longtermRunoffFactor",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("dailyRunoffPowerFactor",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("sdrFine",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("sdrCoarse",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("timeStepInSeconds",86400,"s Duration of timestep in seconds",[]float64{ 0, 1e+08 },""),}
+  sim.DescribeParameter("YearDisturbance",0,"",[]float64{ 0, 0 },"",YearDisturbanceDims),
+  sim.DescribeParameter("GullyEndYear",0,"",[]float64{ 0, 0 },"",GullyEndYearDims),
+  sim.DescribeParameter("Area",0,"m^2",[]float64{ 0, 0 },"",AreaDims),
+  sim.DescribeParameter("averageGullyActivityFactor",0,"",[]float64{ 0, 3 },"",averageGullyActivityFactorDims),
+  sim.DescribeParameter("GullyAnnualAverageSedimentSupply",0,"t.yr^-1",[]float64{ 0, 0 },"",GullyAnnualAverageSedimentSupplyDims),
+  sim.DescribeParameter("GullyPercentFine",0,"Average clay + silt percentage of gully material",[]float64{ 0, 0 },"",GullyPercentFineDims),
+  sim.DescribeParameter("managementPracticeFactor",0,"",[]float64{ 0, 0 },"",managementPracticeFactorDims),
+  sim.DescribeParameter("longtermRunoffFactor",0,"",[]float64{ 0, 0 },"",longtermRunoffFactorDims),
+  sim.DescribeParameter("dailyRunoffPowerFactor",0,"",[]float64{ 0, 0 },"",dailyRunoffPowerFactorDims),
+  sim.DescribeParameter("sdrFine",0,"",[]float64{ 0, 0 },"",sdrFineDims),
+  sim.DescribeParameter("sdrCoarse",0,"",[]float64{ 0, 0 },"",sdrCoarseDims),
+  sim.DescribeParameter("timeStepInSeconds",86400,"s Duration of timestep in seconds",[]float64{ 0, 1e+08 },"",timeStepInSecondsDims),}
 
   result.Inputs = []string{
   "quickflow","year","AnnualRunoff","annualLoad",}
@@ -147,7 +186,19 @@ func (m *DynamicSednetGully)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *DynamicSednetGully) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *DynamicSednetGully) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

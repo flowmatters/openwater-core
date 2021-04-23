@@ -22,6 +22,9 @@ type Storage struct {
   minRelease data.ND2Float64
   maxRelease data.ND2Float64
   
+
+  maxnLVA int
+  
 }
 
 func (m *Storage) ApplyParameters(parameters data.ND2Float64) {
@@ -44,32 +47,32 @@ func (m *Storage) ApplyParameters(parameters data.ND2Float64) {
   m.nLVA = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
   paramIdx += paramSize
 
-  paramSize = 1+ int(m.nLVA.Maximum())
-  newShape = []int{int(m.nLVA.Maximum()), nSets}
+  paramSize = 1* m.maxnLVA
+  newShape = []int{m.maxnLVA, nSets}
 
   m.levels = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2Float64)
   paramIdx += paramSize
 
-  paramSize = 1+ int(m.nLVA.Maximum())
-  newShape = []int{int(m.nLVA.Maximum()), nSets}
+  paramSize = 1* m.maxnLVA
+  newShape = []int{m.maxnLVA, nSets}
 
   m.volumes = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2Float64)
   paramIdx += paramSize
 
-  paramSize = 1+ int(m.nLVA.Maximum())
-  newShape = []int{int(m.nLVA.Maximum()), nSets}
+  paramSize = 1* m.maxnLVA
+  newShape = []int{m.maxnLVA, nSets}
 
   m.areas = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2Float64)
   paramIdx += paramSize
 
-  paramSize = 1+ int(m.nLVA.Maximum())
-  newShape = []int{int(m.nLVA.Maximum()), nSets}
+  paramSize = 1* m.maxnLVA
+  newShape = []int{m.maxnLVA, nSets}
 
   m.minRelease = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2Float64)
   paramIdx += paramSize
 
-  paramSize = 1+ int(m.nLVA.Maximum())
-  newShape = []int{int(m.nLVA.Maximum()), nSets}
+  paramSize = 1* m.maxnLVA
+  newShape = []int{m.maxnLVA, nSets}
 
   m.maxRelease = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2Float64)
   paramIdx += paramSize
@@ -89,15 +92,37 @@ func init() {
 
 func (m *Storage)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  DeltaTDims := []string{
+      }
+  
+  nLVADims := []string{
+      }
+  
+  levelsDims := []string{
+    "nLVA",  }
+  
+  volumesDims := []string{
+    "nLVA",  }
+  
+  areasDims := []string{
+    "nLVA",  }
+  
+  minReleaseDims := []string{
+    "nLVA",  }
+  
+  maxReleaseDims := []string{
+    "nLVA",  }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),
-  sim.DescribeParameter("nLVA",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("levels",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("volumes",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("areas",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("minRelease",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("maxRelease",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," ",DeltaTDims),
+  sim.DescribeParameter("nLVA",0,"",[]float64{ 0, 0 },"",nLVADims),
+  sim.DescribeParameter("levels",0,"",[]float64{ 0, 0 },"",levelsDims),
+  sim.DescribeParameter("volumes",0,"",[]float64{ 0, 0 },"",volumesDims),
+  sim.DescribeParameter("areas",0,"",[]float64{ 0, 0 },"",areasDims),
+  sim.DescribeParameter("minRelease",0,"",[]float64{ 0, 0 },"",minReleaseDims),
+  sim.DescribeParameter("maxRelease",0,"",[]float64{ 0, 0 },"",maxReleaseDims),}
 
   result.Inputs = []string{
   "rainfall","pet","inflow","demand",}
@@ -107,7 +132,66 @@ func (m *Storage)  Description() sim.ModelDescription{
   result.States = []string{
   "currentVolume","level","area",}
 
+  result.Dimensions = []string{
+    "nLVA",  }
 	return result
+}
+
+func (m *Storage) InitialiseDimensions(dims []int) {
+  m.maxnLVA = dims[0]
+  
+}
+
+func (m *Storage) FindDimensions(parameters data.ND2Float64) []int {
+  
+  nSets := parameters.Len(sim.DIMP_CELL)
+  paramIdx := 0
+  paramSize := 1
+  maxValues := make(map[string]float64)
+
+  paramSize = 1
+
+  maxValues["DeltaT"] = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).Maximum()
+  paramIdx += paramSize
+
+  paramSize = 1
+
+  maxValues["nLVA"] = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).Maximum()
+  paramIdx += paramSize
+
+  paramSize = 1* int(maxValues["nLVA"])
+
+  maxValues["levels"] = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).Maximum()
+  paramIdx += paramSize
+
+  paramSize = 1* int(maxValues["nLVA"])
+
+  maxValues["volumes"] = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).Maximum()
+  paramIdx += paramSize
+
+  paramSize = 1* int(maxValues["nLVA"])
+
+  maxValues["areas"] = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).Maximum()
+  paramIdx += paramSize
+
+  paramSize = 1* int(maxValues["nLVA"])
+
+  maxValues["minRelease"] = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).Maximum()
+  paramIdx += paramSize
+
+  paramSize = 1* int(maxValues["nLVA"])
+
+  maxValues["maxRelease"] = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).Maximum()
+  paramIdx += paramSize
+
+  
+  dims := []int{
+    int(maxValues["nLVA"]),
+    
+  }
+  
+  return dims
+  
 }
 
 
@@ -190,27 +274,27 @@ func (m *Storage) Run(inputs data.ND3Float64, states data.ND2Float64, outputs da
       levelsShape := m.levels.Shape()
       levelsNSets := levelsShape[len(levelsShape)-1]
       levelsFrom := []int{  0,  i%levelsNSets }
-      levelsSliceShape := []int{  int(m.nLVA.Maximum()),  }
+      levelsSliceShape := []int{  m.maxnLVA,  }
       levels := m.levels.Slice(levelsFrom, levelsSliceShape, nil).(data.ND1Float64)
       volumesShape := m.volumes.Shape()
       volumesNSets := volumesShape[len(volumesShape)-1]
       volumesFrom := []int{  0,  i%volumesNSets }
-      volumesSliceShape := []int{  int(m.nLVA.Maximum()),  }
+      volumesSliceShape := []int{  m.maxnLVA,  }
       volumes := m.volumes.Slice(volumesFrom, volumesSliceShape, nil).(data.ND1Float64)
       areasShape := m.areas.Shape()
       areasNSets := areasShape[len(areasShape)-1]
       areasFrom := []int{  0,  i%areasNSets }
-      areasSliceShape := []int{  int(m.nLVA.Maximum()),  }
+      areasSliceShape := []int{  m.maxnLVA,  }
       areas := m.areas.Slice(areasFrom, areasSliceShape, nil).(data.ND1Float64)
       minreleaseShape := m.minRelease.Shape()
       minreleaseNSets := minreleaseShape[len(minreleaseShape)-1]
       minreleaseFrom := []int{  0,  i%minreleaseNSets }
-      minreleaseSliceShape := []int{  int(m.nLVA.Maximum()),  }
+      minreleaseSliceShape := []int{  m.maxnLVA,  }
       minrelease := m.minRelease.Slice(minreleaseFrom, minreleaseSliceShape, nil).(data.ND1Float64)
       maxreleaseShape := m.maxRelease.Shape()
       maxreleaseNSets := maxreleaseShape[len(maxreleaseShape)-1]
       maxreleaseFrom := []int{  0,  i%maxreleaseNSets }
-      maxreleaseSliceShape := []int{  int(m.nLVA.Maximum()),  }
+      maxreleaseSliceShape := []int{  m.maxnLVA,  }
       maxrelease := m.maxRelease.Slice(maxreleaseFrom, maxreleaseSliceShape, nil).(data.ND1Float64)
       
 

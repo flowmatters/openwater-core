@@ -19,6 +19,8 @@ type GR4J struct {
   X3 data.ND1Float64
   X4 data.ND1Float64
   
+
+  
 }
 
 func (m *GR4J) ApplyParameters(parameters data.ND2Float64) {
@@ -68,12 +70,25 @@ func init() {
 
 func (m *GR4J)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  X1Dims := []string{
+      }
+  
+  X2Dims := []string{
+      }
+  
+  X3Dims := []string{
+      }
+  
+  X4Dims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("X1",0,"mm Capacity of the production soil (SMA) store",[]float64{ 1, 1500 },""),
-  sim.DescribeParameter("X2",0,"mm Water exchange coefficient",[]float64{ -10, 5 },""),
-  sim.DescribeParameter("X3",0,"mm Capacity of the routing store",[]float64{ 1, 500 },""),
-  sim.DescribeParameter("X4",0,"days Time parameter for unit hydrographs",[]float64{ 0.5, 4 },""),}
+  sim.DescribeParameter("X1",0,"mm Capacity of the production soil (SMA) store",[]float64{ 1, 1500 },"",X1Dims),
+  sim.DescribeParameter("X2",0,"mm Water exchange coefficient",[]float64{ -10, 5 },"",X2Dims),
+  sim.DescribeParameter("X3",0,"mm Capacity of the routing store",[]float64{ 1, 500 },"",X3Dims),
+  sim.DescribeParameter("X4",0,"days Time parameter for unit hydrographs",[]float64{ 0.5, 4 },"",X4Dims),}
 
   result.Inputs = []string{
   "rainfall","pet",}
@@ -83,7 +98,19 @@ func (m *GR4J)  Description() sim.ModelDescription{
   result.States = []string{
   "s","r","n1","n2","q1","q9",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *GR4J) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *GR4J) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

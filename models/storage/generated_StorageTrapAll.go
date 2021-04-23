@@ -15,6 +15,8 @@ import (
 
 type StorageTrapAll struct {
   
+
+  
 }
 
 func (m *StorageTrapAll) ApplyParameters(parameters data.ND2Float64) {
@@ -35,6 +37,7 @@ func init() {
 
 func (m *StorageTrapAll)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
 	result.Parameters = []sim.ParameterDescription{
   }
 
@@ -46,7 +49,19 @@ func (m *StorageTrapAll)  Description() sim.ModelDescription{
   result.States = []string{
   "storedMass",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *StorageTrapAll) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *StorageTrapAll) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

@@ -16,6 +16,8 @@ import (
 type ApplyScalingFactor struct {
   scale data.ND1Float64
   
+
+  
 }
 
 func (m *ApplyScalingFactor) ApplyParameters(parameters data.ND2Float64) {
@@ -47,9 +49,13 @@ func init() {
 
 func (m *ApplyScalingFactor)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  scaleDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("scale",0,"default=1",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("scale",0,"default=1",[]float64{ 0, 0 },"",scaleDims),}
 
   result.Inputs = []string{
   "input",}
@@ -59,7 +65,19 @@ func (m *ApplyScalingFactor)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *ApplyScalingFactor) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *ApplyScalingFactor) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

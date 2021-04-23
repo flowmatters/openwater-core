@@ -16,6 +16,8 @@ import (
 type Lag struct {
   timeLag data.ND1Float64
   
+
+  
 }
 
 func (m *Lag) ApplyParameters(parameters data.ND2Float64) {
@@ -47,9 +49,13 @@ func init() {
 
 func (m *Lag)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  timeLagDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("timeLag",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("timeLag",0,"",[]float64{ 0, 0 },"",timeLagDims),}
 
   result.Inputs = []string{
   "inflow",}
@@ -59,7 +65,19 @@ func (m *Lag)  Description() sim.ModelDescription{
   result.States = []string{
   "lagged",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *Lag) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *Lag) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

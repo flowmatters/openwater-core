@@ -18,6 +18,8 @@ type ConstituentDecay struct {
   halfLife data.ND1Float64
   DeltaT data.ND1Float64
   
+
+  
 }
 
 func (m *ConstituentDecay) ApplyParameters(parameters data.ND2Float64) {
@@ -61,11 +63,21 @@ func init() {
 
 func (m *ConstituentDecay)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  XDims := []string{
+      }
+  
+  halfLifeDims := []string{
+      }
+  
+  DeltaTDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("X",0,"Weighting",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("halfLife",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," "),}
+  sim.DescribeParameter("X",0,"Weighting",[]float64{ 0, 1 }," ",XDims),
+  sim.DescribeParameter("halfLife",0,"",[]float64{ 0, 0 },"",halfLifeDims),
+  sim.DescribeParameter("DeltaT",86400,"Timestep",[]float64{ 1, 86400 }," ",DeltaTDims),}
 
   result.Inputs = []string{
   "inflowLoad","lateralLoad","inflow","outflow","storage",}
@@ -75,7 +87,19 @@ func (m *ConstituentDecay)  Description() sim.ModelDescription{
   result.States = []string{
   "storedMass",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *ConstituentDecay) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *ConstituentDecay) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

@@ -16,6 +16,8 @@ import (
 type RunoffCoefficient struct {
   coeff data.ND1Float64
   
+
+  
 }
 
 func (m *RunoffCoefficient) ApplyParameters(parameters data.ND2Float64) {
@@ -47,9 +49,13 @@ func init() {
 
 func (m *RunoffCoefficient)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  coeffDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("coeff",0,"",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("coeff",0,"",[]float64{ 0, 0 },"",coeffDims),}
 
   result.Inputs = []string{
   "rainfall",}
@@ -59,7 +65,19 @@ func (m *RunoffCoefficient)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *RunoffCoefficient) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *RunoffCoefficient) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

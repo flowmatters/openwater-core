@@ -24,6 +24,8 @@ type SednetParticulateNutrientGeneration struct {
   nutrientDWC data.ND1Float64
   Do_P_CREAMS_Enrichment data.ND1Float64
   
+
+  
 }
 
 func (m *SednetParticulateNutrientGeneration) ApplyParameters(parameters data.ND2Float64) {
@@ -103,17 +105,45 @@ func init() {
 
 func (m *SednetParticulateNutrientGeneration)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  areaDims := []string{
+      }
+  
+  nutSurfSoilConcDims := []string{
+      }
+  
+  hillDeliveryRatioDims := []string{
+      }
+  
+  Nutrient_Enrichment_RatioDims := []string{
+      }
+  
+  nutSubSoilConcDims := []string{
+      }
+  
+  Nutrient_Enrichment_Ratio_GullyDims := []string{
+      }
+  
+  gullyDeliveryRatioDims := []string{
+      }
+  
+  nutrientDWCDims := []string{
+      }
+  
+  Do_P_CREAMS_EnrichmentDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("area",0,"m^2",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("nutSurfSoilConc",0,"kg.kg^-1",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("hillDeliveryRatio",0,"%",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("Nutrient_Enrichment_Ratio",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("nutSubSoilConc",0,"kg.kg^-1",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("Nutrient_Enrichment_Ratio_Gully",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("gullyDeliveryRatio",0,"%",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("nutrientDWC",0,"mg.L^-1",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("Do_P_CREAMS_Enrichment",0,"flag",[]float64{ 0, 0 },""),}
+  sim.DescribeParameter("area",0,"m^2",[]float64{ 0, 0 },"",areaDims),
+  sim.DescribeParameter("nutSurfSoilConc",0,"kg.kg^-1",[]float64{ 0, 0 },"",nutSurfSoilConcDims),
+  sim.DescribeParameter("hillDeliveryRatio",0,"%",[]float64{ 0, 0 },"",hillDeliveryRatioDims),
+  sim.DescribeParameter("Nutrient_Enrichment_Ratio",0,"",[]float64{ 0, 0 },"",Nutrient_Enrichment_RatioDims),
+  sim.DescribeParameter("nutSubSoilConc",0,"kg.kg^-1",[]float64{ 0, 0 },"",nutSubSoilConcDims),
+  sim.DescribeParameter("Nutrient_Enrichment_Ratio_Gully",0,"",[]float64{ 0, 0 },"",Nutrient_Enrichment_Ratio_GullyDims),
+  sim.DescribeParameter("gullyDeliveryRatio",0,"%",[]float64{ 0, 0 },"",gullyDeliveryRatioDims),
+  sim.DescribeParameter("nutrientDWC",0,"mg.L^-1",[]float64{ 0, 0 },"",nutrientDWCDims),
+  sim.DescribeParameter("Do_P_CREAMS_Enrichment",0,"flag",[]float64{ 0, 0 },"",Do_P_CREAMS_EnrichmentDims),}
 
   result.Inputs = []string{
   "fineSedModelFineSheetGeneratedKg","fineSedModelCoarseSheetGeneratedKg","fineSedModelFineGullyGeneratedKg","fineSedModelCoarseGullyGeneratedKg","slowflow",}
@@ -123,7 +153,19 @@ func (m *SednetParticulateNutrientGeneration)  Description() sim.ModelDescriptio
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *SednetParticulateNutrientGeneration) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *SednetParticulateNutrientGeneration) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

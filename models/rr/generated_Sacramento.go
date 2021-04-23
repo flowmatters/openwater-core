@@ -37,6 +37,8 @@ type Sacramento struct {
   uh4 data.ND1Float64
   uh5 data.ND1Float64
   
+
+  
 }
 
 func (m *Sacramento) ApplyParameters(parameters data.ND2Float64) {
@@ -194,30 +196,97 @@ func init() {
 
 func (m *Sacramento)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  lzpkDims := []string{
+      }
+  
+  lzskDims := []string{
+      }
+  
+  uzkDims := []string{
+      }
+  
+  uztwmDims := []string{
+      }
+  
+  uzfwmDims := []string{
+      }
+  
+  lztwmDims := []string{
+      }
+  
+  lzfsmDims := []string{
+      }
+  
+  lzfpmDims := []string{
+      }
+  
+  pfreeDims := []string{
+      }
+  
+  rexpDims := []string{
+      }
+  
+  zpercDims := []string{
+      }
+  
+  sideDims := []string{
+      }
+  
+  ssoutDims := []string{
+      }
+  
+  pctimDims := []string{
+      }
+  
+  adimpDims := []string{
+      }
+  
+  sarvaDims := []string{
+      }
+  
+  rservDims := []string{
+      }
+  
+  uh1Dims := []string{
+      }
+  
+  uh2Dims := []string{
+      }
+  
+  uh3Dims := []string{
+      }
+  
+  uh4Dims := []string{
+      }
+  
+  uh5Dims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("lzpk",0.01,"Lower zone Primary Free water base flow ratio",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("lzsk",0.05,"Lower zone Supplementary Free water base flow ratio",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("uzk",0.3,"Upper zone free water interflow fraction",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("uztwm",50,"mm Upper zone tension water maximum",[]float64{ 0.1, 125 },""),
-  sim.DescribeParameter("uzfwm",40,"mm Upper zone free water maximum",[]float64{ 0, 75 },""),
-  sim.DescribeParameter("lztwm",130,"mm Lower zone tension water maximum",[]float64{ 0, 300 },""),
-  sim.DescribeParameter("lzfsm",25,"mm Lower zone free water supplemental maximum",[]float64{ 0, 300 },""),
-  sim.DescribeParameter("lzfpm",60,"mm Lower zone free water primary maximum",[]float64{ 0, 600 },""),
-  sim.DescribeParameter("pfree",0.06,"Minimum proportion of percolation from upper zone to lower zone directly available for recharing lower zone free water stores.",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("rexp",1,"Exponent of rate of change of percolation rate with changing LZ storage",[]float64{ 0, 3 }," "),
-  sim.DescribeParameter("zperc",40,"Proportional increase in Pbase defining maximum percolation rate",[]float64{ 0, 80 }," "),
-  sim.DescribeParameter("side",0,"Ratio of non-channel baseflow to channel baseflow",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("ssout",0,"[0",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("pctim",0.01,"fraction of catchment that is permanently and directly connected impervious",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("adimp",0,"additional fraction of catchment that can act impervious under saturated soil conditions.",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("sarva",0,"fraction of basin normally covered by streams",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("rserv",0.3,"Fraction lower zone free water that is not available for transpiration",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("uh1",0.8,"Unit hydrograph - proportion runoff that is instantaneous",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("uh2",0.1,"Unit hydrograph - proportion lagged by one timestep",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("uh3",0.05,"Unit hydrograph - proportion lagged by two timesteps",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("uh4",0.03,"Unit hydrograph - proportion lagged by three timesteps",[]float64{ 0, 1 }," "),
-  sim.DescribeParameter("uh5",0.02,"Unit hydrograph - proportion lagged by four timesteps",[]float64{ 0, 1 }," "),}
+  sim.DescribeParameter("lzpk",0.01,"Lower zone Primary Free water base flow ratio",[]float64{ 0, 1 }," ",lzpkDims),
+  sim.DescribeParameter("lzsk",0.05,"Lower zone Supplementary Free water base flow ratio",[]float64{ 0, 1 }," ",lzskDims),
+  sim.DescribeParameter("uzk",0.3,"Upper zone free water interflow fraction",[]float64{ 0, 1 }," ",uzkDims),
+  sim.DescribeParameter("uztwm",50,"mm Upper zone tension water maximum",[]float64{ 0.1, 125 },"",uztwmDims),
+  sim.DescribeParameter("uzfwm",40,"mm Upper zone free water maximum",[]float64{ 0, 75 },"",uzfwmDims),
+  sim.DescribeParameter("lztwm",130,"mm Lower zone tension water maximum",[]float64{ 0, 300 },"",lztwmDims),
+  sim.DescribeParameter("lzfsm",25,"mm Lower zone free water supplemental maximum",[]float64{ 0, 300 },"",lzfsmDims),
+  sim.DescribeParameter("lzfpm",60,"mm Lower zone free water primary maximum",[]float64{ 0, 600 },"",lzfpmDims),
+  sim.DescribeParameter("pfree",0.06,"Minimum proportion of percolation from upper zone to lower zone directly available for recharing lower zone free water stores.",[]float64{ 0, 1 }," ",pfreeDims),
+  sim.DescribeParameter("rexp",1,"Exponent of rate of change of percolation rate with changing LZ storage",[]float64{ 0, 3 }," ",rexpDims),
+  sim.DescribeParameter("zperc",40,"Proportional increase in Pbase defining maximum percolation rate",[]float64{ 0, 80 }," ",zpercDims),
+  sim.DescribeParameter("side",0,"Ratio of non-channel baseflow to channel baseflow",[]float64{ 0, 1 }," ",sideDims),
+  sim.DescribeParameter("ssout",0,"[0",[]float64{ 0, 0 },"",ssoutDims),
+  sim.DescribeParameter("pctim",0.01,"fraction of catchment that is permanently and directly connected impervious",[]float64{ 0, 1 }," ",pctimDims),
+  sim.DescribeParameter("adimp",0,"additional fraction of catchment that can act impervious under saturated soil conditions.",[]float64{ 0, 1 }," ",adimpDims),
+  sim.DescribeParameter("sarva",0,"fraction of basin normally covered by streams",[]float64{ 0, 1 }," ",sarvaDims),
+  sim.DescribeParameter("rserv",0.3,"Fraction lower zone free water that is not available for transpiration",[]float64{ 0, 1 }," ",rservDims),
+  sim.DescribeParameter("uh1",0.8,"Unit hydrograph - proportion runoff that is instantaneous",[]float64{ 0, 1 }," ",uh1Dims),
+  sim.DescribeParameter("uh2",0.1,"Unit hydrograph - proportion lagged by one timestep",[]float64{ 0, 1 }," ",uh2Dims),
+  sim.DescribeParameter("uh3",0.05,"Unit hydrograph - proportion lagged by two timesteps",[]float64{ 0, 1 }," ",uh3Dims),
+  sim.DescribeParameter("uh4",0.03,"Unit hydrograph - proportion lagged by three timesteps",[]float64{ 0, 1 }," ",uh4Dims),
+  sim.DescribeParameter("uh5",0.02,"Unit hydrograph - proportion lagged by four timesteps",[]float64{ 0, 1 }," ",uh5Dims),}
 
   result.Inputs = []string{
   "rainfall","pet",}
@@ -227,7 +296,19 @@ func (m *Sacramento)  Description() sim.ModelDescription{
   result.States = []string{
   "UprTensionWater","UprFreeWater","LwrTensionWater","LwrPrimaryFreeWater","LwrSupplFreeWater","AdditionalImperviousStore",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *Sacramento) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *Sacramento) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

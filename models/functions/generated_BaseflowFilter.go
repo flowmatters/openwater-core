@@ -15,6 +15,8 @@ import (
 
 type BaseflowFilter struct {
   
+
+  
 }
 
 func (m *BaseflowFilter) ApplyParameters(parameters data.ND2Float64) {
@@ -35,6 +37,7 @@ func init() {
 
 func (m *BaseflowFilter)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
 	result.Parameters = []sim.ParameterDescription{
   }
 
@@ -46,7 +49,19 @@ func (m *BaseflowFilter)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *BaseflowFilter) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *BaseflowFilter) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

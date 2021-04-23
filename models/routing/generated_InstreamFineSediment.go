@@ -28,6 +28,8 @@ type InstreamFineSediment struct {
   fineSedReMobVelocity data.ND1Float64
   durationInSeconds data.ND1Float64
   
+
+  
 }
 
 func (m *InstreamFineSediment) ApplyParameters(parameters data.ND2Float64) {
@@ -131,21 +133,61 @@ func init() {
 
 func (m *InstreamFineSediment)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  bankFullFlowDims := []string{
+      }
+  
+  fineSedSettVelocityFloodDims := []string{
+      }
+  
+  floodPlainAreaDims := []string{
+      }
+  
+  linkWidthDims := []string{
+      }
+  
+  linkLengthDims := []string{
+      }
+  
+  linkSlopeDims := []string{
+      }
+  
+  bankHeightDims := []string{
+      }
+  
+  propBankHeightForFineDepDims := []string{
+      }
+  
+  sedBulkDensityDims := []string{
+      }
+  
+  manningsNDims := []string{
+      }
+  
+  fineSedSettVelocityDims := []string{
+      }
+  
+  fineSedReMobVelocityDims := []string{
+      }
+  
+  durationInSecondsDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("bankFullFlow",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("fineSedSettVelocityFlood",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("floodPlainArea",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("linkWidth",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("linkLength",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("linkSlope",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("bankHeight",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("propBankHeightForFineDep",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("sedBulkDensity",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("manningsN",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("fineSedSettVelocity",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("fineSedReMobVelocity",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," "),}
+  sim.DescribeParameter("bankFullFlow",0,"",[]float64{ 0, 0 },"",bankFullFlowDims),
+  sim.DescribeParameter("fineSedSettVelocityFlood",0,"",[]float64{ 0, 0 },"",fineSedSettVelocityFloodDims),
+  sim.DescribeParameter("floodPlainArea",0,"",[]float64{ 0, 0 },"",floodPlainAreaDims),
+  sim.DescribeParameter("linkWidth",0,"",[]float64{ 0, 0 },"",linkWidthDims),
+  sim.DescribeParameter("linkLength",0,"",[]float64{ 0, 0 },"",linkLengthDims),
+  sim.DescribeParameter("linkSlope",0,"",[]float64{ 0, 0 },"",linkSlopeDims),
+  sim.DescribeParameter("bankHeight",0,"",[]float64{ 0, 0 },"",bankHeightDims),
+  sim.DescribeParameter("propBankHeightForFineDep",0,"",[]float64{ 0, 0 },"",propBankHeightForFineDepDims),
+  sim.DescribeParameter("sedBulkDensity",0,"",[]float64{ 0, 0 },"",sedBulkDensityDims),
+  sim.DescribeParameter("manningsN",0,"",[]float64{ 0, 0 },"",manningsNDims),
+  sim.DescribeParameter("fineSedSettVelocity",0,"",[]float64{ 0, 0 },"",fineSedSettVelocityDims),
+  sim.DescribeParameter("fineSedReMobVelocity",0,"",[]float64{ 0, 0 },"",fineSedReMobVelocityDims),
+  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," ",durationInSecondsDims),}
 
   result.Inputs = []string{
   "upstreamMass","lateralMass","reachLocalMass","reachVolume","outflow",}
@@ -155,7 +197,19 @@ func (m *InstreamFineSediment)  Description() sim.ModelDescription{
   result.States = []string{
   "channelStoreFine","totalStoredMass",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *InstreamFineSediment) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *InstreamFineSediment) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

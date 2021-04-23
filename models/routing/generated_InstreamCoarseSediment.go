@@ -15,6 +15,8 @@ import (
 
 type InstreamCoarseSediment struct {
   
+
+  
 }
 
 func (m *InstreamCoarseSediment) ApplyParameters(parameters data.ND2Float64) {
@@ -35,6 +37,7 @@ func init() {
 
 func (m *InstreamCoarseSediment)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
 	result.Parameters = []sim.ParameterDescription{
   }
 
@@ -46,7 +49,19 @@ func (m *InstreamCoarseSediment)  Description() sim.ModelDescription{
   result.States = []string{
   "totalStoredMass",}
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *InstreamCoarseSediment) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *InstreamCoarseSediment) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 

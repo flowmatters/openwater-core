@@ -29,6 +29,8 @@ type BankErosion struct {
   soilPercentFine data.ND1Float64
   durationInSeconds data.ND1Float64
   
+
+  
 }
 
 func (m *BankErosion) ApplyParameters(parameters data.ND2Float64) {
@@ -138,22 +140,65 @@ func init() {
 
 func (m *BankErosion)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
+  
+  riparianVegPercentDims := []string{
+      }
+  
+  maxRiparianVegEffectivenessDims := []string{
+      }
+  
+  soilErodibilityDims := []string{
+      }
+  
+  bankErosionCoeffDims := []string{
+      }
+  
+  linkSlopeDims := []string{
+      }
+  
+  bankFullFlowDims := []string{
+      }
+  
+  bankMgtFactorDims := []string{
+      }
+  
+  sedBulkDensityDims := []string{
+      }
+  
+  bankHeightDims := []string{
+      }
+  
+  linkLengthDims := []string{
+      }
+  
+  dailyFlowPowerFactorDims := []string{
+      }
+  
+  longTermAvDailyFlowDims := []string{
+      }
+  
+  soilPercentFineDims := []string{
+      }
+  
+  durationInSecondsDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
   
-  sim.DescribeParameter("riparianVegPercent",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("maxRiparianVegEffectiveness",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("soilErodibility",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("bankErosionCoeff",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("linkSlope",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("bankFullFlow",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("bankMgtFactor",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("sedBulkDensity",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("bankHeight",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("linkLength",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("dailyFlowPowerFactor",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("longTermAvDailyFlow",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("soilPercentFine",0,"",[]float64{ 0, 0 },""),
-  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," "),}
+  sim.DescribeParameter("riparianVegPercent",0,"",[]float64{ 0, 0 },"",riparianVegPercentDims),
+  sim.DescribeParameter("maxRiparianVegEffectiveness",0,"",[]float64{ 0, 0 },"",maxRiparianVegEffectivenessDims),
+  sim.DescribeParameter("soilErodibility",0,"",[]float64{ 0, 0 },"",soilErodibilityDims),
+  sim.DescribeParameter("bankErosionCoeff",0,"",[]float64{ 0, 0 },"",bankErosionCoeffDims),
+  sim.DescribeParameter("linkSlope",0,"",[]float64{ 0, 0 },"",linkSlopeDims),
+  sim.DescribeParameter("bankFullFlow",0,"",[]float64{ 0, 0 },"",bankFullFlowDims),
+  sim.DescribeParameter("bankMgtFactor",0,"",[]float64{ 0, 0 },"",bankMgtFactorDims),
+  sim.DescribeParameter("sedBulkDensity",0,"",[]float64{ 0, 0 },"",sedBulkDensityDims),
+  sim.DescribeParameter("bankHeight",0,"",[]float64{ 0, 0 },"",bankHeightDims),
+  sim.DescribeParameter("linkLength",0,"",[]float64{ 0, 0 },"",linkLengthDims),
+  sim.DescribeParameter("dailyFlowPowerFactor",0,"",[]float64{ 0, 0 },"",dailyFlowPowerFactorDims),
+  sim.DescribeParameter("longTermAvDailyFlow",0,"",[]float64{ 0, 0 },"",longTermAvDailyFlowDims),
+  sim.DescribeParameter("soilPercentFine",0,"",[]float64{ 0, 0 },"",soilPercentFineDims),
+  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," ",durationInSecondsDims),}
 
   result.Inputs = []string{
   "downstreamFlowVolume","totalVolume",}
@@ -163,7 +208,19 @@ func (m *BankErosion)  Description() sim.ModelDescription{
   result.States = []string{
   }
 
+  result.Dimensions = []string{
+      }
 	return result
+}
+
+func (m *BankErosion) InitialiseDimensions(dims []int) {
+  
+}
+
+func (m *BankErosion) FindDimensions(parameters data.ND2Float64) []int {
+  
+  return []int{}
+  
 }
 
 
