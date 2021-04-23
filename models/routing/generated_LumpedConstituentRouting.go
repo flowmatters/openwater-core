@@ -193,7 +193,7 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3Float64, states data.ND2Fl
       
       
 
-      storedmass= lumpedConstituents(inflowload,lateralload,outflow,storage,storedmass,x,pointinput,deltat,outflowload)
+      storedmass= LumpedConstituentTransport(inflowload,lateralload,outflow,storage,storedmass,x,pointinput,deltat,outflowload)
 
       
       

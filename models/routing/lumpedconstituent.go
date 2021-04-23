@@ -23,7 +23,7 @@ LumpedConstituentRouting:
 	outputs:
 		outflowLoad: kg.s^-1
 	implementation:
-		function: lumpedConstituents
+		function: LumpedConstituentTransport
 		type: scalar
 		lang: go
 		outputs: params
@@ -34,10 +34,11 @@ LumpedConstituentRouting:
 		constituent routing
 */
 
-func lumpedConstituents(inflowLoads, lateralLoads, outflows, storage data.ND1Float64,
-	storedMass float64,
+func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage data.ND1Float64,
+	initialStoredMass float64,
 	x, pointInput, deltaT float64,
-	outflowLoads data.ND1Float64) float64 {
+	outflowLoads data.ND1Float64) (storedMass float64) {
+	storedMass = initialStoredMass
 	nDays := inflowLoads.Len1()
 
 	idx := []int{0}

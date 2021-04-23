@@ -60,7 +60,7 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 	pointSourcePerSecond := pointSourceLoad / (rough.DAYS_PER_YEAR * units.SECONDS_PER_DAY)
 
 	if doDecay < 0.5 {
-		storedMass = lumpedConstituents(
+		storedMass = LumpedConstituentTransport(
 			incomingMassUpstream, incomingMassLateral, outflow, reachVolume,
 			storedMass,
 			0, pointSourcePerSecond, durationInSeconds,
