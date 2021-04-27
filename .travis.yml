@@ -13,12 +13,12 @@ jobs:
         - ./build/ci/$TRAVIS_OS_NAME.sh
         - python3 -m venv ow-test
         - source ow-test/bin/activate
-    - os: osx
-      osx_image: xcode12.2
-      before_install:
-        - ./build/ci/$TRAVIS_OS_NAME.sh
-        - python3 -m venv ow-test
-        - source ow-test/bin/activate
+    # - os: osx
+    #   osx_image: xcode12.2
+    #   before_install:
+    #     - ./build/ci/$TRAVIS_OS_NAME.sh
+    #     - python3 -m venv ow-test
+    #     - source ow-test/bin/activate
     - os: windows
       before_install:
         - ./build/ci/$TRAVIS_OS_NAME.sh
