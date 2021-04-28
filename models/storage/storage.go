@@ -55,6 +55,10 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS data.ND1Float64,
 												 nLVA int,
 												 levels, volumes, areas, minRelease, maxRelease data.ND1Float64,
 												 volumeTS, outflowTS data.ND1Float64) (volume, level, area float64) {
+	if nLVA == 0 {
+		fmt.Println("No points in LVA table or release curves!" )
+		return
+	}
 	volume = initialVolume
 	n := rainfallTS.Len1()
 	nSubtimeSteps := 0
