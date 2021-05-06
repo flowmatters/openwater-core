@@ -22,6 +22,8 @@ Storage:
 		pet: mm
 		inflow: m^3.s^-1
 		demand: m^3.s^-1
+		targetMinimumVolume: m^3
+		targetMinimumCapacity: m^3
 	states:
 		currentVolume: m^3
 		level: m
@@ -49,7 +51,7 @@ Storage:
 		storage
 */
 
-func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS data.ND1Float64, 
+func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVolume, targetMinimumCapacity data.ND1Float64, 
 												 initialVolume, initialLevel, initialArea float64,
 												 deltaT float64,
 												 nLVA int,

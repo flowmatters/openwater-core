@@ -125,7 +125,7 @@ func (m *Storage)  Description() sim.ModelDescription{
   sim.DescribeParameter("maxRelease",0,"",[]float64{ 0, 0 },"",maxReleaseDims),}
 
   result.Inputs = []string{
-  "rainfall","pet","inflow","demand",}
+  "rainfall","pet","inflow","demand","targetMinimumVolume","targetMinimumCapacity",}
   result.Outputs = []string{
   "volume","outflow",}
 
@@ -337,6 +337,12 @@ func (m *Storage) Run(inputs data.ND3Float64, states data.ND2Float64, outputs da
   //    fmt.Println("{demand m^3.s^-1}",tmpTS.Shape())
       demand := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
       
+  //    fmt.Println("{targetMinimumVolume m^3}",tmpTS.Shape())
+      targetminimumvolume := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
+  //    fmt.Println("{targetMinimumCapacity m^3}",tmpTS.Shape())
+      targetminimumcapacity := cellInputs.Slice([]int{ 5,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1Float64)
+      
 
       
 
@@ -350,7 +356,7 @@ func (m *Storage) Run(inputs data.ND3Float64, states data.ND2Float64, outputs da
       
       
 
-      currentvolume,level,area= storageWaterBalance(rainfall,pet,inflow,demand,currentvolume,level,area,deltat,nlva,levels,volumes,areas,minrelease,maxrelease,volume,outflow)
+      currentvolume,level,area= storageWaterBalance(rainfall,pet,inflow,demand,targetminimumvolume,targetminimumcapacity,currentvolume,level,area,deltat,nlva,levels,volumes,areas,minrelease,maxrelease,volume,outflow)
 
       
       
