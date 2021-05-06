@@ -225,6 +225,22 @@ func (nd *ndfloat64) Maximum() float64 {
 	return res
 }
 
+func (nd *ndfloat64) Minimum() float64 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
 func NewArrayFloat64(dims []int) NDFloat64 {
 	return newArrayfloat64(dims)
 }
@@ -490,6 +506,22 @@ func (nd *ndfloat32) Maximum() float32 {
 	for pos := 0; pos < size; pos++ {
 		v := nd.Get(idx)
 		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
+func (nd *ndfloat32) Minimum() float32 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
 			res = v
 		}
 		Increment(idx, shape)
@@ -769,6 +801,22 @@ func (nd *ndint32) Maximum() int32 {
 	return res
 }
 
+func (nd *ndint32) Minimum() int32 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
 func NewArrayInt32(dims []int) NDInt32 {
 	return newArrayint32(dims)
 }
@@ -1034,6 +1082,22 @@ func (nd *nduint32) Maximum() uint32 {
 	for pos := 0; pos < size; pos++ {
 		v := nd.Get(idx)
 		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
+func (nd *nduint32) Minimum() uint32 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
 			res = v
 		}
 		Increment(idx, shape)
@@ -1313,6 +1377,22 @@ func (nd *ndint64) Maximum() int64 {
 	return res
 }
 
+func (nd *ndint64) Minimum() int64 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
 func NewArrayInt64(dims []int) NDInt64 {
 	return newArrayint64(dims)
 }
@@ -1578,6 +1658,22 @@ func (nd *nduint64) Maximum() uint64 {
 	for pos := 0; pos < size; pos++ {
 		v := nd.Get(idx)
 		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
+func (nd *nduint64) Minimum() uint64 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
 			res = v
 		}
 		Increment(idx, shape)
@@ -1857,6 +1953,22 @@ func (nd *ndint) Maximum() int {
 	return res
 }
 
+func (nd *ndint) Minimum() int {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
 func NewArrayInt(dims []int) NDInt {
 	return newArrayint(dims)
 }
@@ -2122,6 +2234,22 @@ func (nd *nduint) Maximum() uint {
 	for pos := 0; pos < size; pos++ {
 		v := nd.Get(idx)
 		if v > res {
+			res = v
+		}
+		Increment(idx, shape)
+	}
+	return res
+}
+
+func (nd *nduint) Minimum() uint {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
 			res = v
 		}
 		Increment(idx, shape)

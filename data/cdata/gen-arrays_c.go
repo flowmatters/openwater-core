@@ -222,6 +222,22 @@ func (nd *ndfloat64C) Maximum() float64 {
 	return res
 }
 
+func (nd *ndfloat64C) Minimum() float64 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := data.Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
+			res = v
+		}
+		data.Increment(idx, shape)
+	}
+	return res
+}
+
 func NewFloat64CArray(impl unsafe.Pointer, dims []int) data.NDFloat64 {
 	return newfloat64CArray((*[1 << 30]C.double)(impl), dims)
 }
@@ -450,6 +466,22 @@ func (nd *ndfloat32C) Maximum() float32 {
 	for pos := 0; pos < size; pos++ {
 		v := nd.Get(idx)
 		if v > res {
+			res = v
+		}
+		data.Increment(idx, shape)
+	}
+	return res
+}
+
+func (nd *ndfloat32C) Minimum() float32 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := data.Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
 			res = v
 		}
 		data.Increment(idx, shape)
@@ -692,6 +724,22 @@ func (nd *ndint32C) Maximum() int32 {
 	return res
 }
 
+func (nd *ndint32C) Minimum() int32 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := data.Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
+			res = v
+		}
+		data.Increment(idx, shape)
+	}
+	return res
+}
+
 func NewInt32CArray(impl unsafe.Pointer, dims []int) data.NDInt32 {
 	return newint32CArray((*[1 << 30]C.int)(impl), dims)
 }
@@ -920,6 +968,22 @@ func (nd *nduint32C) Maximum() uint32 {
 	for pos := 0; pos < size; pos++ {
 		v := nd.Get(idx)
 		if v > res {
+			res = v
+		}
+		data.Increment(idx, shape)
+	}
+	return res
+}
+
+func (nd *nduint32C) Minimum() uint32 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := data.Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
 			res = v
 		}
 		data.Increment(idx, shape)
@@ -1162,6 +1226,22 @@ func (nd *ndint64C) Maximum() int64 {
 	return res
 }
 
+func (nd *ndint64C) Minimum() int64 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := data.Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
+			res = v
+		}
+		data.Increment(idx, shape)
+	}
+	return res
+}
+
 func NewInt64CArray(impl unsafe.Pointer, dims []int) data.NDInt64 {
 	return newint64CArray((*[1 << 30]C.long)(impl), dims)
 }
@@ -1390,6 +1470,22 @@ func (nd *nduint64C) Maximum() uint64 {
 	for pos := 0; pos < size; pos++ {
 		v := nd.Get(idx)
 		if v > res {
+			res = v
+		}
+		data.Increment(idx, shape)
+	}
+	return res
+}
+
+func (nd *nduint64C) Minimum() uint64 {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := data.Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
 			res = v
 		}
 		data.Increment(idx, shape)
@@ -1632,6 +1728,22 @@ func (nd *ndintC) Maximum() int {
 	return res
 }
 
+func (nd *ndintC) Minimum() int {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := data.Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
+			res = v
+		}
+		data.Increment(idx, shape)
+	}
+	return res
+}
+
 func NewIntCArray(impl unsafe.Pointer, dims []int) data.NDInt {
 	return newintCArray((*[1 << 30]C.int)(impl), dims)
 }
@@ -1860,6 +1972,22 @@ func (nd *nduintC) Maximum() uint {
 	for pos := 0; pos < size; pos++ {
 		v := nd.Get(idx)
 		if v > res {
+			res = v
+		}
+		data.Increment(idx, shape)
+	}
+	return res
+}
+
+func (nd *nduintC) Minimum() uint {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := data.Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
 			res = v
 		}
 		data.Increment(idx, shape)

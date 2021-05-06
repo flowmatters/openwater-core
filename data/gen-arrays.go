@@ -29,6 +29,7 @@ type NDFloat64 interface {
 	MustReshape(newShape []int) NDFloat64
 	ReshapeFast(newShape []int) (NDFloat64, error)
 	Maximum() float64
+	Minimum() float64
 }
 
 type ND1Float64 interface {
@@ -166,6 +167,7 @@ type NDFloat32 interface {
 	MustReshape(newShape []int) NDFloat32
 	ReshapeFast(newShape []int) (NDFloat32, error)
 	Maximum() float32
+	Minimum() float32
 }
 
 type ND1Float32 interface {
@@ -303,6 +305,7 @@ type NDInt32 interface {
 	MustReshape(newShape []int) NDInt32
 	ReshapeFast(newShape []int) (NDInt32, error)
 	Maximum() int32
+	Minimum() int32
 }
 
 type ND1Int32 interface {
@@ -440,6 +443,7 @@ type NDUint32 interface {
 	MustReshape(newShape []int) NDUint32
 	ReshapeFast(newShape []int) (NDUint32, error)
 	Maximum() uint32
+	Minimum() uint32
 }
 
 type ND1Uint32 interface {
@@ -577,6 +581,7 @@ type NDInt64 interface {
 	MustReshape(newShape []int) NDInt64
 	ReshapeFast(newShape []int) (NDInt64, error)
 	Maximum() int64
+	Minimum() int64
 }
 
 type ND1Int64 interface {
@@ -714,6 +719,7 @@ type NDUint64 interface {
 	MustReshape(newShape []int) NDUint64
 	ReshapeFast(newShape []int) (NDUint64, error)
 	Maximum() uint64
+	Minimum() uint64
 }
 
 type ND1Uint64 interface {
@@ -851,6 +857,7 @@ type NDInt interface {
 	MustReshape(newShape []int) NDInt
 	ReshapeFast(newShape []int) (NDInt, error)
 	Maximum() int
+	Minimum() int
 }
 
 type ND1Int interface {
@@ -988,6 +995,7 @@ type NDUint interface {
 	MustReshape(newShape []int) NDUint
 	ReshapeFast(newShape []int) (NDUint, error)
 	Maximum() uint
+	Minimum() uint
 }
 
 type ND1Uint interface {

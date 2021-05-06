@@ -221,6 +221,22 @@ func (nd *ndArrayTypeC) Maximum() data.ArrayType {
 	return res
 }
 
+func (nd *ndArrayTypeC) Minimum() data.ArrayType {
+	idx := nd.NewIndex(0)
+	res := nd.Get(idx)
+
+	shape := nd.Shape()
+	size := data.Product(shape)
+	for pos := 0; pos < size; pos++ {
+		v := nd.Get(idx)
+		if v < res {
+			res = v
+		}
+		data.Increment(idx, shape)
+	}
+	return res
+}
+
 func NewArrayTypeCArray(impl unsafe.Pointer, dims []int) data.NDArrayType {
 	return newArrayTypeCArray((*[1 << 30]CArrayType)(impl), dims)
 }
