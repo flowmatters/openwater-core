@@ -274,27 +274,32 @@ func (m *Storage) Run(inputs data.ND3Float64, states data.ND2Float64, outputs da
       levelsShape := m.levels.Shape()
       levelsNSets := levelsShape[len(levelsShape)-1]
       levelsFrom := []int{  0,  i%levelsNSets }
-      levelsSliceShape := []int{  m.maxnLVA,  }
+      levelsSliceShape := []int{  nlva,  }
+      // WAS levelsSliceShape := []int{  m.maxnLVA,  }
       levels := m.levels.Slice(levelsFrom, levelsSliceShape, nil).(data.ND1Float64)
       volumesShape := m.volumes.Shape()
       volumesNSets := volumesShape[len(volumesShape)-1]
       volumesFrom := []int{  0,  i%volumesNSets }
-      volumesSliceShape := []int{  m.maxnLVA,  }
+      volumesSliceShape := []int{  nlva,  }
+      // WAS volumesSliceShape := []int{  m.maxnLVA,  }
       volumes := m.volumes.Slice(volumesFrom, volumesSliceShape, nil).(data.ND1Float64)
       areasShape := m.areas.Shape()
       areasNSets := areasShape[len(areasShape)-1]
       areasFrom := []int{  0,  i%areasNSets }
-      areasSliceShape := []int{  m.maxnLVA,  }
+      areasSliceShape := []int{  nlva,  }
+      // WAS areasSliceShape := []int{  m.maxnLVA,  }
       areas := m.areas.Slice(areasFrom, areasSliceShape, nil).(data.ND1Float64)
       minreleaseShape := m.minRelease.Shape()
       minreleaseNSets := minreleaseShape[len(minreleaseShape)-1]
       minreleaseFrom := []int{  0,  i%minreleaseNSets }
-      minreleaseSliceShape := []int{  m.maxnLVA,  }
+      minreleaseSliceShape := []int{  nlva,  }
+      // WAS minreleaseSliceShape := []int{  m.maxnLVA,  }
       minrelease := m.minRelease.Slice(minreleaseFrom, minreleaseSliceShape, nil).(data.ND1Float64)
       maxreleaseShape := m.maxRelease.Shape()
       maxreleaseNSets := maxreleaseShape[len(maxreleaseShape)-1]
       maxreleaseFrom := []int{  0,  i%maxreleaseNSets }
-      maxreleaseSliceShape := []int{  m.maxnLVA,  }
+      maxreleaseSliceShape := []int{  nlva,  }
+      // WAS maxreleaseSliceShape := []int{  m.maxnLVA,  }
       maxrelease := m.maxRelease.Slice(maxreleaseFrom, maxreleaseSliceShape, nil).(data.ND1Float64)
       
 
