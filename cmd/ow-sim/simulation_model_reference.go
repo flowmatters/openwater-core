@@ -107,9 +107,9 @@ func (mr *modelReference) initDimensions() ([]int, error) {
 	
 	dimSizes := modelInstance.FindDimensions(allParameters.(data.ND2Float64))
 
-	fmt.Printf("===== Simulation dimension sizes for %s =====\n",mr.ModelName)
+	verbosePrintf("===== Simulation dimension sizes for %s =====\n",mr.ModelName)
 	for ix, dim := range(dims){
-		fmt.Printf("\t%s=%d\n",dim,dimSizes[ix])
+		verbosePrintf("\t%s=%d\n",dim,dimSizes[ix])
 	}
 
 	return dimSizes,err
