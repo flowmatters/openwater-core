@@ -291,7 +291,7 @@ func (m *Sacramento)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "rainfall","pet",}
   result.Outputs = []string{
-  "runoff","imperviousRunoff","surfaceRunoff","baseflow",}
+  "actualET","runoff","imperviousRunoff","surfaceRunoff","baseflow",}
 
   result.States = []string{
   "UprTensionWater","UprFreeWater","LwrTensionWater","LwrPrimaryFreeWater","LwrSupplFreeWater","AdditionalImperviousStore",}
@@ -375,7 +375,7 @@ func (m *Sacramento) Run(inputs data.ND3Float64, states data.ND2Float64, outputs
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 4, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 5, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
@@ -455,20 +455,23 @@ func (m *Sacramento) Run(inputs data.ND3Float64, states data.ND2Float64, outputs
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      actualet := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      imperviousrunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      surfacerunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      imperviousrunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
+      surfacerunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 4
       baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       
 
-      uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore= sacramento(rainfall,pet,uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore,lzpk,lzsk,uzk,uztwm,uzfwm,lztwm,lzfsm,lzfpm,pfree,rexp,zperc,side,ssout,pctim,adimp,sarva,rserv,uh1,uh2,uh3,uh4,uh5,runoff,imperviousrunoff,surfacerunoff,baseflow)
+      uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore= sacramento(rainfall,pet,uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore,lzpk,lzsk,uzk,uztwm,uzfwm,lztwm,lzfsm,lzfpm,pfree,rexp,zperc,side,ssout,pctim,adimp,sarva,rserv,uh1,uh2,uh3,uh4,uh5,actualet,runoff,imperviousrunoff,surfacerunoff,baseflow)
 
       
       
@@ -486,7 +489,7 @@ func (m *Sacramento) Run(inputs data.ND3Float64, states data.ND2Float64, outputs
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 5)
       
 
       doneChan <- i

@@ -44,6 +44,7 @@ Sacramento:
 		uh4: '[0,1] Unit hydrograph - proportion lagged by three timesteps,default=0.03'
 		uh5: '[0,1] Unit hydrograph - proportion lagged by four timesteps,default=0.02'
 	outputs:
+		actualET: mm
 		runoff: mm
 		imperviousRunoff: mm
 		surfaceRunoff: mm
@@ -81,7 +82,7 @@ func sacramento(rainfall, pet data.ND1Float64,
 	lzpk, lzsk, uzk, uztwm, uzfwm, lztwm, lzfsm, lzfpm, pfree, rexp,
 	zperc, side, ssout, pctim, adimp, sarva, rserv,
 	uh1, uh2, uh3, uh4, uh5 float64,
-	runoff, imperviousRunoff, surfaceRunoff, baseflow data.ND1Float64) (
+	actualET, runoff, imperviousRunoff, surfaceRunoff, baseflow data.ND1Float64) (
 	float64, // final uprTensionWater,
 	float64, // final uprFreeWater,
 	float64, // final lwrTensionWater,
@@ -113,8 +114,9 @@ func sacramento(rainfall, pet data.ND1Float64,
 
 	alzfsc := lwrSupplFreeWater * (1. + side)
 	alzfpc := lwrPrimaryFreeWater * (1. + side)
-
+	idx := []int{0}
 	for timestep := 0; timestep < nDays; timestep++ {
+		idx[0] = timestep
 		// prevUprTensionWater := uprTensionWater
 		// prevUprFreeWater := uprFreeWater
 		// prevLwrTensionWater := lwrTensionWater
@@ -122,8 +124,8 @@ func sacramento(rainfall, pet data.ND1Float64,
 		// prevLwrSuppFreeWater := lwrSupplFreeWater
 		// prevAddImpStore := additionalImperviousStore
 		// prevHydrographStore := sumSlice(qq)
-		evapt := pet.Get1(timestep)
-		pliq := rainfall.Get1(timestep)
+		evapt := pet.Get(idx)
+		pliq := rainfall.Get(idx)
 
 		//     Determine evaporation from upper zone tension water store
 		e1 := 0.0
@@ -454,11 +456,11 @@ func sacramento(rainfall, pet data.ND1Float64,
 		// }
 
 		bf := baseflowFraction * qf
-		imperviousRunoff.Set1(timestep, roimp)
-		surfaceRunoff.Set1(timestep, qf-bf)
-		baseflow.Set1(timestep, bf)
-		runoff.Set1(timestep, qf)
-
+		imperviousRunoff.Set(idx, roimp)
+		surfaceRunoff.Set(idx, qf-bf)
+		baseflow.Set(idx, bf)
+		runoff.Set(idx, qf)
+		actualET.Set(idx,e1+e2+e3+e4+e5)
 		//hydrographStore := sumSlice(qq)
 
 		// deltaS := ((uprTensionWater-prevUprTensionWater)+
