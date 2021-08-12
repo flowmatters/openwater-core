@@ -19,9 +19,12 @@ jobs:
     runs-on: windows-latest
     steps:
         - uses: actions/checkout@v2
+        - name: pre-build
+          run: ./build/ci/windows.sh
+          shell: bash
         - name: build
-          run: ./build/ci/windows.sh && \
-               source compilation_vars.txt && \
+          shell: bash
+          run: source compilation_vars.txt && \
                export VENV_DIR=bin && \
                python3 --version && \
                ./build/bootstrap-test-env.sh && \
@@ -29,6 +32,4 @@ jobs:
                ./build/build.sh && \
                ./build/run_test.sh && \
                ls -al
-          shell: bash
-
 
