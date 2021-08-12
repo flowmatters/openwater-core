@@ -10,7 +10,7 @@ python3 -c "import sys; print(sys.path)"
 # source ow-test/$VENV_DIR/activate
 # echo ow-test activated
 pip --version
-pip install wheel
+pip install wheel pytest
 curl 'https://raw.githubusercontent.com/flowmatters/openwater/master/requirements.txt' > requirements.txt
 pip install -r requirements.txt
 pip install https://github.com/flowmatters/openwater/archive/master.zip
