@@ -17,6 +17,7 @@ jobs:
         - run: ls -al
   build-windows:
     runs-on: windows-latest
+    shell: bash
     steps:
         - uses: actions/checkout@v2
         - run: ./build/ci/windows.sh
