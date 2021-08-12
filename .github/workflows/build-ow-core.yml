@@ -17,17 +17,18 @@ jobs:
         - run: ls -al
   build-windows:
     runs-on: windows-latest
-    shell: bash
     steps:
         - uses: actions/checkout@v2
-        - run: ./build/ci/windows.sh
-        - run: source compilation_vars.txt
-        - run: export VENV_DIR=bin
-        - run: python3 --version
-        - run: ./build/bootstrap-test-env.sh
-        - run: OW_TEST_PATH=$PWD/test/files go test -v ./...
-        - run: ./build/build.sh
-        - run: ./build/run_test.sh
-        - run: ls -al
+        - name: build
+          run: ./build/ci/windows.sh && \
+               source compilation_vars.txt && \
+               export VENV_DIR=bin && \
+               python3 --version && \
+               ./build/bootstrap-test-env.sh && \
+               OW_TEST_PATH=$PWD/test/files go test -v ./... && \
+               ./build/build.sh && \
+               ./build/run_test.sh && \
+               ls -al
+          shell: bash
 
 
