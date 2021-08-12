@@ -5,8 +5,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@v2
+        - run: ./build/ci/linux.sh
+        - run: python3 -m venv ow-test
+        - run: source ow-test/bin/activate
+        - run: export VENV_DIR=bin
+        - run: python3 --version
+        - run: ./build/bootstrap-test-env.sh
+        - run: OW_TEST_PATH=$PWD/test/files go test -v ./...
+        - run: ./build/build.sh
+        - run: ./build/run_test.sh
+        - run: ls -al
   build-windows:
     runs-on: windows-latest
     steps:
         - uses: actions/checkout@v2
+        - run: ./build/ci/windows.sh
+        - run: source compilation_vars.txt
+        - run: export VENV_DIR=bin
+        - run: python3 --version
+        - run: ./build/bootstrap-test-env.sh
+        - run: OW_TEST_PATH=$PWD/test/files go test -v ./...
+        - run: ./build/build.sh
+        - run: ./build/run_test.sh
+        - run: ls -al
+
 
