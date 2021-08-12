@@ -1,0 +1,12 @@
+name: build-ow-core
+on: [push]
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v2
+  build-windows:
+    runs-on: windows-latest
+    steps:
+        - uses: actions/checkout@v2
+
