@@ -44,7 +44,7 @@ jobs:
             name: windows
             path: |
               *.exe
-              1.8.21/*.dll
+              1.8.21/bin/*.dll
               libopenwater.h
               libopenwater.so
 
