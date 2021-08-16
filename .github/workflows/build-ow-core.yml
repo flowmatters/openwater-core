@@ -21,7 +21,7 @@ jobs:
         - name: upload build
           uses: actions/upload-artifact@v2
           with:
-            name: linux
+            name: linux-${{ github.sha }}
             path: |
               ow-inspect
               ow-single
@@ -43,7 +43,7 @@ jobs:
         - name: upload build
           uses: actions/upload-artifact@v2
           with:
-            name: windows
+            name: windows-${{ github.sha }}
             path: |
               *.exe
               1.8.21/bin/*.dll
