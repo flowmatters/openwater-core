@@ -23,7 +23,9 @@ jobs:
           with:
             name: linux
             path: |
-              ow-*
+              ow-inspect
+              ow-single
+              ow-sim
               ows-ensemble
               libopenwater.h
               libopenwater.so
