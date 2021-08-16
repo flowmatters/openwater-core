@@ -27,5 +27,15 @@ jobs:
         - name: build
           shell: bash
           run: ./build/ci/windows-build.sh
+        - name: update build
+          uses: actions/upload-artifact@v2
+          with:
+            name: windows
+            path: |
+              *.exe
+              1.8.21/*.dll
+              libopenwater.h
+              libopenwater.so
+
 
 
