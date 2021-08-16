@@ -18,6 +18,16 @@ jobs:
         - run: ./build/build.sh
         - run: ./build/run_test.sh
         - run: ls -al
+        - name: upload build
+          uses: actions/upload-artifact@v2
+          with:
+            name: linux
+            path: |
+              ow-*
+              ows-ensemble
+              libopenwater.h
+              libopenwater.so
+
   build-windows:
     runs-on: windows-latest
     steps:
@@ -28,7 +38,7 @@ jobs:
         - name: build
           shell: bash
           run: ./build/ci/windows-build.sh
-        - name: update build
+        - name: upload build
           uses: actions/upload-artifact@v2
           with:
             name: windows
