@@ -386,7 +386,7 @@ func (mr *modelReference) WriteData(generation int) error {
 	return nil
 }
 
-func writeFor(modelName, includeFlag, excludeFlag string) bool {
+func writeFor(modelName, includeFlag, excludeFlag string, defaultVal bool) bool {
 	if includeFlag != "" {
 		includedModels := strings.Split(includeFlag, ",")
 		for _, im := range includedModels {
@@ -406,15 +406,15 @@ func writeFor(modelName, includeFlag, excludeFlag string) bool {
 		}
 	}
 
-	return true
+	return defaultVal
 }
 
-func writeInputs(modelName string) bool {
-	return writeFor(modelName, *inputsFor, *noInputsFor)
+func writeInputs(modelName string, defaultVal bool) bool {
+	return writeFor(modelName, *inputsFor, *noInputsFor, defaultVal)
 }
 
 func writeOutputs(modelName string) bool {
-	return writeFor(modelName, *outputsFor, *noOutputsFor)
+	return writeFor(modelName, *outputsFor, *noOutputsFor, true)
 }
 
 func filenameOrDefault(flag *string, defaultFn string) string {
@@ -482,10 +482,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 			ref.OutputFilename = destFn
 			ref.WriteOutputs = writeOutputs(modelName)
 			ref.WriteStates = true
-
-			if ref.Batches[0] == 0 {
-				ref.WriteInputs = writeInputs(modelName)
-			}
+			ref.WriteInputs = writeInputs(modelName,ref.Batches[0] > 0)
 
 			if destFn != defaultOutputFn {
 				exe_path, _ := osext.Executable()
