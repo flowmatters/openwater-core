@@ -162,11 +162,18 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		}
 
 		inputRef := mr.GetReference(genSlice, "inputs")
-		inputs, err := inputRef.Load()
-		if err == nil {
-			gen.Inputs = inputs.(data.ND3Float64)
-			mr.SimLength = inputs.Len(sim.DIMI_TIMESTEP)
-		} else {
+		inputsExist := inputRef.Exists()
+		if inputsExist {
+			inputs, err := inputRef.Load()
+			if err == nil {
+				gen.Inputs = inputs.(data.ND3Float64)
+				mr.SimLength = inputs.Len(sim.DIMI_TIMESTEP)
+			} else {
+				inputsExist = false
+			}
+		}
+
+		if !inputsExist {
 			verbosePrintf("No inputs saved for %s. Initialising\n", mr.ModelName)
 			gen.Inputs = data.NewArray3DFloat64(gen.Count, len(gen.Model.Description().Inputs), mr.SimLength)
 		}
