@@ -265,9 +265,8 @@ func (h H5RefFloat64) GetDatasets() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err == nil && ds != nil {
-			ds.Close()
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_DATASET {
 			result = append(result, name)
 		}
 	}
@@ -304,11 +303,9 @@ func (h H5RefFloat64) GetGroups() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err != nil && ds == nil {
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_GROUP {
 			result = append(result, name)
-		} else {
-			ds.Close()
 		}
 	}
 	return result, nil
@@ -633,9 +630,8 @@ func (h H5RefFloat32) GetDatasets() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err == nil && ds != nil {
-			ds.Close()
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_DATASET {
 			result = append(result, name)
 		}
 	}
@@ -672,11 +668,9 @@ func (h H5RefFloat32) GetGroups() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err != nil && ds == nil {
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_GROUP {
 			result = append(result, name)
-		} else {
-			ds.Close()
 		}
 	}
 	return result, nil
@@ -1001,9 +995,8 @@ func (h H5RefInt32) GetDatasets() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err == nil && ds != nil {
-			ds.Close()
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_DATASET {
 			result = append(result, name)
 		}
 	}
@@ -1040,11 +1033,9 @@ func (h H5RefInt32) GetGroups() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err != nil && ds == nil {
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_GROUP {
 			result = append(result, name)
-		} else {
-			ds.Close()
 		}
 	}
 	return result, nil
@@ -1369,9 +1360,8 @@ func (h H5RefUint32) GetDatasets() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err == nil && ds != nil {
-			ds.Close()
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_DATASET {
 			result = append(result, name)
 		}
 	}
@@ -1408,11 +1398,9 @@ func (h H5RefUint32) GetGroups() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err != nil && ds == nil {
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_GROUP {
 			result = append(result, name)
-		} else {
-			ds.Close()
 		}
 	}
 	return result, nil
@@ -1737,9 +1725,8 @@ func (h H5RefInt64) GetDatasets() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err == nil && ds != nil {
-			ds.Close()
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_DATASET {
 			result = append(result, name)
 		}
 	}
@@ -1776,11 +1763,9 @@ func (h H5RefInt64) GetGroups() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err != nil && ds == nil {
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_GROUP {
 			result = append(result, name)
-		} else {
-			ds.Close()
 		}
 	}
 	return result, nil
@@ -2105,9 +2090,8 @@ func (h H5RefUint64) GetDatasets() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err == nil && ds != nil {
-			ds.Close()
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_DATASET {
 			result = append(result, name)
 		}
 	}
@@ -2144,11 +2128,9 @@ func (h H5RefUint64) GetGroups() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err != nil && ds == nil {
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_GROUP {
 			result = append(result, name)
-		} else {
-			ds.Close()
 		}
 	}
 	return result, nil
@@ -2473,9 +2455,8 @@ func (h H5RefInt) GetDatasets() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err == nil && ds != nil {
-			ds.Close()
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_DATASET {
 			result = append(result, name)
 		}
 	}
@@ -2512,11 +2493,9 @@ func (h H5RefInt) GetGroups() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err != nil && ds == nil {
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_GROUP {
 			result = append(result, name)
-		} else {
-			ds.Close()
 		}
 	}
 	return result, nil
@@ -2841,9 +2820,8 @@ func (h H5RefUint) GetDatasets() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err == nil && ds != nil {
-			ds.Close()
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_DATASET {
 			result = append(result, name)
 		}
 	}
@@ -2880,11 +2858,9 @@ func (h H5RefUint) GetGroups() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err != nil && ds == nil {
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_GROUP {
 			result = append(result, name)
-		} else {
-			ds.Close()
 		}
 	}
 	return result, nil

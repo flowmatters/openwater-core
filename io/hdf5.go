@@ -267,9 +267,8 @@ func (h H5RefArrayType) GetDatasets() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err == nil && ds != nil {
-			ds.Close()
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_DATASET {
 			result = append(result, name)
 		}
 	}
@@ -306,11 +305,9 @@ func (h H5RefArrayType) GetGroups() ([]string, error) {
 			return nil, err
 		}
 
-		ds, err := g.OpenDataset(name)
-		if err != nil && ds == nil {
+		objType, err := g.ObjectTypeByIndex(uint(i))
+		if err == nil && objType == hdf5.H5G_GROUP {
 			result = append(result, name)
-		} else {
-			ds.Close()
 		}
 	}
 	return result, nil
