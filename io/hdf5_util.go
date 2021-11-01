@@ -204,3 +204,13 @@ func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interfa
 	}
 	return ds, nil
 }
+
+func findInSlice(strings []string, target string) int {
+	for i, v := range strings {
+		if v == target {
+			return i
+		}
+	}
+	return -1
+}
+

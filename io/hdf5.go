@@ -5,6 +5,7 @@ import (
 	"errors"
 	"reflect"
 	"strings"
+	"fmt"
 
 	"github.com/joelrahman/genny/generic"
 
@@ -275,6 +276,46 @@ func (h H5RefArrayType) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
+func (h H5RefArrayType) GetGroups() ([]string, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	g, err := f.OpenGroup(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer g.Close()
+
+	n, err := g.NumObjects()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for i := 0; i < int(n); i++ {
+		name, err := g.ObjectNameByIndex(uint(i))
+		if err != nil {
+			return nil, err
+		}
+
+		ds, err := g.OpenDataset(name)
+		if err != nil && ds == nil {
+			result = append(result, name)
+		} else {
+			ds.Close()
+		}
+	}
+	return result, nil
+}
+
 func ParseH5RefArrayType(path string) H5RefArrayType {
 	components := strings.Split(path, ":")
 	return H5RefArrayType{components[0], components[1], nil}
@@ -283,20 +324,35 @@ func ParseH5RefArrayType(path string) H5RefArrayType {
 func (h H5RefArrayType) Exists() bool {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
+	components := strings.Split(h.Dataset,"/")
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err != nil {
-		return false
+	path := "/"
+	for ix, comp := range(components) {
+		ref := H5RefArrayType{Filename:h.Filename,Dataset: path}
+
+		if ix == (len(components)-1) {
+			datasets, err := ref.GetDatasets()
+
+			if err != nil {
+				return false
+			}
+			if findInSlice(datasets,comp) >= 0 {
+				return true
+			}
+		}
+
+		groups, err := ref.GetGroups()
+
+		if err != nil {
+			return false
+		}
+		if findInSlice(groups,comp) < 0 {
+			return false
+		}
+
+		path = fmt.Sprintf("%s/%s",path,comp)
 	}
-	defer ds.Close()
 
 	return true
 }

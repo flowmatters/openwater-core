@@ -7,6 +7,7 @@ package io
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -273,6 +274,46 @@ func (h H5RefFloat64) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
+func (h H5RefFloat64) GetGroups() ([]string, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	g, err := f.OpenGroup(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer g.Close()
+
+	n, err := g.NumObjects()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for i := 0; i < int(n); i++ {
+		name, err := g.ObjectNameByIndex(uint(i))
+		if err != nil {
+			return nil, err
+		}
+
+		ds, err := g.OpenDataset(name)
+		if err != nil && ds == nil {
+			result = append(result, name)
+		} else {
+			ds.Close()
+		}
+	}
+	return result, nil
+}
+
 func ParseH5RefFloat64(path string) H5RefFloat64 {
 	components := strings.Split(path, ":")
 	return H5RefFloat64{components[0], components[1], nil}
@@ -281,20 +322,35 @@ func ParseH5RefFloat64(path string) H5RefFloat64 {
 func (h H5RefFloat64) Exists() bool {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
+	components := strings.Split(h.Dataset, "/")
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err != nil {
-		return false
+	path := "/"
+	for ix, comp := range components {
+		ref := H5RefFloat64{Filename: h.Filename, Dataset: path}
+
+		if ix == (len(components) - 1) {
+			datasets, err := ref.GetDatasets()
+
+			if err != nil {
+				return false
+			}
+			if findInSlice(datasets, comp) >= 0 {
+				return true
+			}
+		}
+
+		groups, err := ref.GetGroups()
+
+		if err != nil {
+			return false
+		}
+		if findInSlice(groups, comp) < 0 {
+			return false
+		}
+
+		path = fmt.Sprintf("%s/%s", path, comp)
 	}
-	defer ds.Close()
 
 	return true
 }
@@ -586,6 +642,46 @@ func (h H5RefFloat32) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
+func (h H5RefFloat32) GetGroups() ([]string, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	g, err := f.OpenGroup(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer g.Close()
+
+	n, err := g.NumObjects()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for i := 0; i < int(n); i++ {
+		name, err := g.ObjectNameByIndex(uint(i))
+		if err != nil {
+			return nil, err
+		}
+
+		ds, err := g.OpenDataset(name)
+		if err != nil && ds == nil {
+			result = append(result, name)
+		} else {
+			ds.Close()
+		}
+	}
+	return result, nil
+}
+
 func ParseH5RefFloat32(path string) H5RefFloat32 {
 	components := strings.Split(path, ":")
 	return H5RefFloat32{components[0], components[1], nil}
@@ -594,20 +690,35 @@ func ParseH5RefFloat32(path string) H5RefFloat32 {
 func (h H5RefFloat32) Exists() bool {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
+	components := strings.Split(h.Dataset, "/")
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err != nil {
-		return false
+	path := "/"
+	for ix, comp := range components {
+		ref := H5RefFloat32{Filename: h.Filename, Dataset: path}
+
+		if ix == (len(components) - 1) {
+			datasets, err := ref.GetDatasets()
+
+			if err != nil {
+				return false
+			}
+			if findInSlice(datasets, comp) >= 0 {
+				return true
+			}
+		}
+
+		groups, err := ref.GetGroups()
+
+		if err != nil {
+			return false
+		}
+		if findInSlice(groups, comp) < 0 {
+			return false
+		}
+
+		path = fmt.Sprintf("%s/%s", path, comp)
 	}
-	defer ds.Close()
 
 	return true
 }
@@ -899,6 +1010,46 @@ func (h H5RefInt32) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
+func (h H5RefInt32) GetGroups() ([]string, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	g, err := f.OpenGroup(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer g.Close()
+
+	n, err := g.NumObjects()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for i := 0; i < int(n); i++ {
+		name, err := g.ObjectNameByIndex(uint(i))
+		if err != nil {
+			return nil, err
+		}
+
+		ds, err := g.OpenDataset(name)
+		if err != nil && ds == nil {
+			result = append(result, name)
+		} else {
+			ds.Close()
+		}
+	}
+	return result, nil
+}
+
 func ParseH5RefInt32(path string) H5RefInt32 {
 	components := strings.Split(path, ":")
 	return H5RefInt32{components[0], components[1], nil}
@@ -907,20 +1058,35 @@ func ParseH5RefInt32(path string) H5RefInt32 {
 func (h H5RefInt32) Exists() bool {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
+	components := strings.Split(h.Dataset, "/")
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err != nil {
-		return false
+	path := "/"
+	for ix, comp := range components {
+		ref := H5RefInt32{Filename: h.Filename, Dataset: path}
+
+		if ix == (len(components) - 1) {
+			datasets, err := ref.GetDatasets()
+
+			if err != nil {
+				return false
+			}
+			if findInSlice(datasets, comp) >= 0 {
+				return true
+			}
+		}
+
+		groups, err := ref.GetGroups()
+
+		if err != nil {
+			return false
+		}
+		if findInSlice(groups, comp) < 0 {
+			return false
+		}
+
+		path = fmt.Sprintf("%s/%s", path, comp)
 	}
-	defer ds.Close()
 
 	return true
 }
@@ -1212,6 +1378,46 @@ func (h H5RefUint32) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
+func (h H5RefUint32) GetGroups() ([]string, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	g, err := f.OpenGroup(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer g.Close()
+
+	n, err := g.NumObjects()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for i := 0; i < int(n); i++ {
+		name, err := g.ObjectNameByIndex(uint(i))
+		if err != nil {
+			return nil, err
+		}
+
+		ds, err := g.OpenDataset(name)
+		if err != nil && ds == nil {
+			result = append(result, name)
+		} else {
+			ds.Close()
+		}
+	}
+	return result, nil
+}
+
 func ParseH5RefUint32(path string) H5RefUint32 {
 	components := strings.Split(path, ":")
 	return H5RefUint32{components[0], components[1], nil}
@@ -1220,20 +1426,35 @@ func ParseH5RefUint32(path string) H5RefUint32 {
 func (h H5RefUint32) Exists() bool {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
+	components := strings.Split(h.Dataset, "/")
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err != nil {
-		return false
+	path := "/"
+	for ix, comp := range components {
+		ref := H5RefUint32{Filename: h.Filename, Dataset: path}
+
+		if ix == (len(components) - 1) {
+			datasets, err := ref.GetDatasets()
+
+			if err != nil {
+				return false
+			}
+			if findInSlice(datasets, comp) >= 0 {
+				return true
+			}
+		}
+
+		groups, err := ref.GetGroups()
+
+		if err != nil {
+			return false
+		}
+		if findInSlice(groups, comp) < 0 {
+			return false
+		}
+
+		path = fmt.Sprintf("%s/%s", path, comp)
 	}
-	defer ds.Close()
 
 	return true
 }
@@ -1525,6 +1746,46 @@ func (h H5RefInt64) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
+func (h H5RefInt64) GetGroups() ([]string, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	g, err := f.OpenGroup(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer g.Close()
+
+	n, err := g.NumObjects()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for i := 0; i < int(n); i++ {
+		name, err := g.ObjectNameByIndex(uint(i))
+		if err != nil {
+			return nil, err
+		}
+
+		ds, err := g.OpenDataset(name)
+		if err != nil && ds == nil {
+			result = append(result, name)
+		} else {
+			ds.Close()
+		}
+	}
+	return result, nil
+}
+
 func ParseH5RefInt64(path string) H5RefInt64 {
 	components := strings.Split(path, ":")
 	return H5RefInt64{components[0], components[1], nil}
@@ -1533,20 +1794,35 @@ func ParseH5RefInt64(path string) H5RefInt64 {
 func (h H5RefInt64) Exists() bool {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
+	components := strings.Split(h.Dataset, "/")
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err != nil {
-		return false
+	path := "/"
+	for ix, comp := range components {
+		ref := H5RefInt64{Filename: h.Filename, Dataset: path}
+
+		if ix == (len(components) - 1) {
+			datasets, err := ref.GetDatasets()
+
+			if err != nil {
+				return false
+			}
+			if findInSlice(datasets, comp) >= 0 {
+				return true
+			}
+		}
+
+		groups, err := ref.GetGroups()
+
+		if err != nil {
+			return false
+		}
+		if findInSlice(groups, comp) < 0 {
+			return false
+		}
+
+		path = fmt.Sprintf("%s/%s", path, comp)
 	}
-	defer ds.Close()
 
 	return true
 }
@@ -1838,6 +2114,46 @@ func (h H5RefUint64) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
+func (h H5RefUint64) GetGroups() ([]string, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	g, err := f.OpenGroup(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer g.Close()
+
+	n, err := g.NumObjects()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for i := 0; i < int(n); i++ {
+		name, err := g.ObjectNameByIndex(uint(i))
+		if err != nil {
+			return nil, err
+		}
+
+		ds, err := g.OpenDataset(name)
+		if err != nil && ds == nil {
+			result = append(result, name)
+		} else {
+			ds.Close()
+		}
+	}
+	return result, nil
+}
+
 func ParseH5RefUint64(path string) H5RefUint64 {
 	components := strings.Split(path, ":")
 	return H5RefUint64{components[0], components[1], nil}
@@ -1846,20 +2162,35 @@ func ParseH5RefUint64(path string) H5RefUint64 {
 func (h H5RefUint64) Exists() bool {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
+	components := strings.Split(h.Dataset, "/")
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err != nil {
-		return false
+	path := "/"
+	for ix, comp := range components {
+		ref := H5RefUint64{Filename: h.Filename, Dataset: path}
+
+		if ix == (len(components) - 1) {
+			datasets, err := ref.GetDatasets()
+
+			if err != nil {
+				return false
+			}
+			if findInSlice(datasets, comp) >= 0 {
+				return true
+			}
+		}
+
+		groups, err := ref.GetGroups()
+
+		if err != nil {
+			return false
+		}
+		if findInSlice(groups, comp) < 0 {
+			return false
+		}
+
+		path = fmt.Sprintf("%s/%s", path, comp)
 	}
-	defer ds.Close()
 
 	return true
 }
@@ -2151,6 +2482,46 @@ func (h H5RefInt) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
+func (h H5RefInt) GetGroups() ([]string, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	g, err := f.OpenGroup(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer g.Close()
+
+	n, err := g.NumObjects()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for i := 0; i < int(n); i++ {
+		name, err := g.ObjectNameByIndex(uint(i))
+		if err != nil {
+			return nil, err
+		}
+
+		ds, err := g.OpenDataset(name)
+		if err != nil && ds == nil {
+			result = append(result, name)
+		} else {
+			ds.Close()
+		}
+	}
+	return result, nil
+}
+
 func ParseH5RefInt(path string) H5RefInt {
 	components := strings.Split(path, ":")
 	return H5RefInt{components[0], components[1], nil}
@@ -2159,20 +2530,35 @@ func ParseH5RefInt(path string) H5RefInt {
 func (h H5RefInt) Exists() bool {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
+	components := strings.Split(h.Dataset, "/")
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err != nil {
-		return false
+	path := "/"
+	for ix, comp := range components {
+		ref := H5RefInt{Filename: h.Filename, Dataset: path}
+
+		if ix == (len(components) - 1) {
+			datasets, err := ref.GetDatasets()
+
+			if err != nil {
+				return false
+			}
+			if findInSlice(datasets, comp) >= 0 {
+				return true
+			}
+		}
+
+		groups, err := ref.GetGroups()
+
+		if err != nil {
+			return false
+		}
+		if findInSlice(groups, comp) < 0 {
+			return false
+		}
+
+		path = fmt.Sprintf("%s/%s", path, comp)
 	}
-	defer ds.Close()
 
 	return true
 }
@@ -2464,6 +2850,46 @@ func (h H5RefUint) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
+func (h H5RefUint) GetGroups() ([]string, error) {
+	rLockHDF5(h.Filename)
+	defer rUnlockHDF5(h.Filename)
+	// mu.RLock()
+	// defer mu.RUnlock()
+
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	g, err := f.OpenGroup(h.Dataset)
+	if err != nil {
+		return nil, err
+	}
+	defer g.Close()
+
+	n, err := g.NumObjects()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for i := 0; i < int(n); i++ {
+		name, err := g.ObjectNameByIndex(uint(i))
+		if err != nil {
+			return nil, err
+		}
+
+		ds, err := g.OpenDataset(name)
+		if err != nil && ds == nil {
+			result = append(result, name)
+		} else {
+			ds.Close()
+		}
+	}
+	return result, nil
+}
+
 func ParseH5RefUint(path string) H5RefUint {
 	components := strings.Split(path, ":")
 	return H5RefUint{components[0], components[1], nil}
@@ -2472,20 +2898,35 @@ func ParseH5RefUint(path string) H5RefUint {
 func (h H5RefUint) Exists() bool {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
-	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
+	components := strings.Split(h.Dataset, "/")
 
-	ds, err := f.OpenDataset(h.Dataset)
-	if err != nil {
-		return false
+	path := "/"
+	for ix, comp := range components {
+		ref := H5RefUint{Filename: h.Filename, Dataset: path}
+
+		if ix == (len(components) - 1) {
+			datasets, err := ref.GetDatasets()
+
+			if err != nil {
+				return false
+			}
+			if findInSlice(datasets, comp) >= 0 {
+				return true
+			}
+		}
+
+		groups, err := ref.GetGroups()
+
+		if err != nil {
+			return false
+		}
+		if findInSlice(groups, comp) < 0 {
+			return false
+		}
+
+		path = fmt.Sprintf("%s/%s", path, comp)
 	}
-	defer ds.Close()
 
 	return true
 }

@@ -15,15 +15,6 @@ import (
 const TEST_PATH = "openwater-core/test/files"
 const TEST_FILE = "test_hdf5.h5"
 
-func findInSlice(strings []string, target string) int {
-	for i, v := range strings {
-		if v == target {
-			return i
-		}
-	}
-	return -1
-}
-
 func test_filename() string {
 	return strings.Join([]string{
 		os.Getenv("OW_TEST_PATH"),
@@ -59,6 +50,33 @@ func TestGetDatasetNames(t *testing.T) {
 	assert.True(findInSlice(datasetNames, "doubles") >= 0)
 	assert.Equal(-1, findInSlice(datasetNames, "not there"))
 }
+
+func TestExists(t *testing.T) {
+	assert := assert.New(t)
+	fn := test_filename()
+
+	ref := H5RefFloat64{Filename: fn, Dataset: "simple"}
+	assert.True(ref.Exists())
+
+	ref = H5RefFloat64{Filename: fn, Dataset: "simple/strings"}
+	assert.True(ref.Exists())
+
+	ref = H5RefFloat64{Filename: fn, Dataset: "simple/doubles"}
+	assert.True(ref.Exists())
+
+	ref = H5RefFloat64{Filename: fn, Dataset: "simple/notpresent"}
+	assert.False(ref.Exists())
+
+	ref = H5RefFloat64{Filename: fn, Dataset: "notpresent"}
+	assert.False(ref.Exists())
+
+	ref = H5RefFloat64{Filename: fn, Dataset: "simple/sub_group"}
+	assert.True(ref.Exists())
+
+	ref = H5RefFloat64{Filename: fn, Dataset: "ints3d"}
+	assert.True(ref.Exists())
+}
+
 
 func TestReadDouble(t *testing.T) {
 	assert := assert.New(t)
