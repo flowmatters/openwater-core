@@ -131,8 +131,7 @@ func (h H5RefArrayType) Write(data data.NDArrayType) error {
 func (h H5RefArrayType) Create(shape []int, fillValue ArrayType, compress bool) error {
 	lockHDF5(h.Filename)
 	defer unlockHDF5(h.Filename)
-	// mu.Lock()
-	// defer mu.Unlock()
+
 	f, err := openWriteOrCreate(h.Filename, true)
 	if err != nil {
 		return err
@@ -149,8 +148,7 @@ func (h H5RefArrayType) Create(shape []int, fillValue ArrayType, compress bool) 
 func (h H5RefArrayType) WriteSlice(data data.NDArrayType, loc []int) error {
 	lockHDF5(h.Filename)
 	defer unlockHDF5(h.Filename)
-	// mu.Lock()
-	// defer mu.Unlock()
+
 	f, err := openWriteOrCreate(h.Filename, false)
 	if err != nil {
 		return err
@@ -188,8 +186,6 @@ func (h H5RefArrayType) WriteSlice(data data.NDArrayType, loc []int) error {
 func (h H5RefArrayType) LoadText() ([]string, error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
@@ -240,8 +236,6 @@ func (h H5RefArrayType) LoadText() ([]string, error) {
 func (h H5RefArrayType) GetDatasets() ([]string, error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
@@ -278,8 +272,6 @@ func (h H5RefArrayType) GetDatasets() ([]string, error) {
 func (h H5RefArrayType) GetGroups() ([]string, error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
@@ -319,9 +311,6 @@ func ParseH5RefArrayType(path string) H5RefArrayType {
 }
 
 func (h H5RefArrayType) Exists() bool {
-	rLockHDF5(h.Filename)
-	defer rUnlockHDF5(h.Filename)
-
 	components := strings.Split(h.Dataset,"/")
 
 	path := "/"
@@ -357,8 +346,6 @@ func (h H5RefArrayType) Exists() bool {
 func (h H5RefArrayType) Shape() ([]int,error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {

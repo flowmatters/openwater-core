@@ -14,7 +14,7 @@ import (
 )
 
 var mu sync.RWMutex
-var masterMU sync.RWMutex
+// var masterMU sync.RWMutex
 // var mus = make(map[string]*sync.RWMutex)
 
 // errorString is a trivial implementation of error.
@@ -29,7 +29,6 @@ func (e *errorString) Error() string {
 func rLockHDF5(fn string) {
 	// masterMU.Lock()
 	// defer masterMU.Unlock()
-
 	mu.RLock()
 	// mutex,ok := mus[fn]
 	// if !ok {

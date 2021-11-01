@@ -51,6 +51,18 @@ func TestGetDatasetNames(t *testing.T) {
 	assert.Equal(-1, findInSlice(datasetNames, "not there"))
 }
 
+func TestGetGroupNames(t *testing.T) {
+	assert := assert.New(t)
+	fn := test_filename()
+
+	ref := H5RefFloat64{Filename: fn, Dataset: "simple"}
+	datasetNames, err := ref.GetGroups()
+	assert.Nil(err)
+
+	assert.Equal(1, len(datasetNames))
+	assert.True(findInSlice(datasetNames, "sub_group") >= 0)
+}
+
 func TestExists(t *testing.T) {
 	assert := assert.New(t)
 	fn := test_filename()
