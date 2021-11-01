@@ -313,6 +313,10 @@ func (h H5RefFloat64) Exists() bool {
 
 	path := "/"
 	for ix, comp := range components {
+		if len(comp) == 0 {
+			continue
+		}
+
 		ref := H5RefFloat64{Filename: h.Filename, Dataset: path}
 
 		if ix == (len(components) - 1) {
@@ -665,6 +669,10 @@ func (h H5RefFloat32) Exists() bool {
 
 	path := "/"
 	for ix, comp := range components {
+		if len(comp) == 0 {
+			continue
+		}
+
 		ref := H5RefFloat32{Filename: h.Filename, Dataset: path}
 
 		if ix == (len(components) - 1) {
@@ -1017,6 +1025,10 @@ func (h H5RefInt32) Exists() bool {
 
 	path := "/"
 	for ix, comp := range components {
+		if len(comp) == 0 {
+			continue
+		}
+
 		ref := H5RefInt32{Filename: h.Filename, Dataset: path}
 
 		if ix == (len(components) - 1) {
@@ -1369,6 +1381,10 @@ func (h H5RefUint32) Exists() bool {
 
 	path := "/"
 	for ix, comp := range components {
+		if len(comp) == 0 {
+			continue
+		}
+
 		ref := H5RefUint32{Filename: h.Filename, Dataset: path}
 
 		if ix == (len(components) - 1) {
@@ -1721,6 +1737,10 @@ func (h H5RefInt64) Exists() bool {
 
 	path := "/"
 	for ix, comp := range components {
+		if len(comp) == 0 {
+			continue
+		}
+
 		ref := H5RefInt64{Filename: h.Filename, Dataset: path}
 
 		if ix == (len(components) - 1) {
@@ -2073,6 +2093,10 @@ func (h H5RefUint64) Exists() bool {
 
 	path := "/"
 	for ix, comp := range components {
+		if len(comp) == 0 {
+			continue
+		}
+
 		ref := H5RefUint64{Filename: h.Filename, Dataset: path}
 
 		if ix == (len(components) - 1) {
@@ -2425,6 +2449,10 @@ func (h H5RefInt) Exists() bool {
 
 	path := "/"
 	for ix, comp := range components {
+		if len(comp) == 0 {
+			continue
+		}
+
 		ref := H5RefInt{Filename: h.Filename, Dataset: path}
 
 		if ix == (len(components) - 1) {
@@ -2777,6 +2805,10 @@ func (h H5RefUint) Exists() bool {
 
 	path := "/"
 	for ix, comp := range components {
+		if len(comp) == 0 {
+			continue
+		}
+
 		ref := H5RefUint{Filename: h.Filename, Dataset: path}
 
 		if ix == (len(components) - 1) {

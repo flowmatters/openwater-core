@@ -315,6 +315,10 @@ func (h H5RefArrayType) Exists() bool {
 
 	path := "/"
 	for ix, comp := range(components) {
+		if len(comp)==0{
+			continue
+		}
+
 		ref := H5RefArrayType{Filename:h.Filename,Dataset: path}
 
 		if ix == (len(components)-1) {
