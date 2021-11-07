@@ -14,6 +14,7 @@ const (
 	MIN_TIMESTEP_SECONDS = 30
 	ALLOWED_REL_ERROR_RELEASE_RATE = 1e-5
 	ALLOWED_ABS_ERROR_RELEASE_RATE = 1e-4
+	ESSENTIALLY_ZERO_RELEASE_RATE = 1e-4
 	MAX_SUBTIMESTEPS = 600000
 )
 
@@ -111,7 +112,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 		if absError < ALLOWED_ABS_ERROR_RELEASE_RATE {
 			return true
 		}
-		if (a == 0.0) || (b == 0.0) {
+		if (math.Abs(a) < ESSENTIALLY_ZERO_RELEASE_RATE) && (math.Abs(b) < ESSENTIALLY_ZERO_RELEASE_RATE) {
 			return true
 		}
 		relError := (absError / a)
@@ -140,8 +141,11 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 		outflowVolume := 0.0
 
 		inflow := inflowTS.Get(idx)
-		demand := demandTS.Get(idx)
-
+		origDemand := demandTS.Get(idx)
+		demand := origDemand
+		// targetMinVol := targetMinimumVolume.Get(idx)
+		// targetMinCap := targetMinimumCapacity.Get(idx)
+		// targetMaxVol := volCurveMax - targetMinCap
 		rainfallPerSecond := rainfallTS.Get(idx) / deltaT
 		petPerSecond := petTS.Get(idx) / deltaT
 		netAtmosphericFluxInPerSecond := (rainfallPerSecond - petPerSecond) * units.MILLIMETRES_TO_METRES
@@ -157,28 +161,14 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 			netAtmosphericFluxInRate := netAtmosphericFluxInPerSecond * area
 
 			netFluxInWithoutRelease := inflow + netAtmosphericFluxInRate
+			testVol := 0.0
 			avgOutflow := 0.0
 			for {
-				testVol := volume + ((inflow-estOutflow)+(netAtmosphericFluxInPerSecond*area)) * subtimestep
+				testVol = volume + ((inflow-estOutflow)+(netAtmosphericFluxInPerSecond*area)) * subtimestep
 
 				if testVol < 0.0 {
 					if subtimestep <= MIN_TIMESTEP_SECONDS {
-						minR := cappedPiecewise(volume,minRelease)
-						maxR := cappedPiecewise(volume,maxRelease)
-
-						fmt.Printf("==== %d - Hit minimum timestep (%f) and volume out of bounds ====\n",i,subtimestep)
-						fmt.Printf("demand = %f\n",demand)
-						fmt.Printf("input = %f\n",inflow)
-						fmt.Printf("volume = %f\n",volume)
-						fmt.Printf("netAtmosphericFluxInRate=%f\n",netAtmosphericFluxInRate)
-						fmt.Printf("netFluxInWithoutRelease=%f\n",netFluxInWithoutRelease)
-						fmt.Printf("estOutflow=%f\n",estOutflow)
-						fmt.Printf("minR=%f\n",minR)
-						fmt.Printf("maxR=%f\n",maxR)
-						fmt.Printf("testVol=%f\n",testVol)
-						fmt.Printf("%d - testVol(%f) outside volume bounds [%f,%f] at minimum subtimestep\n",
-								i,testVol,volCurveMin,volCurveMax)
-
+						// report()
 						panic(err)
 					}
 					subtimestep = math.Max(subtimestep*0.5,MIN_TIMESTEP_SECONDS)
@@ -204,6 +194,11 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 
 			outflowVolume += avgOutflow * subtimestep
 			volume = volume + (netFluxInWithoutRelease-avgOutflow) * subtimestep
+			if volume < 0 {
+				// report()
+				panic(err)
+			}
+
 			timeRemaining -= subtimestep
 		}
 
