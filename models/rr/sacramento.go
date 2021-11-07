@@ -10,17 +10,17 @@ import (
 
 /*OW-SPEC
 Sacramento:
-  inputs:
-    rainfall: mm
-    pet: mm
-  states:
-    UprTensionWater:
-    UprFreeWater:
-    LwrTensionWater:
-	LwrPrimaryFreeWater:
-	LwrSupplFreeWater:
-	AdditionalImperviousStore:
-  parameters:
+	inputs:
+		rainfall: mm
+		pet: mm
+	states:
+		UprTensionWater:
+		UprFreeWater:
+		LwrTensionWater:
+		LwrPrimaryFreeWater:
+		LwrSupplFreeWater:
+		AdditionalImperviousStore:
+	parameters:
 		lzpk: '[0,1] Lower zone Primary Free water base flow ratio, default=0.01'
 		lzsk: '[0,1] Lower zone Supplementary Free water base flow ratio, default=0.05'
 		uzk: '[0,1] Upper zone free water interflow fraction, default=0.3'
