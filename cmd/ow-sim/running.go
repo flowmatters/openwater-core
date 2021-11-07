@@ -32,15 +32,18 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 				if outputs == nil {
 					fmt.Printf("No outputs from %s in generation %d\n", name, i)
 				}
+				simulationDone <- name
+			} else {
+				simulationDone <- ""
 			}
-
-			simulationDone <- name
 		}(gen, modelName)
 	}
 
 	for i := 0; i < modelCount; i++ {
 		mn := <-simulationDone
-		verbosePrintf("%d: %s finished\n", i, mn)
+		if mn != "" {
+			verbosePrintf("%d: %s finished\n", i, mn)
+		}
 	}
 
 	genSimulationEnd := time.Now()
