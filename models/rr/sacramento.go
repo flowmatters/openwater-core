@@ -16,11 +16,11 @@ Sacramento:
   states:
     UprTensionWater:
     UprFreeWater:
-		LwrTensionWater:
-		LwrPrimaryFreeWater:
-		LwrSupplFreeWater:
-		AdditionalImperviousStore:
-	parameters:
+    LwrTensionWater:
+	LwrPrimaryFreeWater:
+	LwrSupplFreeWater:
+	AdditionalImperviousStore:
+  parameters:
 		lzpk: '[0,1] Lower zone Primary Free water base flow ratio, default=0.01'
 		lzsk: '[0,1] Lower zone Supplementary Free water base flow ratio, default=0.05'
 		uzk: '[0,1] Upper zone free water interflow fraction, default=0.3'
@@ -65,7 +65,7 @@ Sacramento:
 const pdn20 = 5.08
 const pdnor = 25.4
 const nunit = 5
-const VERRY_SMALL = 0.0 // 1.0e-10
+const VERY_SMALL = 0.0 // 1.0e-10
 
 func sumSlice(s []float64) (sum float64) {
 	sum = 0.0
@@ -129,7 +129,7 @@ func sacramento(rainfall, pet data.ND1Float64,
 
 		//     Determine evaporation from upper zone tension water store
 		e1 := 0.0
-		if uztwm > VERRY_SMALL {
+		if uztwm > VERY_SMALL {
 			e1 = evapt * uprTensionWater / uztwm
 		}
 
@@ -147,13 +147,13 @@ func sacramento(rainfall, pet data.ND1Float64,
 		//     If the upper zone free water ratio exceeded the upper tension zone
 		//     content ratio, then transfer the free water into tension
 		a := 1.0
-		if uztwm > VERRY_SMALL {
+		if uztwm > VERY_SMALL {
 			//      if( uztwm > tiny(uztwm) ) then
 			a = uprTensionWater / uztwm
 		}
 
 		b := 1.0
-		if uzfwm > VERRY_SMALL {
+		if uzfwm > VERY_SMALL {
 			//  //!REB  This should be > 0.0 as it is the
 			//                                      Upper zone free water capacity
 			b = uprFreeWater / uzfwm
@@ -168,7 +168,7 @@ func sacramento(rainfall, pet data.ND1Float64,
 		//     Evaporation from ADIMP area and Lower zone tension water
 		e3 := 0.0
 		e5 := 0.0
-		if uztwm+lztwm > VERRY_SMALL {
+		if uztwm+lztwm > VERY_SMALL {
 			//      if( uztwm+lztwm > tiny(uztwm) ) then
 			e3 = math.Min((evapt-e1-e2)*lwrTensionWater/(uztwm+lztwm), lwrTensionWater)
 			e5 = math.Min(e1+(evapt-e1-e2)*(additionalImperviousStore-e1-uprTensionWater)/(uztwm+lztwm), additionalImperviousStore)
@@ -185,14 +185,14 @@ func sacramento(rainfall, pet data.ND1Float64,
 
 		//     Resupply the lower zone tension with water from the lower zone
 		//     free, if more water is available there.
-		if lztwm > VERRY_SMALL {
+		if lztwm > VERY_SMALL {
 			//      if( lztwm > tiny(lztwm) ) then
 			a = lwrTensionWater / lztwm
 		} else {
 			a = 1.
 		}
 
-		if alzfpm+alzfsm-saved+lztwm > VERRY_SMALL {
+		if alzfpm+alzfsm-saved+lztwm > VERY_SMALL {
 			//      if( alzfpm+alzfsm-saved+lztwm > tiny(lztwm) ) then
 			b = (alzfpc + alzfsc - saved + lwrTensionWater) / (alzfpm + alzfsm - saved + lztwm)
 		} else {
@@ -291,7 +291,7 @@ func sacramento(rainfall, pet data.ND1Float64,
 				//         Compute the baseflow from the lower zone
 				//          bf= alzfpc*dlzp
 				bf := 0.0
-				if alzfpc > VERRY_SMALL {
+				if alzfpc > VERY_SMALL {
 					//          if( alzfpc > tiny(alzfpc) ) then //!REB Epsilon*Real should= 0.0
 					bf = alzfpc * dlzp //!REB this is a strange problem
 				} else { //!REB
@@ -301,7 +301,7 @@ func sacramento(rainfall, pet data.ND1Float64,
 				flobf = flobf + bf
 				alzfpc = alzfpc - bf
 				//          bf= alzfsc*dlzs
-				if alzfsc > VERRY_SMALL { //!REB
+				if alzfsc > VERY_SMALL { //!REB
 					//          if( alzfsc > tiny(alzfsc) ) then //!REB Epsilon*Real should= 0.0
 					bf = alzfsc * dlzs //!REB this is also a strange problem
 				} else { //!REB
@@ -312,12 +312,12 @@ func sacramento(rainfall, pet data.ND1Float64,
 				flobf = flobf + bf
 
 				//         Adjust the upper zone for percolation and interflow
-				if uprFreeWater > VERRY_SMALL { //!REB
+				if uprFreeWater > VERY_SMALL { //!REB
 					//           Determine percolation from the upper zone free water
 					//           limited to available water and lower zone air space
 					lzair := lztwm - lwrTensionWater + alzfsm - alzfsc + alzfpm - alzfpc
 					perc := 0.0
-					if lzair > VERRY_SMALL {
+					if lzair > VERY_SMALL {
 						//            if( lzair > tiny(lzair) ) then
 						perc = (pbase * dinc * uprFreeWater) / uzfwm
 						perc = math.Min(lzair, math.Min(uprFreeWater,
@@ -343,7 +343,7 @@ func sacramento(rainfall, pet data.ND1Float64,
 					lwrTensionWater = lwrTensionWater + perctw
 
 					//           Distribute water between LZ free water supplemental and primary
-					if percfw > VERRY_SMALL {
+					if percfw > VERY_SMALL {
 						//            if( percfw > tiny(percfw) ) then
 						ratlp := 1. - alzfpc/alzfpm
 						ratls := 1. - alzfsc/alzfsm
@@ -365,7 +365,7 @@ func sacramento(rainfall, pet data.ND1Float64,
 				}
 
 				//         Fill upper zone free water with tension water spill
-				if pinc > VERRY_SMALL {
+				if pinc > VERY_SMALL {
 					//          if( pinc > tiny(pinc) ) then
 					pav = pinc
 					if pav-uzfwm+uprFreeWater <= 0 {
@@ -460,7 +460,7 @@ func sacramento(rainfall, pet data.ND1Float64,
 		surfaceRunoff.Set(idx, qf-bf)
 		baseflow.Set(idx, bf)
 		runoff.Set(idx, qf)
-		actualET.Set(idx,e1+e2+e3+e4+e5)
+		actualET.Set(idx, e1+e2+e3+e4+e5)
 		//hydrographStore := sumSlice(qq)
 
 		// deltaS := ((uprTensionWater-prevUprTensionWater)+
@@ -474,7 +474,7 @@ func sacramento(rainfall, pet data.ND1Float64,
 
 		//baseFlowLoss := ((alzfsc - lwrSupplFreeWater) + (alzfpc - lwrPrimaryFreeWater) + (flobf - flwbf)) * (1.0 - pctim)
 		//massBalance := pliq - aet - qf - deltaS - baseFlowLoss - math.Min(ssout, flwbf+flwsf)
-		// if math.Abs(massBalance) > VERRY_SMALL {
+		// if math.Abs(massBalance) > VERY_SMALL {
 		// 	if !mbError {
 		// 		mbError = true
 		// 	}
