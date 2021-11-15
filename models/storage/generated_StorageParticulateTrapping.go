@@ -126,7 +126,7 @@ func (m *StorageParticulateTrapping)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "inflowLoad","inflow","outflow","storage",}
   result.Outputs = []string{
-  "trappedMass","outflowMass",}
+  "trappedMass","outflowLoad",}
 
   result.States = []string{
   "storedMass",}
@@ -264,11 +264,11 @@ func (m *StorageParticulateTrapping) Run(inputs data.ND3Float64, states data.ND2
       trappedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      outflowmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       
 
-      storedmass= storageParticulateTrapping(inflowload,inflow,outflow,storage,storedmass,deltat,reservoircapacity,reservoirlength,subtractor,multiplier,lengthdischargefactor,lengthdischargepower,trappedmass,outflowmass)
+      storedmass= storageParticulateTrapping(inflowload,inflow,outflow,storage,storedmass,deltat,reservoircapacity,reservoirlength,subtractor,multiplier,lengthdischargefactor,lengthdischargepower,trappedmass,outflowload)
 
       
       

@@ -26,7 +26,7 @@ StorageParticulateTrapping:
 		lengthDischargePower:
 	outputs:
 		trappedMass: kg
-		outflowMass: kg.s^-1
+		outflowLoad: kg.s^-1
 	implementation:
 		function: storageParticulateTrapping
 		type: scalar
@@ -42,7 +42,7 @@ StorageParticulateTrapping:
 func storageParticulateTrapping(inflowMass, storageInflow, storageOutflow, storageVolume data.ND1Float64, // inputs
 	initialStoredMass float64,
 	deltaT, reservoirCapacity, reservoirLength, subtractor, multiplier, lengthDischargeFactor, lengthDischargePower float64,
-	trappedMass, outflowMass data.ND1Float64) (storedMass float64) {
+	trappedMass, outflowLoad data.ND1Float64) (storedMass float64) {
 	storedMass = initialStoredMass
 	n := inflowMass.Len1()
 	idx := []int{0}
@@ -66,7 +66,7 @@ func storageParticulateTrapping(inflowMass, storageInflow, storageOutflow, stora
 
 		concentration := storedMass / storageVolume.Get(idx) // kg/m^3
 		massOutRate := storageOutflow.Get(idx) * concentration
-		outflowMass.Set(idx, massOutRate)
+		outflowLoad.Set(idx, massOutRate)
 	}
 
 	return
