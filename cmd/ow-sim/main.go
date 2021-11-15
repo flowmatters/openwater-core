@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime/pprof"
 	"time"
+	"gonum.org/v1/hdf5"
 
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
@@ -29,6 +30,7 @@ const (
 
 func main() {
 	flag.Parse()
+	hdf5.DisplayErrors(false)
 
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
