@@ -394,7 +394,6 @@ func writeFor(modelName, includeFlag, excludeFlag string, defaultVal bool) bool 
 				return true
 			}
 		}
-		return false
 	}
 
 	if excludeFlag != "" {
@@ -482,7 +481,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 			ref.OutputFilename = destFn
 			ref.WriteOutputs = writeOutputs(modelName)
 			ref.WriteStates = true
-			ref.WriteInputs = writeInputs(modelName,ref.Batches[0] > 0)
+			ref.WriteInputs = writeInputs(modelName,ref.Batches[0] == 0)
 
 			if destFn != defaultOutputFn {
 				exe_path, _ := osext.Executable()
