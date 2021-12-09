@@ -31,6 +31,11 @@ func RunSingleModel(
 	pArray := cdata.NewFloat64CArray(unsafe.Pointer(params), []int{int(nParameters), int(nParameterSets)}).(data.ND2Float64)
 	oArray := cdata.NewFloat64CArray(unsafe.Pointer(outputs), []int{int(nOutputCells), int(nOutputs), int(nOutputTimesteps)}).(data.ND3Float64)
 
+	dimSizes := model.FindDimensions(pArray.(data.ND2Float64))
+	if len(dimSizes) > 0 {
+		model.InitialiseDimensions(dimSizes)
+	}
+
 	model.ApplyParameters(pArray)
 	// coeffSlice := pArray.Slice([]int{0, 0}, []int{1, int(nParameterSets)}, nil).(data.ND1Float64)
 	// i := 0
