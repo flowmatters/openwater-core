@@ -23,10 +23,6 @@ func RunSingleModel(
 	gName := C.GoString(modelName)
 	model := sim.Catalog[gName]()
 
-	// fmt.Println(nInputSets, nInputs, nTimesteps)
-	// fmt.Println(nParameters, nParameterSets)
-	// fmt.Println(nOutputCells, nOutputs, nOutputTimesteps)
-
 	iArray := cdata.NewFloat64CArray(unsafe.Pointer(inputs), []int{int(nInputSets), int(nInputs), int(nTimesteps)}).(data.ND3Float64)
 	pArray := cdata.NewFloat64CArray(unsafe.Pointer(params), []int{int(nParameters), int(nParameterSets)}).(data.ND2Float64)
 	oArray := cdata.NewFloat64CArray(unsafe.Pointer(outputs), []int{int(nOutputCells), int(nOutputs), int(nOutputTimesteps)}).(data.ND3Float64)
@@ -48,10 +44,6 @@ func RunSingleModel(
 	} else {
 		sArray = cdata.NewFloat64CArray(unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2Float64)
 	}
-	// fmt.Println("i", iArray.Shape())
-	// fmt.Println("p", pArray.Shape())
-	// fmt.Println("s", sArray.Shape())
-	// fmt.Println("o", oArray.Shape())
 
 	// fmt.Printf("Running model: %s!\n", gName)
 	model.Run(iArray, sArray, oArray)
