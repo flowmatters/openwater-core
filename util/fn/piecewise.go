@@ -40,7 +40,7 @@ func Piecewise(x float64, xs, ys data.ND1Float64) (y float64, err error) {
 	err = nil
 	i, j := brackets(x, xs)
 	if (i < 0) || (j<0)  {
-		err = errors.New(fmt.Sprintf("Couldn't find brackets for %f in %s",x,xs))
+		err = errors.New(fmt.Sprintf("Couldn't find brackets for %f in %v",x,xs.Unroll()))
 		return
 	}
 	idx := []int{i}
