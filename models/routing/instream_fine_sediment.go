@@ -2,7 +2,6 @@ package routing
 
 import (
 	"math"
-
 	"github.com/flowmatters/openwater-core/conv/units"
 	"github.com/flowmatters/openwater-core/data"
 )
@@ -56,11 +55,22 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 	propBankHeightForFineDep, sedBulkDensity, manningsN,
 	fineSedSettVelocity, fineSedReMobVelocity, durationInSeconds float64,
 	loadDownstream, loadToFloodplain, floodplainDepositionFraction, channelDepositionFraction data.ND1Float64) (float64, float64) {
+
+	if bankFullFlow <= 1e-8 {
+		totalStoredMass = LumpedConstituentTransport(
+			upstreamMass, lateralMass, outflow, reachVolume,
+			totalStoredMass,
+			0, 0.0, durationInSeconds,
+			loadDownstream)
+		return channelStoreFine, totalStoredMass
+	}
+
 	n := reachVolume.Len1()
 	idx := []int{0}
 
 	linkArea := linkWidth * linkLength
 	maxStorage := propBankHeightForFineDep * bankHeight * linkArea * sedBulkDensity * units.TONNES_TO_KG
+
 	if channelStoreFine < 0.0 {
 		// Treat initial value as proportion of maxStorage
 		channelStoreFine = math.Abs(channelStoreFine) * maxStorage
