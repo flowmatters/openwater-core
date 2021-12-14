@@ -424,7 +424,7 @@ func filenameOrDefault(flag *string, defaultFn string) string {
 	return *flag
 }
 
-func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models map[string]*modelReference, genCount int) {
+func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models map[string]*modelReference, genCount, nodeCount int) {
 	simLength := 0
 
 	outputPaths := make(map[string]string)
@@ -440,6 +440,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 	paramFilename := filenameOrDefault(parameterInputFile, inputFn)
 	initStatesFilename := filenameOrDefault(statesInputFile, inputFn)
 
+	nodeCount = 0
 	models = make(map[string]*modelReference)
 	for _, modelName := range modelNames {
 		ref, err := initModel(inputFn, modelName)
@@ -501,6 +502,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 		verbosePrintln("Generations for ", ref.ModelName, ref.Generations)
 		models[modelName] = ref
 		genCount = len(ref.Generations)
+		nodeCount += int(ref.Batches[len(ref.Batches)-1])
 	}
 
 	for _, r := range models {

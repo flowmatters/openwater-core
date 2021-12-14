@@ -101,14 +101,17 @@ func run_simulation(args []string) {
 	var genCount int
 	writingDone := make(chan int)
 
-	models, genCount := makeModelRefs(modelNames, fn, outputFn)
+	models, genCount, nodeCount := makeModelRefs(modelNames, fn, outputFn)
+	nodesCompleted := 0
 
 	fmt.Println()
 	for i := 0; i < genCount; i++ {
-		fmt.Printf("==== Generation %d / %d ====\n", i+1, genCount)
+		pcComplete := 100.0 * float64(nodesCompleted) / float64(nodeCount)
+		fmt.Printf("==== %.1f%% - Generation %d / %d ====\n", pcComplete, i+1, genCount)
 
 		// === RUN GENERATION ===
-		genSimulationTime := runGeneration(i, models, modelNames) // synchronous
+		genSimulationTime, nodesInGeneration := runGeneration(i, models, modelNames) // synchronous
+		nodesCompleted += nodesInGeneration
 		totalTimeSimulation += genSimulationTime
 		// === /RUN GENERATION ===
 

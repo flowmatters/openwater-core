@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-func runGeneration(i int, models map[string]*modelReference, modelNames []string) float64 {
-	genTotal := 0
+func runGeneration(i int, models map[string]*modelReference, modelNames []string) (elapsedTime float64, nodesRun int) {
+	nodesRun = 0
 	simulationDone := make(chan string)
 	genStart := time.Now()
 	modelCount := 0
@@ -24,7 +24,7 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 		verbosePrintf("* %d x %s\n", gen.Count, modelName)
 		modelCount++
 
-		genTotal += gen.Count
+		nodesRun += gen.Count
 		go func(g *modelGeneration, name string) {
 			if g.Count > 0 {
 				g.Run()
@@ -47,10 +47,9 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 	}
 
 	genSimulationEnd := time.Now()
-	genSimulationElapsed := genSimulationEnd.Sub(genStart).Seconds()
-	verbosePrintf("= %d runs in %f seconds\n", genTotal, genSimulationElapsed)
-
-	return genSimulationElapsed
+	elapsedTime = genSimulationEnd.Sub(genStart).Seconds()
+	verbosePrintf("= %d runs in %f seconds\n", nodesRun, elapsedTime)
+	return
 }
 
 func writeGeneration(g int, models map[string]*modelReference, modelNames []string) {
