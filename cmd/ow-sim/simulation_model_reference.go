@@ -56,19 +56,21 @@ type modelReference struct {
 	outputsInitialised    bool
 }
 
-func initModel(fn, model string) (*modelReference, error) {
+func initModel(fn, model, paramFn string) (*modelReference, error) {
 	modelRef := io.H5RefInt32{Filename: fn, Dataset: "/MODELS/" + model + "/batches"}
 	batchesArray, err := modelRef.Load()
 	if err != nil {
+		fmt.Printf("Couldn't load batches for %s\n",model)
 		return nil, err
 	}
 	batches := batchesArray.Unroll()
 	result := modelReference{StructureFilename: fn, ModelName: model, Batches: batches}
 	result.TimeSeriesFilename = fn
-	result.ParametersFilename = fn
+	result.ParametersFilename = paramFn
 	result.InitialStatesFilename = fn
 	dimensions, err := result.initDimensions()
 	if err != nil {
+		fmt.Printf("Couldn't initialise dimensions for %s\n",model)
 		return nil, err
 	}
 	result.Dimensions = dimensions
@@ -88,6 +90,7 @@ func (mr *modelReference) makeModel() (sim.TimeSteppingModel, error) {
 func (mr *modelReference) initDimensions() ([]int, error) {
 	modelInstance, err := mr.makeModel()
 	if err != nil {
+		fmt.Printf("Couldn't make model\n")
 		return nil, err
 	}
 
@@ -102,6 +105,7 @@ func (mr *modelReference) initDimensions() ([]int, error) {
 
 	allParameters, err := h5Ref.Load()
 	if err != nil {
+		fmt.Printf("Couldn't load parameters for model %s from %s\n",mr.ModelName,mr.ParametersFilename)
 		return nil, err
 	}
 	
@@ -443,7 +447,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 	nodeCount = 0
 	models = make(map[string]*modelReference)
 	for _, modelName := range modelNames {
-		ref, err := initModel(inputFn, modelName)
+		ref, err := initModel(inputFn, modelName, paramFilename)
 
 		if err != nil {
 			fmt.Println("Couldn't initialise model", modelName)
@@ -452,7 +456,6 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 		}
 
 		ref.TimeSeriesFilename = tsFilename
-		ref.ParametersFilename = paramFilename
 		ref.InitialStatesFilename = initStatesFilename
 
 		if simLength == 0 {
