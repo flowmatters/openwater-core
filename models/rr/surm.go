@@ -82,16 +82,18 @@ func surm(rainfall, pet data.ND1Float64,
 		perviousQuickflow := infiltrationExcess + saturationExcess
 		quickflow += perviousQuickflow
 
+		et := math.Max(math.Min(10*soilMoistureStore/smax, petThisTS), 0.0) //* fperv
+		soilMoistureStore -= et
+
 		recharge := rfac * math.Max(soilMoistureStore-fieldCapacity, 0.0) //* fperv
 		gw += recharge
 		soilMoistureStore -= recharge
 
-		et := math.Max(math.Min(10*soilMoistureStore/smax, petThisTS), 0.0) //* fperv
-		soilMoistureStore -= et
+		seep := dseep * gw
+		gw = math.Max(gw-seep,0.0)
 
 		baseflow := bfac * gw
-		seep := dseep * gw
-		gw = math.Max(gw-baseflow-seep, 0.0)
+		gw = math.Max(gw-baseflow, 0.0)
 		// baseflow = baseflow
 		baseflow = baseflow * fperv
 
