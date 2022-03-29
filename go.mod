@@ -9,5 +9,5 @@ require (
 	github.com/stretchr/testify v1.4.0
 	gonum.org/v1/hdf5 v0.0.0-20210714002203-8c5d23bc6946
 	google.golang.org/protobuf v1.25.0
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.8
 )
