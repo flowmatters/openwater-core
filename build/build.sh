@@ -13,6 +13,7 @@ done
 
 echo libopenwater
 go build -buildmode=c-shared -o libopenwater.so ./libopenwater 
+mkdir -p ../bin
 cp libopenwater.* ../bin
 
 ls -lh
