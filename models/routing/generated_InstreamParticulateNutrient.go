@@ -85,7 +85,7 @@ func (m *InstreamParticulateNutrient)  Description() sim.ModelDescription{
   "loadDownstream","loadToFloodplain",}
 
   result.States = []string{
-  "channelStoredMass",}
+  "instreamStoredMass","channelStoredMass",}
 
   result.Dimensions = []string{
       }
@@ -107,12 +107,14 @@ func (m *InstreamParticulateNutrient) FindDimensions(parameters data.ND2Float64)
 
 func (m *InstreamParticulateNutrient) InitialiseStates(n int) data.ND2Float64 {
   // Zero states
-	var result = data.NewArray2DFloat64(n,1)
+	var result = data.NewArray2DFloat64(n,2)
 
 	// for i := 0; i < n; i++ {
-  //   stateSet := make(sim.StateSet,1)
+  //   stateSet := make(sim.StateSet,2)
   //   
-	// 	stateSet[0] = 0 // channelStoredMass
+	// 	stateSet[0] = 0 // instreamStoredMass
+  //   
+	// 	stateSet[1] = 0 // channelStoredMass
   //   
 
   //   if result==nil {
@@ -186,7 +188,9 @@ func (m *InstreamParticulateNutrient) Run(inputs data.ND3Float64, states data.ND
 
       
       
-      channelstoredmass := initialStates.Get1(0)
+      instreamstoredmass := initialStates.Get1(0)
+      
+      channelstoredmass := initialStates.Get1(1)
       
       
 
@@ -232,11 +236,13 @@ func (m *InstreamParticulateNutrient) Run(inputs data.ND3Float64, states data.ND
       
       
 
-      channelstoredmass= instreamParticulateNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,streambankerosion,lateralsediment,floodplaindepositionfraction,channeldepositionfraction,channelstoredmass,particulatenutrientconcentration,soilpercentfine,durationinseconds,loaddownstream,loadtofloodplain)
+      instreamstoredmass,channelstoredmass= instreamParticulateNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,streambankerosion,lateralsediment,floodplaindepositionfraction,channeldepositionfraction,instreamstoredmass,channelstoredmass,particulatenutrientconcentration,soilpercentfine,durationinseconds,loaddownstream,loadtofloodplain)
 
       
       
-      initialStates.Set1(0, channelstoredmass)
+      initialStates.Set1(0, instreamstoredmass)
+      
+      initialStates.Set1(1, channelstoredmass)
       
       
 

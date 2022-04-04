@@ -18,6 +18,7 @@ InstreamParticulateNutrient:
 		floodplainDepositionFraction:
 		channelDepositionFraction:
   states:
+		instreamStoredMass:
 		channelStoredMass:
 	parameters:
 		particulateNutrientConcentration: '[0,1] Proportion of sediment mass, default=0'
@@ -46,22 +47,25 @@ InstreamParticulateNutrient:
 
 func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reachVolume, outflow, 
 	streamBankErosion, lateralSediment, floodplainDepositionFraction, channelDepositionFraction data.ND1Float64,
-	storedMass float64,
+	initialInstreamStoredMass, initialChannelStoredMass float64,
 	particulateNutrientConcentration, soilPercentFine, durationInSeconds float64,
-	loadDownstream, loadToFloodplain data.ND1Float64) float64 {
+	loadDownstream, loadToFloodplain data.ND1Float64) (instreamStoredMass, channelStoredMass float64) {
 	n := incomingMassUpstream.Len1()
 	idx := []int{0}
+
+	instreamStoredMass = initialInstreamStoredMass
+	channelStoredMass = initialChannelStoredMass
 
 	for i:=0; i < n; i++ {
 		idx[0]=i
 		incomingUpstream := incomingMassUpstream.Get(idx) * durationInSeconds
 		incomingLateral := incomingMassLateral.Get(idx) * durationInSeconds
 
-		totalDailyConstsituentMass := storedMass + incomingUpstream + incomingLateral // + AdditionalInflowMass
+		totalDailyConstsituentMass := instreamStoredMass + incomingUpstream + incomingLateral // + AdditionalInflowMass
 
 		//Do some adjustments to try to overcome the issue where FUs might've provided a Nutrient load (DWC?) but ont a sediment load
 		//This ultimately makes very little difference
-		totalDailyConstsituentMassForDepositionProcesses := storedMass + incomingUpstream /*+ AdditionalInflowMass*/
+		totalDailyConstsituentMassForDepositionProcesses := instreamStoredMass + incomingUpstream /*+ AdditionalInflowMass*/
 		if (lateralSediment.Get(idx) > 0.0) {
 			totalDailyConstsituentMassForDepositionProcesses += incomingLateral
 		}
@@ -87,17 +91,26 @@ func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reac
 		//double bedDeposit = SedMod.proportionDepositedBed * totalDailyConstsituentMass;
 		//Potentially the sed model could have re-mobilised with 'zero' existing constituent mass...
 		//But there's not much we can do about that
-		bedDeposit := channelDepositionFraction.Get(idx) * totalDailyConstsituentMassForDepositionProcesses
+		bedDepositSignal := channelDepositionFraction.Get(idx)
+		bedExchange := 0.0
 
-		if bedDeposit >= 0 {
-			bedDeposit = math.Min(bedDeposit,totalDailyConstsituentMassForDepositionProcesses - nutrientDailyDepositedFloodPlain)
+		if bedDepositSignal >= 0 { // Fraction of working mass is deposited
+			bedExchange = math.Min(bedDepositSignal * totalDailyConstsituentMassForDepositionProcesses,
+														 totalDailyConstsituentMassForDepositionProcesses - nutrientDailyDepositedFloodPlain)
+			channelStoredMass += bedExchange
+		} else {
+			// resuspension := - bedDepositFraction * channelStoredMass // Signal is a fraction of stored sediment
+			// resuspension := - bedDepositSignal * particulateNutrientConcentration // Signal is a kg/s of sediment remobilised
+			resuspension := - bedDepositSignal * totalDailyConstsituentMassForDepositionProcesses
+			channelStoredMass -= resuspension
+			bedExchange = - resuspension
 		// } else {
 		// 	//Remobilisation
 		// 	nutrientDailyRemobilisedBed = bedDeposit * -1.0 //This will make remobilisation a positive number
 		// 	nutrientDailyDepositedBed = 0.0
 		}
 
-		netLoss := nutrientDailyDepositedFloodPlain + bedDeposit
+		netLoss := nutrientDailyDepositedFloodPlain + bedExchange
 		amountLeft := totalDailyConstsituentMass - netLoss
 
 		// copied from lumped constituent - should refactor
@@ -107,20 +120,20 @@ func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reac
 
 		workingVol := outflowV + storedV
 		if workingVol < MINIMUM_VOLUME {
-			storedMass = 0.0 // workingMass
+			instreamStoredMass = 0.0 // workingMass
 			loadDownstream.Set(idx, 0.0)
 			continue
 		}
 
 		concentration := amountLeft / workingVol
-		storedMass = concentration * storedV
+		instreamStoredMass = concentration * storedV
 
 		outflowLoad := concentration * outflowRate
 
 		loadDownstream.Set(idx,outflowLoad)
 	}
 
-	return storedMass
+	return
 }
 
 
