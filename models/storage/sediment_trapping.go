@@ -64,8 +64,12 @@ func storageParticulateTrapping(inflowMass, storageInflow, storageOutflow, stora
 
 		storedMass = storedMass + incomingMass - dailyTrappedConstituentLoad
 
-		concentration := storedMass / storageVolume.Get(idx) // kg/m^3
-		massOutRate := storageOutflow.Get(idx) * concentration
+		storageOutflowRate := storageOutflow.Get(idx)
+		storageWorkingVolume := storageOutflowRate*deltaT + storageVolume.Get(idx)
+
+		concentration := storedMass / storageWorkingVolume
+		massOutRate := storageOutflowRate * concentration
+		storedMass = math.Max(storedMass - (massOutRate*deltaT),0.0)
 		outflowLoad.Set(idx, massOutRate)
 	}
 
