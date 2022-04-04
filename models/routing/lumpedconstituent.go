@@ -5,7 +5,7 @@ import (
 	//	"fmt"
 )
 
-const MINIMUM_VOLUME = 1e-4
+const MINIMUM_VOLUME = 1e-2
 
 /*OW-SPEC
 LumpedConstituentRouting:
@@ -47,22 +47,23 @@ func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage dat
 		inflowLoad := inflowLoads.Get(idx)
 		lateralLoad := lateralLoads.Get(idx)
 		totalLoadIn := (inflowLoad + lateralLoad + pointInput) * deltaT
-		workingMass := storedMass + totalLoadIn
 
-		outflowV := outflows.Get(idx) * deltaT
+		outflowR := outflows.Get(idx)
+		outflowV := outflowR * deltaT
 		storedV := storage.Get(idx)
 
+		workingMass := storedMass + totalLoadIn
 		workingVol := outflowV + storedV
+
 		if workingVol < MINIMUM_VOLUME {
-			storedMass = 0.0 // workingMass
+			storedMass = 0.0
 			outflowLoads.Set(idx, 0.0)
 			continue
 		}
 
 		concentration := workingMass / workingVol
 		storedMass = concentration * storedV
-
-		outflowLoad := concentration * outflowV / deltaT
+		outflowLoad := concentration * outflowR
 
 		outflowLoads.Set(idx, outflowLoad)
 	}
