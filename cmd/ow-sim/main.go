@@ -208,15 +208,17 @@ func run_simulation(args []string) {
 	verbosePrintln("Simulation finished. Waiting for results to be written")
 	generationsEnd := time.Now()
 
-	for {
-		genFinished := <-writingDone
-		if genFinished == (genCount - 1) {
-			verbosePrintf("Generation %d finished writing\n", genFinished)
-			break
+	if outputFn != "" {
+		for {
+			genFinished := <-writingDone
+			if genFinished == (genCount - 1) {
+				verbosePrintf("Generation %d finished writing\n", genFinished)
+				break
+			}
+			verbosePrintf("Waiting for final generation (%d), got generation %d, sleeping\n", genCount-1, genFinished)
+			writingDone <- genFinished
+			time.Sleep(time.Duration(500 * 1000 * 1000))
 		}
-		verbosePrintf("Waiting for final generation (%d), got generation %d, sleeping\n", genCount-1, genFinished)
-		writingDone <- genFinished
-		time.Sleep(time.Duration(500 * 1000 * 1000))
 	}
 
 	simEnd := time.Now()
