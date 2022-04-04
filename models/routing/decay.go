@@ -38,50 +38,37 @@ func constituentDecay(inflowLoads, lateralLoads, inflows, outflows, storage data
 	storedMass float64,
 	x, halflife, deltaT float64,
 	outflowLoads data.ND1Float64) float64 {
+	const MINIMUM_VOLUME=0.01
 	n := inflowLoads.Len1()
 	idx := []int{0}
 
 	for day := 0; day < n; day++ {
 		idx[0] = day
 
+		if halflife > 0 {
+			storedMass *= math.Pow(2.0, -deltaT/halflife)
+		}
+
 		inflowLoad := inflowLoads.Get(idx) * deltaT
 		lateralLoad := lateralLoads.Get(idx) * deltaT
 		workingMass := storedMass + inflowLoad + lateralLoad
 
-		outflowV := outflows.Get(idx) * deltaT
+		outflowR := outflows.Get(idx)
+		outflowV := outflowR * deltaT
 		storedV := storage.Get(idx)
 
 		workingVol := outflowV + storedV
 		if workingVol < MINIMUM_VOLUME {
-			storedMass = workingMass
+			storedMass = 0.0
 			outflowLoads.Set(idx, 0.0)
 			continue
 		}
 
 		concentration := workingMass / workingVol
-		storedMass = concentration * storedV
-		outflowLoad := concentration * outflowV / deltaT
-
-		// dailyDecayedConstituentLoad = 0
-
-		//double load = ConstituentOutput.StoredMass;
-		load := storedMass
-
-		if halflife <= 0 {
-			//No decay, prevent a NaN from dividing by zero
-			//load = ConstituentOutput.StoredMass;
-			////load = ConstituentStorage;
-		} else {
-			//Load after decay
-			load *= math.Pow(2.0, -deltaT/halflife)
-		}
-
-		storedMass = load
-
-		// ProcessedLoad = load + UpstreamFlowMass + CatchmentInflowMass + AdditionalInflowMass
+		outflowLoad := concentration * outflowR
+		storedMass = workingMass - outflowLoad * deltaT
 
 		outflowLoads.Set(idx, outflowLoad)
-		//		load :=
 	}
 	return storedMass
 }
