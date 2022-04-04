@@ -77,6 +77,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 
 	volCurveMin := volumes.Get(idxCurve0)
 	volCurveMax := volumes.Get(idxCurveN)
+	maxSpill := minRelease.Get(idxCurveN)
 
 	// Water balance functions
 	cappedPiecewise := func(vol float64,ys data.ND1Float64) float64 {
@@ -140,52 +141,115 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 
 		outflowVolume := 0.0
 
+		targetMinCap := targetMinimumCapacity.Get(idx)
+		targetMaxVol := volCurveMax - targetMinCap
+		autoAdjustDemand := false//true
+
 		inflow := inflowTS.Get(idx)
 		origDemand := demandTS.Get(idx)
 		demand := origDemand
-		// targetMinVol := targetMinimumVolume.Get(idx)
-		// targetMinCap := targetMinimumCapacity.Get(idx)
-		// targetMaxVol := volCurveMax - targetMinCap
+
+		// volumeOverTarget := math.Max(0.0, volume - targetMaxVol)
+		// if volumeOverTarget > 0.0 {
+		// 	// Adjust once per timestep
+		// 	rateToTarget := volumeOverTarget/subtimestep
+		// 	x := origDemand + 0.0001 * rateToTarget * rateToTarget
+		// 	y := math.Min(x,rateToTarget)
+		// 	z := math.Max(y,origDemand)	
+		// 	demand = z
+		// 	// demand = math.Max(origDemand,math.Log(volumeOverTarget)/subtimestep)
+		// }
+
+		// if volume > volCurveMax {
+		// 	outflowVolume += volume - volCurveMax
+		// 	volume = volCurveMax
+		// }
+
 		rainfallPerSecond := rainfallTS.Get(idx) / deltaT
 		petPerSecond := petTS.Get(idx) / deltaT
-		netAtmosphericFluxInPerSecond := (rainfallPerSecond - petPerSecond) * units.MILLIMETRES_TO_METRES
+		netAtmosphericFluxDepthPerSecond := (rainfallPerSecond - petPerSecond) * units.MILLIMETRES_TO_METRES
 
 		for timeRemaining > 0 {
 			nSubtimeSteps += 1
+
 			subtimestep = math.Min(timeRemaining,subtimestep*2)
+
+			demand = origDemand
+			if autoAdjustDemand && (volume > targetMaxVol) {
+				demand = math.Max(origDemand,0.0001*(volume-targetMaxVol)/subtimestep)
+			}
+
+			// demand = origDemand
+			// if (volume) > volCurveMax {
+			// 	demand = math.Max(origDemand,(volume-volCurveMax)/(timeRemaining))
+			// }
+
+			// demand = origDemand
+			// if (volume+inflow*timeRemaining) > volCurveMax {
+			// 	demand = math.Max(origDemand,((volume+inflow*subtimestep)-volCurveMax)/(timeRemaining))
+			// }
+
+			// if volume > volCurveMax {
+			// 	outflowVolume += volume - volCurveMax
+			// 	volume = volCurveMax
+			// }
 
 			estOutflow := releaseRate(demand,volume)
 
 			area = cappedPiecewise(volume,areas)
+			// netAtmosphericFluxInRate := netAtmosphericFluxDepthPerSecond * area
 
-			netAtmosphericFluxInRate := netAtmosphericFluxInPerSecond * area
-
-			netFluxInWithoutRelease := inflow + netAtmosphericFluxInRate
+			// netFluxInWithoutRelease := inflow + netAtmosphericFluxInRate
 			testVol := 0.0
 			avgOutflow := 0.0
+			avgArea := 0.0
+
 			for {
-				testVol = volume + ((inflow-estOutflow)+(netAtmosphericFluxInPerSecond*area)) * subtimestep
+				testVol = volume + ((inflow-estOutflow)+(netAtmosphericFluxDepthPerSecond*area)) * subtimestep
+				// demand = origDemand
+				// if volume > targetMaxVol {
+				// 	overAmount := volume - targetMaxVol
+				// 	extraReleaseRequired := overAmount / subtimestep
+				// 	demand = origDemand + extraReleaseRequired
+				// 	// demand = math.Max(origDemand,0.05*(volume-targetMaxVol)/subtimestep)
+				// }
+
+				// demand = origDemand
+				// if testVol > volCurveMax {
+				// 	// drainTime := math.Max(subtimestep,0.25*timeRemaining)
+				// 	drainTime := 0.4*timeRemaining
+				// 	// drainTime := timeRemaining
+				// 	demand = math.Max(origDemand,(testVol-volCurveMax)/drainTime)
+				// 	estOutflow = releaseRate(demand,testVol)
+				// }
 
 				if testVol < 0.0 {
 					if subtimestep <= MIN_TIMESTEP_SECONDS {
 						// report()
-						panic(err)
+						panic("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS")
 					}
 					subtimestep = math.Max(subtimestep*0.5,MIN_TIMESTEP_SECONDS)
 				} else {
-					testArea := cappedPiecewise(testVol,areas)
-					avgArea := (area+testArea)/2.0
-					testVol = volume + ((inflow-estOutflow)+(netAtmosphericFluxInPerSecond*avgArea)) * subtimestep
+					// testArea = cappedPiecewise(testVol,areas)
+					// avgArea = (area+testArea)/2.0
+					avgArea = cappedPiecewise((testVol+volume)/2.0,areas)
+					testVol = volume + ((inflow-estOutflow)+(netAtmosphericFluxDepthPerSecond*avgArea)) * subtimestep
 
 					estOutflowAfter := releaseRate(demand,testVol)
 
 					avgOutflow = (estOutflowAfter + estOutflow) / 2.0
-					if releaseRatesCloseEnough(estOutflow,avgOutflow) {
-						break
-					}
 
-					if subtimestep <= MIN_TIMESTEP_SECONDS {
-						break
+					testVol = volume + ((inflow-avgOutflow)+(netAtmosphericFluxDepthPerSecond*avgArea)) * subtimestep
+					if testVol >= 0.0 {
+						if releaseRatesCloseEnough(estOutflow,avgOutflow) {
+							break
+						}
+
+						if subtimestep <= MIN_TIMESTEP_SECONDS {
+							break
+						}
+					} else if subtimestep <= MIN_TIMESTEP_SECONDS {
+						panic("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS")
 					}
 				}
 
@@ -193,12 +257,25 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 			}
 
 			outflowVolume += avgOutflow * subtimestep
-			volume = volume + (netFluxInWithoutRelease-avgOutflow) * subtimestep
+			// testVol = volume + (inflow+(netAtmosphericFluxDepthPerSecond*avgArea)-avgOutflow) * subtimestep
+			// testArea := cappedPiecewise(testVol,areas)
+			// netAtmosphericFluxInRate = netAtmosphericFluxDepthPerSecond * (area+testArea)/2.0
+			// netFluxInWithoutRelease = inflow + netAtmosphericFluxInRate
+			volume = volume + (inflow+(netAtmosphericFluxDepthPerSecond*avgArea)-avgOutflow) * subtimestep
 			if volume < 0 {
 				// report()
 				panic(err)
 			}
 
+			if volume > volCurveMax {
+				overTopRatio := math.Min(volume/volCurveMax,2.0)
+				excessOutflow := math.Max((overTopRatio*maxSpill) - avgOutflow,0.0)
+				excessOutflowVolume := excessOutflow * subtimestep
+				excessOutflowVolume = math.Max(math.Min(excessOutflowVolume,volume-volCurveMax),0.0)
+				outflowVolume += excessOutflowVolume
+				volume = volume - excessOutflowVolume
+			}
+	
 			timeRemaining -= subtimestep
 		}
 
