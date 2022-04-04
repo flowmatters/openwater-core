@@ -14,6 +14,7 @@ import (
 
 
 type InstreamCoarseSediment struct {
+  durationInSeconds data.ND1Float64
   
 
   
@@ -21,6 +22,17 @@ type InstreamCoarseSediment struct {
 
 func (m *InstreamCoarseSediment) ApplyParameters(parameters data.ND2Float64) {
 
+  nSets := parameters.Len(sim.DIMP_CELL)
+  var newShape []int
+  paramIdx := 0
+  paramSize := 1
+
+
+  paramSize = 1
+  newShape = []int{ nSets}
+
+  m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1Float64)
+  paramIdx += paramSize
 
   
 }
@@ -38,8 +50,12 @@ func init() {
 func (m *InstreamCoarseSediment)  Description() sim.ModelDescription{
 	var result sim.ModelDescription
   
+  durationInSecondsDims := []string{
+      }
+  
 	result.Parameters = []sim.ParameterDescription{
-  }
+  
+  sim.DescribeParameter("durationInSeconds",86400,"Timestep",[]float64{ 1, 86400 }," ",durationInSecondsDims),}
 
   result.Inputs = []string{
   "upstreamMass","lateralMass","reachLocalMass",}
@@ -134,6 +150,7 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3Float64, states data.ND2Floa
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
+      durationinseconds := m.durationInSeconds.Get1(i%m.durationInSeconds.Len1())
       
 
       // fmt.Println("i",i)
@@ -173,7 +190,7 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3Float64, states data.ND2Floa
       
       
 
-      totalstoredmass= instreamCoarseSediment(upstreammass,lateralmass,reachlocalmass,totalstoredmass,loaddownstream)
+      totalstoredmass= instreamCoarseSediment(upstreammass,lateralmass,reachlocalmass,totalstoredmass,durationinseconds,loaddownstream)
 
       
       
