@@ -1,13 +1,12 @@
 package fn
 
 import (
-	"fmt"
 	"math"
 )
 
 func FindRoot(fn func(x float64) float64,
-	fn_dx func(x float64) float64,
-	initialX, minX, maxX, tolerance, convergenceLimit float64, maxIterations int) (x, delta float64) {
+fn_dx func(x float64) float64,
+initialX, minX, maxX, tolerance, convergenceLimit float64, maxIterations int) (x, delta float64) {
 	delta = fn(initialX)
 	x = initialX
 	maxDelta := fn(maxX)
@@ -44,9 +43,6 @@ func FindRoot(fn func(x float64) float64,
 		for _, trial := range trialXs {
 			if math.Abs(x-trial) < convergenceLimit {
 				hitConvergenceLimit++
-				// fmt.Printf("Convergence limit reached: ")
-				// fmt.Printf("Iterataion %d, Trial %d=%f, x=%f, x range=[%f,%f], delta range=[%f,%f]\n",
-				// 	iteration, n, trial, x, minX, maxX, minDelta, maxDelta)
 			}
 
 			trialDelta := fn(trial)
@@ -123,6 +119,6 @@ func FindRoot(fn func(x float64) float64,
 		}
 	}
 
-	fmt.Printf("Iterations exausted. x=%f, delta=%f\n", x, delta)
 	return
 }
+
