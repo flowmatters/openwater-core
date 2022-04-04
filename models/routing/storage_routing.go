@@ -1,7 +1,7 @@
 package routing
 
 import (
-	// "fmt"
+	"fmt"
 	"math"
 
 	"github.com/flowmatters/openwater-core/data"
