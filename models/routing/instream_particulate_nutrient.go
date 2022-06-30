@@ -25,6 +25,8 @@ InstreamParticulateNutrient:
 		soilPercentFine:
 		durationInSeconds: '[1,86400] Timestep, default=86400'
 	outputs:
+		loadDeposited:
+	  loadFromStreambank:
 		loadDownstream:
 		loadToFloodplain:
 	implementation:
@@ -49,7 +51,7 @@ func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reac
 	streamBankErosion, lateralSediment, floodplainDepositionFraction, channelDepositionFraction data.ND1Float64,
 	initialInstreamStoredMass, initialChannelStoredMass float64,
 	particulateNutrientConcentration, soilPercentFine, durationInSeconds float64,
-	loadDownstream, loadToFloodplain data.ND1Float64) (instreamStoredMass, channelStoredMass float64) {
+	loadDeposited, loadFromStreambank,loadDownstream, loadToFloodplain data.ND1Float64) (instreamStoredMass, channelStoredMass float64) {
 	n := incomingMassUpstream.Len1()
 	idx := []int{0}
 
@@ -75,7 +77,9 @@ func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reac
 		}
 
 		//stream bank generation
-		streamBankParticulate := streamBankErosion.Get(idx) * particulateNutrientConcentration * durationInSeconds
+		streamBankParticulate := streamBankErosion.Get(idx) * particulateNutrientConcentration
+		loadFromStreambank.Set(idx,streamBankParticulate)
+		streamBankParticulate = streamBankParticulate * durationInSeconds
 		totalDailyConstsituentMass += streamBankParticulate
 		totalDailyConstsituentMassForDepositionProcesses += streamBankParticulate * (soilPercentFine / 100)
 
@@ -131,6 +135,7 @@ func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reac
 		outflowLoad := concentration * outflowRate
 
 		loadDownstream.Set(idx,outflowLoad)
+		loadDeposited.Set(idx,bedExchange)
 	}
 
 	return

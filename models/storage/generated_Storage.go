@@ -127,7 +127,7 @@ func (m *Storage)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "rainfall","pet","inflow","demand","targetMinimumVolume","targetMinimumCapacity",}
   result.Outputs = []string{
-  "volume","outflow",}
+  "volume","outflow","rainfallVolume","evaporationVolume",}
 
   result.States = []string{
   "currentVolume","level","area",}
@@ -252,7 +252,7 @@ func (m *Storage) Run(inputs data.ND3Float64, states data.ND2Float64, outputs da
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 2, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 4, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
@@ -354,9 +354,15 @@ func (m *Storage) Run(inputs data.ND3Float64, states data.ND2Float64, outputs da
       outputPosSlice[sim.DIMO_OUTPUT] = 1
       outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
+      outputPosSlice[sim.DIMO_OUTPUT] = 2
+      rainfallvolume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 3
+      evaporationvolume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
       
 
-      currentvolume,level,area= storageWaterBalance(rainfall,pet,inflow,demand,targetminimumvolume,targetminimumcapacity,currentvolume,level,area,deltat,nlva,levels,volumes,areas,minrelease,maxrelease,volume,outflow)
+      currentvolume,level,area= storageWaterBalance(rainfall,pet,inflow,demand,targetminimumvolume,targetminimumcapacity,currentvolume,level,area,deltat,nlva,levels,volumes,areas,minrelease,maxrelease,volume,outflow,rainfallvolume,evaporationvolume)
 
       
       
@@ -368,7 +374,7 @@ func (m *Storage) Run(inputs data.ND3Float64, states data.ND2Float64, outputs da
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 2)
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
       
 
       doneChan <- i

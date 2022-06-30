@@ -47,7 +47,7 @@ func storageDissolvedDecay(inflowMass, storageInflow, storageOutflow, storageVol
 			inflowMass, nil, storageOutflow, storageVolume,
 			initialStoredMass,
 			0.0, 0.0, deltaT,
-			outflowMass)
+			outflowMass,nil)
 		return
 	}
 

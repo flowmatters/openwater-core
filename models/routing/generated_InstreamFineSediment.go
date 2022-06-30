@@ -192,7 +192,7 @@ func (m *InstreamFineSediment)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "upstreamMass","lateralMass","reachLocalMass","reachVolume","outflow",}
   result.Outputs = []string{
-  "loadDownstream","loadToFloodplain","floodplainDepositionFraction","channelDepositionFraction",}
+  "loadDownstream","loadToFloodplain","loadToChannelDeposition","floodplainDepositionFraction","channelDepositionFraction",}
 
   result.States = []string{
   "channelStoreFine","totalStoredMass",}
@@ -268,7 +268,7 @@ func (m *InstreamFineSediment) Run(inputs data.ND3Float64, states data.ND2Float6
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 4, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 5, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
@@ -346,14 +346,17 @@ func (m *InstreamFineSediment) Run(inputs data.ND3Float64, states data.ND2Float6
       loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      floodplaindepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      loadtochanneldeposition := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
+      floodplaindepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 4
       channeldepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       
 
-      channelstorefine,totalstoredmass= instreamFineSediment(upstreammass,lateralmass,reachlocalmass,reachvolume,outflow,channelstorefine,totalstoredmass,bankfullflow,finesedsettvelocityflood,floodplainarea,linkwidth,linklength,linkslope,bankheight,propbankheightforfinedep,sedbulkdensity,manningsn,finesedsettvelocity,finesedremobvelocity,durationinseconds,loaddownstream,loadtofloodplain,floodplaindepositionfraction,channeldepositionfraction)
+      channelstorefine,totalstoredmass= instreamFineSediment(upstreammass,lateralmass,reachlocalmass,reachvolume,outflow,channelstorefine,totalstoredmass,bankfullflow,finesedsettvelocityflood,floodplainarea,linkwidth,linklength,linkslope,bankheight,propbankheightforfinedep,sedbulkdensity,manningsn,finesedsettvelocity,finesedremobvelocity,durationinseconds,loaddownstream,loadtofloodplain,loadtochanneldeposition,floodplaindepositionfraction,channeldepositionfraction)
 
       
       
@@ -363,7 +366,7 @@ func (m *InstreamFineSediment) Run(inputs data.ND3Float64, states data.ND2Float6
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 5)
       
 
       doneChan <- i

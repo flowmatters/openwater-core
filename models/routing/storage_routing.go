@@ -78,11 +78,12 @@ func storageRouting(inflows, laterals,  rainfall, evap data.ND1Float64,
 	qi := 0.0
 	outflow := 0.0
 	storage := 0.0
+	inflow := 0.0
 
 	for i := 0; i < n; i++ {
 		idx[0] = i
 
-		inflow := inflows.Get(idx)
+		inflow = inflows.Get(idx)
 		lateral := laterals.Get(idx)
 
 		if math.IsNaN(inflow) {
@@ -100,7 +101,7 @@ func storageRouting(inflows, laterals,  rainfall, evap data.ND1Float64,
 		storages.Set(idx, storage)
 	}
 
-	return 0.0, 0.0, 0.0
+	return storage, inflow, outflow
 }
 
 func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevStorage, netEvapRate,

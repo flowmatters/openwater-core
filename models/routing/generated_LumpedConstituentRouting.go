@@ -82,7 +82,7 @@ func (m *LumpedConstituentRouting)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "inflowLoad","lateralLoad","outflow","storage",}
   result.Outputs = []string{
-  "outflowLoad",}
+  "outflowLoad","pointSourceLoad",}
 
   result.States = []string{
   "storedMass",}
@@ -156,7 +156,7 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3Float64, states data.ND2Fl
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 1, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 2, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
@@ -215,9 +215,12 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3Float64, states data.ND2Fl
       outputPosSlice[sim.DIMO_OUTPUT] = 0
       outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
+      outputPosSlice[sim.DIMO_OUTPUT] = 1
+      pointsourceload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
       
 
-      storedmass= LumpedConstituentTransport(inflowload,lateralload,outflow,storage,storedmass,x,pointinput,deltat,outflowload)
+      storedmass= LumpedConstituentTransport(inflowload,lateralload,outflow,storage,storedmass,x,pointinput,deltat,outflowload,pointsourceload)
 
       
       
@@ -225,7 +228,7 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3Float64, states data.ND2Fl
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 1)
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 2)
       
 
       doneChan <- i

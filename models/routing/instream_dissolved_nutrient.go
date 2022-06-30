@@ -27,8 +27,10 @@ InstreamDissolvedNutrientDecay:
 		uptakeVelocity:
 		durationInSeconds: '[1,86400] Timestep, default=86400'
 	outputs:
+		decayedLoad:
 		loadDownstream:
 		loadToFloodplain:
+		loadFromPointSource:
 	implementation:
 		function: instreamDissolvedNutrient
 		type: scalar
@@ -50,7 +52,7 @@ InstreamDissolvedNutrientDecay:
 func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachVolume, outflow, floodplainDepositionFraction data.ND1Float64,
 	storedMass float64,
 	doDecay, pointSourceLoad, linkHeight, linkWidth, linkLength, uptakeVelocity, durationInSeconds float64,
-	loadDownstream, loadToFloodplain data.ND1Float64) float64 {
+	decayedLoad, loadDownstream, loadToFloodplain, loadFromPointSource data.ND1Float64) float64 {
 	n := incomingMassUpstream.Len1()
 	idx := []int{0}
 	prevVolume := reachVolume.Get(idx)
@@ -64,7 +66,7 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 			incomingMassUpstream, incomingMassLateral, outflow, reachVolume,
 			storedMass,
 			0, pointSourcePerSecond, durationInSeconds,
-			loadDownstream)
+			loadDownstream, loadFromPointSource)
 		return storedMass
 	}
 
@@ -214,7 +216,9 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 
 			dailyDecayedConstituentLoad = allAvailConstit - loadOut
 
+			decayedLoad.Set(idx,dailyDecayedConstituentLoad)
 			loadDownstream.Set(idx, allAvailConstit-dailyDecayedConstituentLoad) // Is this just loadOut?
+			loadFromPointSource.Set(idx,pointSourceLoad_kg)
 		}
 
 		prevVolume = reachVolumeNow

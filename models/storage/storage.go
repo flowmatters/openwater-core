@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	MIN_TIMESTEP_SECONDS = 30
+	MIN_TIMESTEP_SECONDS_NEGATIVE = 6
+	MIN_TIMESTEP_SECONDS_POSITIVE = 60
 	ALLOWED_REL_ERROR_RELEASE_RATE = 1e-5
 	ALLOWED_ABS_ERROR_RELEASE_RATE = 1e-4
 	ESSENTIALLY_ZERO_RELEASE_RATE = 1e-4
@@ -42,6 +43,8 @@ Storage:
 	outputs:
 		volume: m^3
 		outflow: m^3.s^-1
+		rainfallVolume: m^3.s^-1
+		evaporationVolume: m^3.s^-1
 	implementation:
 		function: storageWaterBalance
 		type: scalar
@@ -71,7 +74,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 												 deltaT float64,
 												 nLVA int,
 												 levels, volumes, areas, minRelease, maxRelease data.ND1Float64,
-												 volumeTS, outflowTS data.ND1Float64) (volume, level, area float64) {
+												 volumeTS, outflowTS, rainfallVolume, evaporationVolume data.ND1Float64) (volume, level, area float64) {
 	idxCurve0 := []int{0}
 	idxCurveN := []int{nLVA-1}
 
@@ -165,6 +168,9 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 		// 	volume = volCurveMax
 		// }
 
+		rainfallVolForTimestep := 0.0
+		evaporationVolForTimestep := 0.0
+
 		rainfallPerSecond := rainfallTS.Get(idx) / deltaT
 		petPerSecond := petTS.Get(idx) / deltaT
 		netAtmosphericFluxDepthPerSecond := (rainfallPerSecond - petPerSecond) * units.MILLIMETRES_TO_METRES
@@ -224,11 +230,13 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 				// }
 
 				if testVol < 0.0 {
-					if subtimestep <= MIN_TIMESTEP_SECONDS {
+					if subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE {
 						// report()
 						panic("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS")
+						// fmt.Println("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE")
+						// return
 					}
-					subtimestep = math.Max(subtimestep*0.5,MIN_TIMESTEP_SECONDS)
+					subtimestep = math.Max(subtimestep*0.5,MIN_TIMESTEP_SECONDS_NEGATIVE)
 				} else {
 					// testArea = cappedPiecewise(testVol,areas)
 					// avgArea = (area+testArea)/2.0
@@ -245,15 +253,18 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 							break
 						}
 
-						if subtimestep <= MIN_TIMESTEP_SECONDS {
+						if subtimestep <= MIN_TIMESTEP_SECONDS_POSITIVE {
 							break
 						}
-					} else if subtimestep <= MIN_TIMESTEP_SECONDS {
-						panic("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS")
+					} else if subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE {
+						panic("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE")
+						// fmt.Println("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE")
+						// return
 					}
 				}
-
-				subtimestep = math.Max(subtimestep*0.5,MIN_TIMESTEP_SECONDS)
+				rainfallVolForTimestep += rainfallPerSecond * avgArea * subtimestep
+				evaporationVolForTimestep += petPerSecond * avgArea * subtimestep
+				subtimestep = math.Max(subtimestep*0.5,MIN_TIMESTEP_SECONDS_NEGATIVE)
 			}
 
 			outflowVolume += avgOutflow * subtimestep
@@ -283,6 +294,9 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 
 		outflowRate := outflowVolume / deltaT
 		outflowTS.Set(idx,outflowRate)
+
+		rainfallVolume.Set(idx,rainfallVolForTimestep/deltaT)
+		evaporationVolume.Set(idx,evaporationVolForTimestep/deltaT)
 	}
 
 	level = cappedPiecewise(volume,levels)

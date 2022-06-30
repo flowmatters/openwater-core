@@ -63,7 +63,7 @@ func (m *InstreamCoarseSediment)  Description() sim.ModelDescription{
   "loadDownstream",}
 
   result.States = []string{
-  "totalStoredMass",}
+  "channelStore","totalStoredMass",}
 
   result.Dimensions = []string{
       }
@@ -85,12 +85,14 @@ func (m *InstreamCoarseSediment) FindDimensions(parameters data.ND2Float64) []in
 
 func (m *InstreamCoarseSediment) InitialiseStates(n int) data.ND2Float64 {
   // Zero states
-	var result = data.NewArray2DFloat64(n,1)
+	var result = data.NewArray2DFloat64(n,2)
 
 	// for i := 0; i < n; i++ {
-  //   stateSet := make(sim.StateSet,1)
+  //   stateSet := make(sim.StateSet,2)
   //   
-	// 	stateSet[0] = 0 // totalStoredMass
+	// 	stateSet[0] = 0 // channelStore
+  //   
+	// 	stateSet[1] = 0 // totalStoredMass
   //   
 
   //   if result==nil {
@@ -162,7 +164,9 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3Float64, states data.ND2Floa
 
       
       
-      totalstoredmass := initialStates.Get1(0)
+      channelstore := initialStates.Get1(0)
+      
+      totalstoredmass := initialStates.Get1(1)
       
       
 
@@ -190,11 +194,13 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3Float64, states data.ND2Floa
       
       
 
-      totalstoredmass= instreamCoarseSediment(upstreammass,lateralmass,reachlocalmass,totalstoredmass,durationinseconds,loaddownstream)
+      channelstore,totalstoredmass= instreamCoarseSediment(upstreammass,lateralmass,reachlocalmass,channelstore,totalstoredmass,durationinseconds,loaddownstream)
 
       
       
-      initialStates.Set1(0, totalstoredmass)
+      initialStates.Set1(0, channelstore)
+      
+      initialStates.Set1(1, totalstoredmass)
       
       
 

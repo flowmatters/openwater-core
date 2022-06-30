@@ -11,6 +11,7 @@ InstreamCoarseSediment:
 		lateralMass:
 		reachLocalMass:
   states:
+		channelStore:
 		totalStoredMass:
 	parameters:
 		durationInSeconds: '[1,86400] Timestep, default=86400'
@@ -29,9 +30,9 @@ InstreamCoarseSediment:
 */
 
 func instreamCoarseSediment(upstreamMass, lateralMass, reachLocalMass data.ND1Float64,
-	storedMass float64,
+	channelStore, storedMass float64,
 	deltaT float64,
-	loadDownstream data.ND1Float64) float64 {
+	loadDownstream data.ND1Float64) (float64, float64) {
 	n := upstreamMass.Len1()
 	idx := []int{0}
 
@@ -69,10 +70,11 @@ func instreamCoarseSediment(upstreamMass, lateralMass, reachLocalMass data.ND1Fl
 
 		//dailyCoarseSedDeposited_Kg = ConstituentStorage;
 		dailyCoarseSedDeposited_Kg = totalDailyConstituentMass
+		channelStore += dailyCoarseSedDeposited_Kg
 		//ConstituentStorage -= dailyCoarseSedDeposited_Kg;
 		totalDailyConstituentMass = 0
 
-		storedMass = dailyCoarseSedDeposited_Kg
+		storedMass = 0.0
 
 		//TotalDailyLoadCoarse_Kg_per_DayOut = 0;
 		//InChannelStorage();
@@ -92,5 +94,5 @@ func instreamCoarseSediment(upstreamMass, lateralMass, reachLocalMass data.ND1Fl
 
 		loadDownstream.Set(idx, totalDailyConstituentMass)
 	}
-	return storedMass
+	return channelStore, storedMass
 }

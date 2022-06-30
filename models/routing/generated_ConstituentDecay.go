@@ -82,7 +82,7 @@ func (m *ConstituentDecay)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "inflowLoad","lateralLoad","inflow","outflow","storage",}
   result.Outputs = []string{
-  "outflowLoad",}
+  "decayedLoad","outflowLoad",}
 
   result.States = []string{
   "storedMass",}
@@ -156,7 +156,7 @@ func (m *ConstituentDecay) Run(inputs data.ND3Float64, states data.ND2Float64, o
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 1, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 2, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
@@ -216,11 +216,14 @@ func (m *ConstituentDecay) Run(inputs data.ND3Float64, states data.ND2Float64, o
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
+      decayedload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 1
       outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       
 
-      storedmass= constituentDecay(inflowload,lateralload,inflow,outflow,storage,storedmass,x,halflife,deltat,outflowload)
+      storedmass= constituentDecay(inflowload,lateralload,inflow,outflow,storage,storedmass,x,halflife,deltat,decayedload,outflowload)
 
       
       
@@ -228,7 +231,7 @@ func (m *ConstituentDecay) Run(inputs data.ND3Float64, states data.ND2Float64, o
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 1)
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 2)
       
 
       doneChan <- i

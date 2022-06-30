@@ -82,7 +82,7 @@ func (m *InstreamParticulateNutrient)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "incomingMassUpstream","incomingMassLateral","reachVolume","outflow","streambankErosion","lateralSediment","floodplainDepositionFraction","channelDepositionFraction",}
   result.Outputs = []string{
-  "loadDownstream","loadToFloodplain",}
+  "loadDeposited","loadFromStreambank","loadDownstream","loadToFloodplain",}
 
   result.States = []string{
   "instreamStoredMass","channelStoredMass",}
@@ -158,7 +158,7 @@ func (m *InstreamParticulateNutrient) Run(inputs data.ND3Float64, states data.ND
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 2, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 4, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
@@ -229,14 +229,20 @@ func (m *InstreamParticulateNutrient) Run(inputs data.ND3Float64, states data.ND
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      loaddeposited := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
+      loadfromstreambank := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 2
+      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 3
       loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       
 
-      instreamstoredmass,channelstoredmass= instreamParticulateNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,streambankerosion,lateralsediment,floodplaindepositionfraction,channeldepositionfraction,instreamstoredmass,channelstoredmass,particulatenutrientconcentration,soilpercentfine,durationinseconds,loaddownstream,loadtofloodplain)
+      instreamstoredmass,channelstoredmass= instreamParticulateNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,streambankerosion,lateralsediment,floodplaindepositionfraction,channeldepositionfraction,instreamstoredmass,channelstoredmass,particulatenutrientconcentration,soilpercentfine,durationinseconds,loaddeposited,loadfromstreambank,loaddownstream,loadtofloodplain)
 
       
       
@@ -246,7 +252,7 @@ func (m *InstreamParticulateNutrient) Run(inputs data.ND3Float64, states data.ND
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 2)
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
       
 
       doneChan <- i

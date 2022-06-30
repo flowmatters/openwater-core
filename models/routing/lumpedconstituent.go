@@ -22,6 +22,7 @@ LumpedConstituentRouting:
 		DeltaT: '[1,86400] Timestep, default=86400'
 	outputs:
 		outflowLoad: kg.s^-1
+		pointSourceLoad: kg.s^-1
 	implementation:
 		function: LumpedConstituentTransport
 		type: scalar
@@ -37,7 +38,7 @@ LumpedConstituentRouting:
 func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage data.ND1Float64,
 	initialStoredMass float64,
 	x, pointInput, deltaT float64,
-	outflowLoads data.ND1Float64) (storedMass float64) {
+	outflowLoads, pointSourceLoad data.ND1Float64) (storedMass float64) {
 	storedMass = initialStoredMass
 	nDays := inflowLoads.Len1()
 
@@ -58,6 +59,9 @@ func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage dat
 		if workingVol < MINIMUM_VOLUME {
 			storedMass = 0.0
 			outflowLoads.Set(idx, 0.0)
+			if pointSourceLoad != nil {
+				pointSourceLoad.Set(idx,0.0)
+			}
 			continue
 		}
 
@@ -66,6 +70,9 @@ func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage dat
 		outflowLoad := concentration * outflowR
 
 		outflowLoads.Set(idx, outflowLoad)
+		if pointSourceLoad != nil {
+			pointSourceLoad.Set(idx,pointInput)
+		}
 	}
 	return storedMass
 }

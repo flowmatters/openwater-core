@@ -126,7 +126,7 @@ func (m *InstreamDissolvedNutrientDecay)  Description() sim.ModelDescription{
   result.Inputs = []string{
   "incomingMassUpstream","incomingMassLateral","reachVolume","outflow","floodplainDepositionFraction",}
   result.Outputs = []string{
-  "loadDownstream","loadToFloodplain",}
+  "decayedLoad","loadDownstream","loadToFloodplain","loadFromPointSource",}
 
   result.States = []string{
   "totalStoredMass",}
@@ -200,7 +200,7 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3Float64, states data
   inputsSizeSlice[sim.DIMI_TIMESTEP] = inputLen
 
 //  var result sim.RunResults
-//	result.Outputs = data.NewArray3DFloat64( 2, inputLen, numCells)
+//	result.Outputs = data.NewArray3DFloat64( 4, inputLen, numCells)
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
@@ -264,14 +264,20 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3Float64, states data
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      decayedload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
+      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 2
       loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
+      
+      outputPosSlice[sim.DIMO_OUTPUT] = 3
+      loadfrompointsource := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1Float64)
       
       
 
-      totalstoredmass= instreamDissolvedNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,floodplaindepositionfraction,totalstoredmass,dodecay,pointsourceload,linkheight,linkwidth,linklength,uptakevelocity,durationinseconds,loaddownstream,loadtofloodplain)
+      totalstoredmass= instreamDissolvedNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,floodplaindepositionfraction,totalstoredmass,dodecay,pointsourceload,linkheight,linkwidth,linklength,uptakevelocity,durationinseconds,decayedload,loaddownstream,loadtofloodplain,loadfrompointsource)
 
       
       
@@ -279,7 +285,7 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3Float64, states data
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 2)
+  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
       
 
       doneChan <- i

@@ -38,11 +38,12 @@ USLEFineSedimentGeneration:
 		usleHSDRCoarse: '[0,100]% Hillslope Coarse Sediment Delivery Ratio'
 		timeStepInSeconds: '[0,100000000]s Duration of timestep in seconds, default=86400'
 	outputs:
-		quickLoadFine: kg
-		slowLoadFine: kg
-		quickLoadCoarse: kg
-		slowLoadCoarse: kg
-		totalLoad: kg
+		quickLoadFine: kg.s^-1
+		slowLoadFine: kg.s^-1
+		quickLoadCoarse: kg.s^-1
+		slowLoadCoarse: kg.s^-1
+		totalFineLoad: kg.s^-1
+		totalCoarseLoad: kg.s^-1
 		generatedLoadFine: kg
 		generatedLoadCoarse: kg
 	implementation:
@@ -63,7 +64,7 @@ func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYe
 	usleHSDRFine, usleHSDRCoarse, timeStepInSeconds float64,
 	quickLoadFine, slowLoadFine,
 	quickLoadCoarse, slowLoadCoarse,
-	totalLoad, generatedLoadFine,
+	totalFineLoad, totalCoarseLoad, generatedLoadFine,
 	generatedLoadCoarse data.ND1Float64) {
 	n := quickflow.Len1()
 
@@ -209,11 +210,12 @@ func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYe
 
 		quickLoadFine.Set(idx, loadQ)
 		slowLoadFine.Set(idx, loadS)
+		totalFineLoad.Set(idx, loadQ+loadS)
 
-		quickLoadCoarse.Set(idx, USLE_Daily_Load_kg_after_HSDR_applied_Coarse/timeStepInSeconds)
-		slowLoadCoarse.Set(idx, loadS)
-		totalLoad.Set(idx, loadQ+loadS)
-
+		coarseQuick := USLE_Daily_Load_kg_after_HSDR_applied_Coarse/timeStepInSeconds
+		quickLoadCoarse.Set(idx, coarseQuick)
+		slowLoadCoarse.Set(idx, 0.0) // SURELY INCORRECT
+		totalCoarseLoad.Set(idx, coarseQuick+0.0) 
 		generatedLoadFine.Set(idx,USLE_Daily_Load_kg_Fine/timeStepInSeconds)
 		generatedLoadCoarse.Set(idx,USLE_Daily_Load_kg_Coarse/timeStepInSeconds)
 	}

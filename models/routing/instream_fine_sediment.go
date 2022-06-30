@@ -34,6 +34,7 @@ InstreamFineSediment:
 	outputs:
 		loadDownstream:
 		loadToFloodplain:
+		loadToChannelDeposition:
 		floodplainDepositionFraction:
 		channelDepositionFraction:
 	implementation:
@@ -54,14 +55,14 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 	linkWidth, linkLength, linkSlope, bankHeight,
 	propBankHeightForFineDep, sedBulkDensity, manningsN,
 	fineSedSettVelocity, fineSedReMobVelocity, durationInSeconds float64,
-	loadDownstream, loadToFloodplain, floodplainDepositionFraction, channelDepositionFraction data.ND1Float64) (float64, float64) {
+	loadDownstream, loadToFloodplain, loadToChannelDeposition, floodplainDepositionFraction, channelDepositionFraction data.ND1Float64) (float64, float64) {
 
 	if bankFullFlow <= 1e-8 {
 		totalStoredMass = LumpedConstituentTransport(
 			upstreamMass, lateralMass, outflow, reachVolume,
 			totalStoredMass,
 			0, 0.0, durationInSeconds,
-			loadDownstream)
+			loadDownstream,nil)
 		return channelStoreFine, totalStoredMass
 	}
 
@@ -158,6 +159,7 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 		loadToFloodplain.Set(idx, floodPlainDepositionFine_Kg_per_Day/durationInSeconds)
 		floodplainDepositionFraction.Set(idx, proportionDepositedFloodplain)
 		channelDepositionFraction.Set(idx,proportionDepositedChannel)
+		loadToChannelDeposition.Set(idx,netStreamDepositionFineSed)
 	}
 
 	return channelStoreFine, totalStoredMass
