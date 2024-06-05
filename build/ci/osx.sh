@@ -9,4 +9,5 @@ export PATH=$PATH:/opt/homebrew/include
 # brew install tree
 # tree /
 # find / -name "hdf5.h"
-export CPATH="/opt/homebrew/include/"
+export CGO_FLAGS="-I /opt/homebrew/include"
+printenv CGO_FLAGS
