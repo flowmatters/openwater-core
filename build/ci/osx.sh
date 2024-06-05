@@ -4,10 +4,11 @@ brew update
 brew install hdf5
 brew install go
 echo "######################"
-ls -a /opt/homebrew/include
+ls -a /opt/homebrew/include | grep hdf5
 export PATH=$PATH:/opt/homebrew/include
 # brew install tree
 # tree /
 # find / -name "hdf5.h"
-export CGO_FLAGS="-I /opt/homebrew/include"
+export CGO_FLAGS="-I/opt/homebrew/include"
+export C_INCLUDE_PATH=$C_INCLUDE_PATH:/opt/homebrew/include
 printenv CGO_FLAGS
