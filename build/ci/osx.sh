@@ -2,7 +2,7 @@
 
 brew update
 brew install go
-brew install hdf5@1.8
+brew install hdf5
 brew link hdf5
 echo "######################"
 ls -a /opt/homebrew/include | grep hdf5
@@ -13,7 +13,7 @@ export PATH=$PATH:/opt/homebrew/lib
 # brew install tree
 # tree /
 # find / -name "hdf5.h"
-export CGO_FLAGS="-I/opt/homebrew/include"
+export CGO_FLAGS="-I/opt/homebrew/include -L/opt/homebrew/lib -lhdf5"
 export CFLAGS="-I/opt/homebrew/include/"
 export CPPFLAGS="-I/opt/homebrew/include/"
 export LDFLAGS="-L/opt/homebrew/lib"
