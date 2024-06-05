@@ -13,7 +13,8 @@ export PATH=$PATH:/opt/homebrew/lib
 # brew install tree
 # tree /
 # find / -name "hdf5.h"
-export CGO_FLAGS="-I/opt/homebrew/include -L/opt/homebrew/lib -lhdf5"
+export CGO_CFLAGS="-I/opt/homebrew/include"
+export CGO_LDFLAGS="-L/opt/homebrew/lib -lhdf5 -lhdf5_hl"
 export CFLAGS="-I/opt/homebrew/include/"
 export CPPFLAGS="-I/opt/homebrew/include/"
 export LDFLAGS="-L/opt/homebrew/lib"
