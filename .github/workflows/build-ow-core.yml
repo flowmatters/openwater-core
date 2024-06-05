@@ -9,16 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@v2
-        - run: ./build/ci/linux.sh
-        - run: python3 -m venv ow-test
-        - run: source ow-test/bin/activate
-        - run: export VENV_DIR=bin
-        - run: python3 --version
-        - run: ./build/bootstrap-test-env.sh
-        - run: OW_TEST_PATH=$PWD/test/files go test -v ./...
-        - run: ./build/build.sh
-        - run: ./build/run_test.sh
-        - run: ls -al
+        - run: ./build/ci/all.sh
         - name: upload build
           uses: actions/upload-artifact@v2
           with:
@@ -30,17 +21,11 @@ jobs:
               ows-ensemble
               libopenwater.h
               libopenwater.so
-
   build-windows:
     runs-on: windows-latest
     steps:
         - uses: actions/checkout@v2
-        - name: pre-build
-          run: ./build/ci/windows.sh
-          shell: bash
-        - name: build
-          shell: bash
-          run: ./build/ci/windows-build.sh
+        - run: ./build/ci/all.sh
         - name: upload build
           uses: actions/upload-artifact@v2
           with:
@@ -50,6 +35,20 @@ jobs:
               1.8.21/bin/*.dll
               libopenwater.h
               libopenwater.so
+  build-osx:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: ./build/ci/all.sh
+      # - name: upload build
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: macos-${{ github.sha }}
+      #     path: |
+      #       *.exe
+      #       1.8.21/bin/*.dll
+      #       libopenwater.h
+      #       libopenwater.so
 
 
 
