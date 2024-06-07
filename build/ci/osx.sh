@@ -5,8 +5,11 @@ brew install go
 brew install hdf5
 brew link hdf5
 echo "######################"
-sudo cp /opt/homebrew/include/* /usr/local/inlcude/
-sudo cp /opt/homebrew/lib/* /usr/local/lib/
+# sudo cp /opt/homebrew/include/* /usr/local/include/
+# sudo cp /opt/homebrew/lib/* /usr/local/lib/
+sudo mkdir -p /usr/local
+sudo ln -s /opt/homebrew/include /usr/local/include
+sudo ln -s /opt/homebrew/lib /usr/local/lib
 echo "usr"
 ls -a /usr/local/include | grep hdf5
 ls -a /usr/local/lib | grep hdf5
