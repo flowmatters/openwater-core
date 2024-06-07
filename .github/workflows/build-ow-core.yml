@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: ./build/ci/all.sh
       - name: upload build
-      - uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2
         with:
           name: macos-${{ github.sha }}
           path: |
