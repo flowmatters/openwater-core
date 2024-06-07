@@ -40,15 +40,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: ./build/ci/all.sh
-      # - name: upload build
-      # - uses: actions/upload-artifact@v2
-      #   with:
-      #     name: macos-${{ github.sha }}
-      #     path: |
-      #       *.exe
-      #       1.8.21/bin/*.dll
-      #       libopenwater.h
-      #       libopenwater.so
+      - name: upload build
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-${{ github.sha }}
+          path: |
+            ow-inspect
+            ow-single
+            ow-sim
+            ows-ensemble
+            libopenwater.h
+            libopenwater.so
 
 
 
