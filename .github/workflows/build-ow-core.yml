@@ -25,7 +25,9 @@ jobs:
     runs-on: windows-latest
     steps:
         - uses: actions/checkout@v2
-        - run: ./build/ci/all.sh
+        - name: build
+          run: ./build/ci/all.sh
+          shell: bash
         - name: upload build
           uses: actions/upload-artifact@v2
           with:

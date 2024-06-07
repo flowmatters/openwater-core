@@ -8,7 +8,9 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
     ./build/ci/linux.sh
     python3 -m venv ow-test
     source ow-test/bin/activate
-else # Windows
+else 
+    # Windows
+    echo "build windows"
     source compilation_vars.txt
 fi
 export VENV_DIR=bin
