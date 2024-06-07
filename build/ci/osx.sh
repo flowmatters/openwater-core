@@ -4,18 +4,21 @@ brew update
 brew install go
 brew install hdf5
 brew link hdf5
-echo "######################"
+# echo "######################"
 # sudo cp /opt/homebrew/include/* /usr/local/include/
 # sudo cp /opt/homebrew/lib/* /usr/local/lib/
-sudo mkdir -p /usr/local
-sudo ln -s /opt/homebrew/include /usr/local/include
-sudo ln -s /opt/homebrew/lib /usr/local/lib
-echo "usr"
-ls -a /usr/local/include | grep hdf5
-ls -a /usr/local/lib | grep hdf5
-echo "homebrew"
-ls -a /opt/homebrew/include | grep hdf5
-ls -a /opt/homebrew/lib | grep hdf5
+arch=$(uname -i)
+if [[$arch == arm*]]; then
+    sudo mkdir -p /usr/local
+    sudo ln -s /opt/homebrew/include /usr/local/include
+    sudo ln -s /opt/homebrew/lib /usr/local/lib
+    echo "usr"
+    ls -a /usr/local/include | grep hdf5
+    ls -a /usr/local/lib | grep hdf5
+    echo "homebrew"
+    ls -a /opt/homebrew/include | grep hdf5
+    ls -a /opt/homebrew/lib | grep hdf5
+fi
 uname -a
 export PATH=$PATH:/opt/homebrew/include
 export PATH=$PATH:/opt/homebrew/lib
