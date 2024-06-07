@@ -2,6 +2,7 @@
 
 brew update
 brew install go
+brew install go
 brew install hdf5
 # brew link hdf5
 # echo "######################"
