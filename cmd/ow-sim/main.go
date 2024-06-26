@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime/pprof"
 	"time"
+
 	"gonum.org/v1/hdf5"
 
 	"github.com/flowmatters/openwater-core/data"
@@ -166,6 +167,15 @@ func run_simulation(args []string) {
 			srcModelNumber := link.Get1(LINK_SRC_MODEL)
 			srcModelName := modelNames[srcModelNumber]
 			srcModel, _ := models[srcModelName].GetGeneration(int(linkGen))
+			if srcModel == nil {
+				fmt.Printf("Model %s not found for generation %d\n", srcModelName, linkGen)
+				os.Exit(1)
+			}
+
+			if srcModel.Outputs == nil {
+				fmt.Printf("Model %s has no outputs in generation %d\n", srcModelName, linkGen)
+				os.Exit(1)
+			}
 
 			destGen := link.Get1(LINK_DEST_GENERATION)
 			destModelNumber := link.Get1(LINK_DEST_MODEL)

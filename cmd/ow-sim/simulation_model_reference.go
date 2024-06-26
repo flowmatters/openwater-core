@@ -157,6 +157,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 			genSlice[0] = int(mr.Batches[i-1])
 		}
 		gen.Count = genSlice[1] - genSlice[0]
+		verbosePrintf("Generation %d for %s has %d cells\n", i, mr.ModelName, gen.Count)
 
 		if gen.Count == 0 {
 			gen.Inputs = data.NewArray3DFloat64(0, 0, 0)
