@@ -11,6 +11,7 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
 else 
     # Windows
     echo "build windows"
+    ./build/ci/windows.sh
     source compilation_vars.txt
 fi
 export VENV_DIR=bin
