@@ -21,6 +21,15 @@ jobs:
               ows-ensemble
               libopenwater.h
               libopenwater.so
+        - name: Zip nightly
+          run: printf "ow-inspect\now-single\now-sim\nows-ensemble\nlibopenwater.h\nlibopenwater.so" | zip build.zip -@ 
+        - name: Release Nightly
+          uses: softprops/action-gh-release@v1
+          with:
+            name: ubuntu-Nightly
+            files: build.zip
+            fail_on_unmatched_files: true
+            tag_name: Nightly-ubuntu
   build-windows:
     runs-on: windows-latest
     steps:
@@ -37,11 +46,21 @@ jobs:
               1.8.21/bin/*.dll
               libopenwater.h
               libopenwater.so
+        - name: Zip Nightly
+          run: echo "1.8.21/bin/*.dll" "libopenwater.h" "libopenwater.so" "*.exe" | tar -acf build.zip -T -
+        - name: Release Nightly
+          uses: softprops/action-gh-release@v1
+          with:
+            name: windows-Nightly
+            files: build.zip
+            fail_on_unmatched_files: true
+            tag_name: Nightly-windows
   build-osx:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - run: ./build/ci/all.sh
+      - name: build
+        run: ./build/ci/all.sh
       - name: upload build
         uses: actions/upload-artifact@v2
         with:
@@ -53,6 +72,12 @@ jobs:
             ows-ensemble
             libopenwater.h
             libopenwater.so
-
-
-
+      - name: Zip nightly
+        run: printf "ow-inspect\now-single\now-sim\nows-ensemble\nlibopenwater.h\nlibopenwater.so" | zip build.zip -@ 
+      - name: Release Nightly
+        uses: softprops/action-gh-release@v1
+        with:
+          name: osx-Nightly
+          files: build.zip
+          fail_on_unmatched_files: true
+          tag_name: Nightly-osx
