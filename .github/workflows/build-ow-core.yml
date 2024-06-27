@@ -47,7 +47,7 @@ jobs:
               libopenwater.h
               libopenwater.so
         - name: Zip Nightly
-          run: echo "1.8.21" "libopenwater.h" "libopenwater.so" "*.exe" | tar -acf build.zip -T -
+          run: echo "1.8.21/bin/*.dll" "libopenwater.h" "libopenwater.so" "*.exe" | tar -acf build.zip -T -
         - name: Release Nightly
           uses: softprops/action-gh-release@v1
           with:
