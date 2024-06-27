@@ -29,7 +29,7 @@ jobs:
             name: ubuntu-Nightly
             files: build.zip
             fail_on_unmatched_files: true
-            tag_name: Nightly, ubuntu
+            tag_name: Nightly-ubuntu
   build-windows:
     runs-on: windows-latest
     steps:
@@ -54,7 +54,7 @@ jobs:
             name: windows-Nightly
             files: build.zip
             fail_on_unmatched_files: true
-            tag_name: Nightly, windows
+            tag_name: Nightly-windows
   build-osx:
     runs-on: macos-latest
     steps:
@@ -80,4 +80,4 @@ jobs:
           name: osx-Nightly
           files: build.zip
           fail_on_unmatched_files: true
-          tag_name: Nightly, osx
+          tag_name: Nightly-osx
