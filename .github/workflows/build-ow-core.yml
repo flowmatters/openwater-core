@@ -32,7 +32,8 @@ jobs:
               ows-ensemble
               libopenwater.h
               libopenwater.so
-            fail_on_unmatched: true
+            fail_on_unmatched_files: true
+            tag_name: Nightly
   build-windows:
     runs-on: windows-latest
     steps:
@@ -58,7 +59,8 @@ jobs:
               1.8.21/bin/*.dll
               libopenwater.h
               libopenwater.so
-            fail_on_unmatched: true
+            fail_on_unmatched_files: true
+            tag_name: Nightly
   build-osx:
     runs-on: macos-latest
     steps:
@@ -87,7 +89,5 @@ jobs:
             ows-ensemble
             libopenwater.h
             libopenwater.so
-          fail_on_unmatched: true
-
-
-
+          fail_on_unmatched_files: true
+          tag_name: Nightly
