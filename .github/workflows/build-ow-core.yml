@@ -22,18 +22,12 @@ jobs:
               libopenwater.h
               libopenwater.so
         - name: Zip nightly
-          run: echo "ow-inspect" "ow-single" "ow-sim" "ows-ensemble" "libopenwater.h" "libopenwater.so" | zip build.zip -@ 
+          run: printf "ow-inspect\now-single\now-sim\nows-ensemble\nlibopenwater.h\nlibopenwater.so" | zip build.zip -@ 
         - name: Release Nightly
           uses: softprops/action-gh-release@v1
           with:
             name: ubuntu-Nightly
-            files: |
-              ow-inspect
-              ow-single
-              ow-sim
-              ows-ensemble
-              libopenwater.h
-              libopenwater.so
+            files: build.zip
             fail_on_unmatched_files: true
             tag_name: Nightly, ubuntu
   build-windows:
@@ -58,7 +52,7 @@ jobs:
           uses: softprops/action-gh-release@v1
           with:
             name: windows-Nightly
-            file: build.zip
+            files: build.zip
             fail_on_unmatched_files: true
             tag_name: Nightly, windows
   build-osx:
@@ -79,11 +73,11 @@ jobs:
             libopenwater.h
             libopenwater.so
       - name: Zip nightly
-        run: echo "ow-inspect" "ow-single" "ow-sim" "ows-ensemble" "libopenwater.h" "libopenwater.so" | zip build.zip -@ 
+        run: printf "ow-inspect\now-single\now-sim\nows-ensemble\nlibopenwater.h\nlibopenwater.so" | zip build.zip -@ 
       - name: Release Nightly
         uses: softprops/action-gh-release@v1
         with:
           name: osx-Nightly
-          file: build.zip
+          files: build.zip
           fail_on_unmatched_files: true
           tag_name: Nightly, osx
