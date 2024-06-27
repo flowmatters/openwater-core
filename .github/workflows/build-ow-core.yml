@@ -21,6 +21,18 @@ jobs:
               ows-ensemble
               libopenwater.h
               libopenwater.so
+        - name: Release Nightly
+          uses: softprops/action-gh-release@v1
+          with:
+            name: ubuntu-Nightly
+            files: |
+              ow-inspect
+              ow-single
+              ow-sim
+              ows-ensemble
+              libopenwater.h
+              libopenwater.so
+            fail_on_unmatched: true
   build-windows:
     runs-on: windows-latest
     steps:
@@ -37,11 +49,22 @@ jobs:
               1.8.21/bin/*.dll
               libopenwater.h
               libopenwater.so
+        - name: Release Nightly
+          uses: softprops/action-gh-release@v1
+          with:
+            name: windows-Nightly
+            files: |
+              *.exe
+              1.8.21/bin/*.dll
+              libopenwater.h
+              libopenwater.so
+            fail_on_unmatched: true
   build-osx:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - run: ./build/ci/all.sh
+      - name: build
+        run: ./build/ci/all.sh
       - name: upload build
         uses: actions/upload-artifact@v2
         with:
@@ -53,6 +76,18 @@ jobs:
             ows-ensemble
             libopenwater.h
             libopenwater.so
+      - name: Release Nightly
+        uses: softprops/action-gh-release@v1
+        with:
+          name: osx-Nightly
+          files: |
+            ow-inspect
+            ow-single
+            ow-sim
+            ows-ensemble
+            libopenwater.h
+            libopenwater.so
+          fail_on_unmatched: true
 
 
 
