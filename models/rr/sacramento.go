@@ -76,6 +76,15 @@ func sumSlice(s []float64) (sum float64) {
 	return
 }
 
+func makeUnitHydrograph(uh1, uh2, uh3, uh4, uh5 float64) []float64 {
+	base := []float64{uh1, uh2, uh3, uh4, uh5}
+	sum := sumSlice(base)
+	for i := 0; i < nunit; i++ {
+		base[i] = base[i] / sum
+	}
+	return base
+}
+
 func sacramento(rainfall, pet data.ND1Float64,
 	uprTensionWater, uprFreeWater, lwrTensionWater,
 	lwrPrimaryFreeWater, lwrSupplFreeWater, additionalImperviousStore float64,
@@ -100,12 +109,7 @@ func sacramento(rainfall, pet data.ND1Float64,
 	// uh4 /= uhTotal
 	// uh5 /= uhTotal
 	qq := make([]float64, nunit)
-	dro := make([]float64, nunit)
-	dro[0] = uh1
-	dro[1] = uh2
-	dro[2] = uh3
-	dro[3] = uh4
-	dro[4] = uh5
+	dro := makeUnitHydrograph(uh1, uh2, uh3, uh4, uh5)
 
 	saved := rserv * (lzfpm + lzfsm)
 	alzfsm := lzfsm * (1. + side)
