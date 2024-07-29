@@ -22,14 +22,14 @@ const dimensionTemplate = `\[([_a-zA-Z][_a-zA-Z0-9]*)(,([_a-zA-Z][_a-zA-Z0-9]*))
 
 type ModelSpecs map[string]ModelSpec
 type VariableSpec struct {
-	Name        string
-	Units       string
-	Position    int
-	Default     float64
-	Description string
-	Range       []float64
-	IsDimension bool
-	Dimensions  []string
+	Name           string
+	Units          string
+	Position       int
+	Default        float64
+	Description    string
+	Range          []float64
+	IsDimension    bool
+	Dimensions     []string
 	Dimensionality int
 }
 
@@ -81,21 +81,21 @@ func processDirectory(path string) {
 
 func transform(spec ModelSpec) ModelSpec {
 	spec.ParameterSpecs = make([]VariableSpec, len(spec.Parameters))
-	spec.Dimensions = make([]string,0)
+	spec.Dimensions = make([]string, 0)
 	dims := make(map[string]struct{})
 
 	for i, v := range spec.Parameters {
 		paramName := fmt.Sprint(v.Key)
 		var dimensions []string = nil
-		if strings.Contains(paramName,"[") {
-			cleanName := strings.Replace(strings.Replace(paramName,"[",",",1),"]","",1)
-			nameComponents := strings.Split(cleanName,",")
+		if strings.Contains(paramName, "[") {
+			cleanName := strings.Replace(strings.Replace(paramName, "[", ",", 1), "]", "", 1)
+			nameComponents := strings.Split(cleanName, ",")
 			paramName = nameComponents[0]
 			dimensions = nameComponents[1:]
-			for _, d := range(dimensions) {
+			for _, d := range dimensions {
 				dims[d] = struct{}{}
 			}
-			fmt.Println(paramName,dimensions)
+			fmt.Println(paramName, dimensions)
 		}
 
 		txt := fmt.Sprint(v.Value)
@@ -137,27 +137,27 @@ func transform(spec ModelSpec) ModelSpec {
 			len(dimensions) + 1}
 	}
 
-	for _,v := range spec.ParameterSpecs {
+	for _, v := range spec.ParameterSpecs {
 		if v.Dimensions == nil {
 			continue
 		}
-		for _,d := range v.Dimensions {
-			for i,p := range spec.ParameterSpecs {
-				if strings.Compare(p.Name,d) == 0 {
-					fmt.Printf("%s is a dimension of %s\n",p.Name,v.Name)
-				  spec.ParameterSpecs[i].IsDimension = true
+		for _, d := range v.Dimensions {
+			for i, p := range spec.ParameterSpecs {
+				if strings.Compare(p.Name, d) == 0 {
+					fmt.Printf("%s is a dimension of %s\n", p.Name, v.Name)
+					spec.ParameterSpecs[i].IsDimension = true
 				}
 			}
 		}
 	}
 
 	for k := range dims {
-		spec.Dimensions = append(spec.Dimensions,k)
+		spec.Dimensions = append(spec.Dimensions, k)
 	}
 
-	for _,v := range spec.ParameterSpecs {
+	for _, v := range spec.ParameterSpecs {
 		if v.IsDimension {
-			fmt.Printf("%s is a dimension\n",v.Name)
+			fmt.Printf("%s is a dimension\n", v.Name)
 		}
 	}
 	return spec
@@ -182,42 +182,45 @@ func processFile(fn string) {
 
 	re := regexp.MustCompile("(?smU)/(\\*\\s*OW-SPEC)(.*)(\\*/)")
 
-	specContents := re.FindSubmatch(contents)
-	if specContents == nil {
-		//		fmt.Printf("No OW-SPEC in %s\n",fn)
-		return
-	}
-
-	tabRe := regexp.MustCompile("\t")
-	spec := specContents[2]
-	spec = tabRe.ReplaceAll(spec, []byte("  "))
-
-	desc := make(ModelSpecs) // := make(map[interface{}]interface{})
-	err = yaml.Unmarshal(spec, &desc)
-	if err != nil {
-		fmt.Println(err)
-		// for i := range specContents {
-		// 	fmt.Println(i)
-		// 	fmt.Println(string(specContents[i]))
-		// }
-		return
-	}
-
-	for name, description := range desc {
-		if description.Package == "" {
-			description.Package = string(packageName)
+	specs := re.FindAllSubmatch(contents, -1)
+	for _, specContents := range specs {
+		// specContents := re.FindSubmatch(contents)
+		if specContents == nil {
+			//		fmt.Printf("No OW-SPEC in %s\n",fn)
+			return
 		}
 
-		if description.Name == "" {
-			description.Name = name
+		tabRe := regexp.MustCompile("\t")
+		spec := specContents[2]
+		spec = tabRe.ReplaceAll(spec, []byte("  "))
+
+		desc := make(ModelSpecs) // := make(map[interface{}]interface{})
+		err = yaml.Unmarshal(spec, &desc)
+		if err != nil {
+			fmt.Println(err)
+			// for i := range specContents {
+			// 	fmt.Println(i)
+			// 	fmt.Println(string(specContents[i]))
+			// }
+			return
 		}
 
-		description = transform(description)
+		for name, description := range desc {
+			if description.Package == "" {
+				description.Package = string(packageName)
+			}
 
-		description.Filename = fn
-		// fmt.Println(name)
-		// fmt.Println(description)
-		generateWrapper(description)
+			if description.Name == "" {
+				description.Name = name
+			}
+
+			description = transform(description)
+
+			description.Filename = fn
+			// fmt.Println(name)
+			// fmt.Println(description)
+			generateWrapper(description)
+		}
 	}
 }
 
