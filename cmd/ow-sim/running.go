@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func runGeneration(i int, models map[string]*modelReference, modelNames []string) (elapsedTime float64, nodesRun int) {
@@ -55,13 +57,17 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 func writeGeneration(g int, models map[string]*modelReference, modelNames []string) {
 	genWriteStart := time.Now()
 	verbosePrintf("Writing results for generation %d...\n", g)
+	eGroup := errgroup.Group{}
 	for _, modelName := range modelNames {
-		modelRef := models[modelName]
-		err := modelRef.WriteData(g)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		eGroup.Go(func() error {
+			modelRef := models[modelName]
+			err := modelRef.WriteData(g)
+			return err
+		})
+	}
+	if err := eGroup.Wait(); err != nil {
+		fmt.Println("Error writing generation data:", err)
+		os.Exit(1)
 	}
 	genWriteEnd := time.Now()
 	genWriteElapsed := genWriteEnd.Sub(genWriteStart)

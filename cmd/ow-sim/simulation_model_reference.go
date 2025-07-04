@@ -6,7 +6,6 @@ import (
 	gio "io"
 	"math"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/flowmatters/openwater-core/data"
@@ -14,7 +13,6 @@ import (
 	"github.com/flowmatters/openwater-core/io/protobuf"
 	"github.com/flowmatters/openwater-core/sim"
 	"github.com/golang/protobuf/proto"
-	"github.com/kardianos/osext"
 )
 
 type modelGeneration struct {
@@ -52,7 +50,6 @@ type modelReference struct {
 	Dimensions            []int
 	Generations           []*modelGeneration
 	OutputWriter          *gio.PipeWriter
-	OutputProcess         *exec.Cmd
 	outputsInitialised    bool
 }
 
@@ -60,7 +57,7 @@ func initModel(fn, model, paramFn string) (*modelReference, error) {
 	modelRef := io.H5RefInt32{Filename: fn, Dataset: "/MODELS/" + model + "/batches"}
 	batchesArray, err := modelRef.Load()
 	if err != nil {
-		fmt.Printf("Couldn't load batches for %s\n",model)
+		fmt.Printf("Couldn't load batches for %s\n", model)
 		return nil, err
 	}
 	batches := batchesArray.Unroll()
@@ -70,7 +67,7 @@ func initModel(fn, model, paramFn string) (*modelReference, error) {
 	result.InitialStatesFilename = fn
 	dimensions, err := result.initDimensions()
 	if err != nil {
-		fmt.Printf("Couldn't initialise dimensions for %s\n",model)
+		fmt.Printf("Couldn't initialise dimensions for %s\n", model)
 		return nil, err
 	}
 	result.Dimensions = dimensions
@@ -105,18 +102,18 @@ func (mr *modelReference) initDimensions() ([]int, error) {
 
 	allParameters, err := h5Ref.Load()
 	if err != nil {
-		fmt.Printf("Couldn't load parameters for model %s from %s\n",mr.ModelName,mr.ParametersFilename)
+		fmt.Printf("Couldn't load parameters for model %s from %s\n", mr.ModelName, mr.ParametersFilename)
 		return nil, err
 	}
-	
+
 	dimSizes := modelInstance.FindDimensions(allParameters.(data.ND2Float64))
 
-	verbosePrintf("===== Simulation dimension sizes for %s =====\n",mr.ModelName)
-	for ix, dim := range(dims){
-		verbosePrintf("\t%s=%d\n",dim,dimSizes[ix])
+	verbosePrintf("===== Simulation dimension sizes for %s =====\n", mr.ModelName)
+	for ix, dim := range dims {
+		verbosePrintf("\t%s=%d\n", dim, dimSizes[ix])
 	}
 
-	return dimSizes,err
+	return dimSizes, err
 }
 
 func (mr *modelReference) GetReference(genSlice []int, element string) io.H5RefFloat64 {
@@ -145,7 +142,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		gen := modelGeneration{}
 		modelInstance, err := mr.makeModel()
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 		gen.Model = modelInstance
 		if mr.Dimensions != nil {
@@ -320,7 +317,6 @@ func (mr *modelReference) writeProtobuf(generation int) error {
 	if generation == len(mr.Batches)-1 {
 		fmt.Printf("Waiting for output writer for %s to close\n", mr.ModelName)
 		mr.OutputWriter.Close()
-		mr.OutputProcess.Wait()
 		fmt.Printf("Output writer for %s closed\n", mr.ModelName)
 	}
 
@@ -344,10 +340,6 @@ func (mr *modelReference) WriteData(generation int) error {
 
 	if gen.Count == 0 {
 		return nil
-	}
-
-	if mr.OutputProcess != nil {
-		return mr.writeProtobuf(generation)
 	}
 
 	if !mr.outputsInitialised {
@@ -485,20 +477,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 			ref.OutputFilename = destFn
 			ref.WriteOutputs = writeOutputs(modelName)
 			ref.WriteStates = true
-			ref.WriteInputs = writeInputs(modelName,ref.Batches[0] == 0)
-
-			if destFn != defaultOutputFn {
-				exe_path, _ := osext.Executable()
-				fmt.Printf("Configuring external write process: %s\n", exe_path)
-				write_cmd := exec.Command(exe_path, "-writer", destFn)
-				reader, writer := gio.Pipe()
-				write_cmd.Stdin = reader
-				write_cmd.Stdout = os.Stdout
-				ref.OutputWriter = writer
-				write_cmd.Start()
-				ref.OutputProcess = write_cmd
-				// os.Exit(1)
-			}
+			ref.WriteInputs = writeInputs(modelName, ref.Batches[0] == 0)
 		}
 
 		verbosePrintln("Batches for ", ref.ModelName, ref.Batches)

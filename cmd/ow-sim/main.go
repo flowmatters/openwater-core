@@ -6,7 +6,9 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
+	"strings"
 	"time"
+
 	"gonum.org/v1/hdf5"
 
 	"github.com/flowmatters/openwater-core/data"
@@ -33,6 +35,7 @@ func main() {
 	hdf5.DisplayErrors(false)
 
 	if *cpuprofile != "" {
+		fmt.Printf("Writing CPU profile to %s\n", *cpuprofile)
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
 			log.Fatal(err)
@@ -51,7 +54,7 @@ func main() {
 }
 
 func run_simulation(args []string) {
-
+	tStart := time.Now()
 	fn := args[0]
 	var outputFn string = ""
 	if len(args) > 1 {

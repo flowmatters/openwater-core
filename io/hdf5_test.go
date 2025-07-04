@@ -89,7 +89,6 @@ func TestExists(t *testing.T) {
 	assert.True(ref.Exists())
 }
 
-
 func TestReadDouble(t *testing.T) {
 	assert := assert.New(t)
 	fn := test_filename()

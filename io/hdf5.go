@@ -311,23 +311,23 @@ func ParseH5RefArrayType(path string) H5RefArrayType {
 }
 
 func (h H5RefArrayType) Exists() bool {
-	components := strings.Split(h.Dataset,"/")
+	components := strings.Split(h.Dataset, "/")
 
 	path := "/"
-	for ix, comp := range(components) {
-		if len(comp)==0{
+	for ix, comp := range components {
+		if len(comp) == 0 {
 			continue
 		}
 
-		ref := H5RefArrayType{Filename:h.Filename,Dataset: path}
+		ref := H5RefArrayType{Filename: h.Filename, Dataset: path}
 
-		if ix == (len(components)-1) {
+		if ix == (len(components) - 1) {
 			datasets, err := ref.GetDatasets()
 
 			if err != nil {
 				return false
 			}
-			if findInSlice(datasets,comp) >= 0 {
+			if findInSlice(datasets, comp) >= 0 {
 				return true
 			}
 		}
@@ -337,17 +337,17 @@ func (h H5RefArrayType) Exists() bool {
 		if err != nil {
 			return false
 		}
-		if findInSlice(groups,comp) < 0 {
+		if findInSlice(groups, comp) < 0 {
 			return false
 		}
 
-		path = fmt.Sprintf("%s/%s",path,comp)
+		path = fmt.Sprintf("%s/%s", path, comp)
 	}
 
 	return true
 }
 
-func (h H5RefArrayType) Shape() ([]int,error) {
+func (h H5RefArrayType) Shape() ([]int, error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
 
@@ -372,5 +372,5 @@ func (h H5RefArrayType) Shape() ([]int,error) {
 	}
 
 	shape := conv.UintsToInts(dims)
-	return shape,nil
+	return shape, nil
 }

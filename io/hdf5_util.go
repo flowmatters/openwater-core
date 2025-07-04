@@ -13,9 +13,8 @@ import (
 	"gonum.org/v1/hdf5"
 )
 
-var mu sync.RWMutex
-// var masterMU sync.RWMutex
-// var mus = make(map[string]*sync.RWMutex)
+var lockMapMu sync.RWMutex
+var mus = make(map[string]*sync.RWMutex)
 
 // errorString is a trivial implementation of error.
 type errorString struct {
@@ -27,46 +26,39 @@ func (e *errorString) Error() string {
 }
 
 func rLockHDF5(fn string) {
-	// masterMU.Lock()
-	// defer masterMU.Unlock()
-	mu.RLock()
-	// mutex,ok := mus[fn]
-	// if !ok {
-	// 	newMutex := &sync.RWMutex{}
-	// 	mus[fn] = newMutex
-	// 	mutex = newMutex
-	// }
-	// mutex.RLock()
+	lockMapMu.Lock()
+	defer lockMapMu.Unlock()
+	mutex, ok := mus[fn]
+	if !ok {
+		newMutex := &sync.RWMutex{}
+		mus[fn] = newMutex
+		mutex = newMutex
+	}
+	mutex.RLock()
 }
 
 func rUnlockHDF5(fn string) {
-	// masterMU.Lock()
-	// defer masterMU.Unlock()
-
-	mu.RUnlock()
-	// mus[fn].RUnlock()
+	lockMapMu.Lock()
+	defer lockMapMu.Unlock()
+	mus[fn].RUnlock()
 }
 
 func lockHDF5(fn string) {
-	// masterMU.Lock()
-	// defer masterMU.Unlock()
-
-	mu.Lock()
-	// mutex,ok := mus[fn]
-	// if !ok {
-	// 	newMutex := &sync.RWMutex{}
-	// 	mus[fn] = newMutex
-	// 	mutex = newMutex
-	// }
-	// mutex.Lock()
+	lockMapMu.Lock()
+	defer lockMapMu.Unlock()
+	mutex, ok := mus[fn]
+	if !ok {
+		newMutex := &sync.RWMutex{}
+		mus[fn] = newMutex
+		mutex = newMutex
+	}
+	mutex.Lock()
 }
 
 func unlockHDF5(fn string) {
-	// masterMU.Lock()
-	// defer masterMU.Unlock()
-
-	mu.Unlock()
-	// mus[fn].Unlock()
+	lockMapMu.Lock()
+	defer lockMapMu.Unlock()
+	mus[fn].Unlock()
 }
 
 func prefix(msg string, e error) error {
@@ -167,15 +159,15 @@ func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interfa
 		defer space.Close()
 
 		if compress {
-			dcpl, err := hdf5.NewPropList(hdf5.P_DATASET_CREATE);
+			dcpl, err := hdf5.NewPropList(hdf5.P_DATASET_CREATE)
 			if err != nil {
-				return nil, prefix("Cannot create property list",err)
+				return nil, prefix("Cannot create property list", err)
 			}
 			defer dcpl.Close()
 
 			dcpl.SetDeflate(hdf5.DefaultCompression)
 
-			ds, err := g.CreateDatasetWith(paths[0], dtype, space,dcpl)
+			ds, err := g.CreateDatasetWith(paths[0], dtype, space, dcpl)
 			if err != nil {
 				return nil, prefix("Cannot create dataset  "+path+": ", err)
 			}
@@ -212,4 +204,3 @@ func findInSlice(strings []string, target string) int {
 	}
 	return -1
 }
-
