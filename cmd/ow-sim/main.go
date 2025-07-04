@@ -59,13 +59,32 @@ func run_simulation(args []string) {
 	var outputFn string = ""
 	if len(args) > 1 {
 		outputFn = args[1]
-
+		fmt.Printf("Output file: %s\n", outputFn)
 		if _, err := os.Stat(outputFn); err == nil {
 			if *overwrite {
 				os.Remove(outputFn)
 			} else {
 				fmt.Printf("Output file (%s) exists and overwrite not set. Delete file or use -overwrite\n", outputFn)
 				os.Exit(1)
+			}
+		}
+	}
+	if *splitOutputs != "" {
+		pairs := strings.Split(*splitOutputs, ",")
+		for _, pair := range pairs {
+			elements := strings.Split(pair, "=")
+			if len(elements) != 2 {
+				fmt.Printf("Invalid split output specification: %s\n", pair)
+				os.Exit(1)
+			}
+			fn := elements[1]
+			if _, err := os.Stat(fn); err == nil {
+				if *overwrite {
+					os.Remove(fn)
+				} else {
+					fmt.Printf("Split output file (%s) exists and overwrite not set. Delete file or use -overwrite\n", fn)
+					os.Exit(1)
+				}
 			}
 		}
 	}
@@ -120,7 +139,7 @@ func run_simulation(args []string) {
 
 		// === WRITE GENERATION OUTPUTS ===
 		// asynchronous
-		if outputFn != "" {
+		if outputFn != "" || *splitOutputs != "" {
 			go func(g int) {
 				if g > 0 {
 					prevG := -1
@@ -211,7 +230,7 @@ func run_simulation(args []string) {
 	verbosePrintln("Simulation finished. Waiting for results to be written")
 	generationsEnd := time.Now()
 
-	if outputFn != "" {
+	if outputFn != "" || *splitOutputs != "" {
 		for {
 			genFinished := <-writingDone
 			if genFinished == (genCount - 1) {
@@ -220,7 +239,7 @@ func run_simulation(args []string) {
 			}
 			verbosePrintf("Waiting for final generation (%d), got generation %d, sleeping\n", genCount-1, genFinished)
 			writingDone <- genFinished
-			time.Sleep(time.Duration(500 * 1000 * 1000))
+			time.Sleep(time.Duration(500 * 1000 * 1000)) // This is not enough for some simulations! You should have an alternative to this.
 		}
 	}
 
@@ -232,6 +251,6 @@ func run_simulation(args []string) {
 	fmt.Printf("Total Simulation Time: %f\n", totalTimeSimulation)
 	fmt.Printf("Total Link Time: %f\n", totalTimeLinks)
 	fmt.Printf("Total Final Write Time: %f\n", totalTimeFinalWrite)
-
+	fmt.Printf("Total elapsed time: %f\n", (simEnd.Sub(tStart)).Seconds())
 	//	fmt.Println("Add stats")
 }
