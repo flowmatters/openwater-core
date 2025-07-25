@@ -7,7 +7,7 @@ import (
 	"github.com/flowmatters/openwater-core/sim"
 )
 
-// func jsonSafe2D(vals data.NDFloat64, shiftDim int) [][]interface{} {
+// func jsonSafe2D(vals data.ND[float64], shiftDim int) [][]interface{} {
 //   result := make([][]interface{}, len(vals))
 //   for i,v := range(vals){
 //     result[i] = jsonSafe(v)
@@ -15,7 +15,7 @@ import (
 //   return result
 // }
 
-// func jsonSafe(vals data.NDFloat64) []interface{} {
+// func jsonSafe(vals data.ND[float64]) []interface{} {
 //   result := make([]interface{}, len(vals))
 //   for i,v := range(vals){
 //     if math.IsNaN(v) {

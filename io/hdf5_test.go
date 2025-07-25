@@ -27,7 +27,7 @@ func TestReadStrings(t *testing.T) {
 	_, err := os.Stat(fn)
 	assert.Nil(err, fmt.Sprintf("File (%s) doesn't exist", fn))
 
-	ref := H5RefFloat64{Filename: fn, Dataset: "simple/strings"}
+	ref := H5Ref[float64]{Filename: fn, Dataset: "simple/strings"}
 	theStrings, err := ref.LoadText()
 
 	assert.Nil(err)
@@ -40,7 +40,7 @@ func TestGetDatasetNames(t *testing.T) {
 	assert := assert.New(t)
 	fn := test_filename()
 
-	ref := H5RefFloat64{Filename: fn, Dataset: "simple"}
+	ref := H5Ref[float64]{Filename: fn, Dataset: "simple"}
 	datasetNames, err := ref.GetDatasets()
 	assert.Nil(err)
 
@@ -55,7 +55,7 @@ func TestGetGroupNames(t *testing.T) {
 	assert := assert.New(t)
 	fn := test_filename()
 
-	ref := H5RefFloat64{Filename: fn, Dataset: "simple"}
+	ref := H5Ref[float64]{Filename: fn, Dataset: "simple"}
 	datasetNames, err := ref.GetGroups()
 	assert.Nil(err)
 
@@ -67,34 +67,33 @@ func TestExists(t *testing.T) {
 	assert := assert.New(t)
 	fn := test_filename()
 
-	ref := H5RefFloat64{Filename: fn, Dataset: "simple"}
+	ref := H5Ref[float64]{Filename: fn, Dataset: "simple"}
 	assert.True(ref.Exists())
 
-	ref = H5RefFloat64{Filename: fn, Dataset: "simple/strings"}
+	ref = H5Ref[float64]{Filename: fn, Dataset: "simple/strings"}
 	assert.True(ref.Exists())
 
-	ref = H5RefFloat64{Filename: fn, Dataset: "simple/doubles"}
+	ref = H5Ref[float64]{Filename: fn, Dataset: "simple/doubles"}
 	assert.True(ref.Exists())
 
-	ref = H5RefFloat64{Filename: fn, Dataset: "simple/notpresent"}
+	ref = H5Ref[float64]{Filename: fn, Dataset: "simple/notpresent"}
 	assert.False(ref.Exists())
 
-	ref = H5RefFloat64{Filename: fn, Dataset: "notpresent"}
+	ref = H5Ref[float64]{Filename: fn, Dataset: "notpresent"}
 	assert.False(ref.Exists())
 
-	ref = H5RefFloat64{Filename: fn, Dataset: "simple/sub_group"}
+	ref = H5Ref[float64]{Filename: fn, Dataset: "simple/sub_group"}
 	assert.True(ref.Exists())
 
-	ref = H5RefFloat64{Filename: fn, Dataset: "ints3d"}
+	ref = H5Ref[float64]{Filename: fn, Dataset: "ints3d"}
 	assert.True(ref.Exists())
 }
-
 
 func TestReadDouble(t *testing.T) {
 	assert := assert.New(t)
 	fn := test_filename()
 
-	ref := H5RefFloat64{Filename: fn, Dataset: "simple/doubles"}
+	ref := H5Ref[float64]{Filename: fn, Dataset: "simple/doubles"}
 	all, err := ref.Load()
 	assert.Nil(err)
 
@@ -102,13 +101,13 @@ func TestReadDouble(t *testing.T) {
 	assert.Equal(8, all.Shape()[0])
 
 	slice := [][]int{[]int{2, 6, 1}}
-	subset := H5RefFloat64{Filename: fn, Dataset: "simple/doubles", Slice: slice}
+	subset := H5Ref[float64]{Filename: fn, Dataset: "simple/doubles", Slice: slice}
 	all, err = subset.Load()
 	assert.Nil(err)
 
 	assert.Equal(1, len(all.Shape()))
 	assert.Equal(4, all.Shape()[0])
-	all1 := all.(data.ND1Float64)
+	all1 := all.(data.ND1[float64])
 	assert.Equal(2.0, all1.Get1(0))
 	assert.Equal(8.0, all1.Get1(3))
 }
@@ -118,7 +117,7 @@ func TestRead3DInts(t *testing.T) {
 	fn := test_filename()
 	ds := "ints3d"
 
-	ref := H5RefInt32{Filename: fn, Dataset: ds}
+	ref := H5Ref[int32]{Filename: fn, Dataset: ds}
 	all, err := ref.Load()
 	assert.Nil(err)
 
@@ -127,7 +126,7 @@ func TestRead3DInts(t *testing.T) {
 	assert.Equal(5, all.Shape()[0])
 	assert.Equal(10, all.Shape()[1])
 	assert.Equal(4, all.Shape()[2])
-	all3d := all.(data.ND3Int32)
+	all3d := all.(data.ND3[int32])
 	assert.Equal(int32(19), all3d.Get3(0, 4, 3))
 	assert.Equal(int32(154), all3d.Get3(3, 8, 2))
 
@@ -136,7 +135,7 @@ func TestRead3DInts(t *testing.T) {
 	assert.Equal(int32(154), unrolled[154])
 
 	slice := [][]int{nil, []int{2, 6, 1}, []int{1, 3, 1}}
-	subset := H5RefInt32{Filename: fn, Dataset: ds, Slice: slice}
+	subset := H5Ref[int32]{Filename: fn, Dataset: ds, Slice: slice}
 	all, err = subset.Load()
 	assert.Nil(err)
 
@@ -145,7 +144,7 @@ func TestRead3DInts(t *testing.T) {
 	assert.Equal(4, all.Shape()[1])
 	assert.Equal(2, all.Shape()[2])
 
-	all3d = all.(data.ND3Int32)
+	all3d = all.(data.ND3[int32])
 	assert.Equal(int32(61), all3d.Get3(1, 3, 0))
 	assert.Equal(int32(134), all3d.Get3(3, 1, 1))
 }
@@ -155,9 +154,9 @@ func TestWrite3DFloat64Whole(t *testing.T) {
 	test_fn := "_test_write_whole.h5"
 	ds := "float64_3d"
 
-	ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+	ref := H5Ref[float64]{Filename: test_fn, Dataset: ds}
 
-	the_data, err := data.ARangeFloat64(1000).Reshape([]int{10, 20, 5})
+	the_data, err := data.ARange[float64](1000).Reshape([]int{10, 20, 5})
 	assert.Nil(err)
 
 	indices := [][]int{
@@ -175,7 +174,7 @@ func TestWrite3DFloat64Whole(t *testing.T) {
 	err = ref.Write(the_data)
 	assert.Nil(err)
 
-	ref_read := H5RefFloat64{Filename: test_fn, Dataset: ds}
+	ref_read := H5Ref[float64]{Filename: test_fn, Dataset: ds}
 	read_data, err := ref_read.Load()
 	assert.Nil(err)
 
@@ -196,14 +195,14 @@ func TestWriteTwice(t *testing.T) {
 	test_fn := "_test_write_twice.h5"
 	ds := "float64_1d"
 
-	ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+	ref := H5Ref[float64]{Filename: test_fn, Dataset: ds}
 
-	the_data := data.ARangeFloat64(10)
+	the_data := data.ARange[float64](10)
 
 	err := ref.Write(the_data)
 	assert.Nil(err)
 
-	ref_read := H5RefFloat64{Filename: test_fn, Dataset: ds}
+	ref_read := H5Ref[float64]{Filename: test_fn, Dataset: ds}
 	read_data, err := ref_read.Load()
 	assert.Nil(err)
 
@@ -213,13 +212,13 @@ func TestWriteTwice(t *testing.T) {
 
 	assert.Equal(4.0, read_data.Get([]int{4}))
 
-	new_data := data.NewArray1DFloat64(10)
-	data.ScaleFloat64Array(new_data, the_data, 2)
+	new_data := data.NewArray1D[float64](10)
+	data.ScaleArray[float64](new_data, the_data, 2)
 
 	err = ref.Write(new_data)
 	assert.Nil(err)
 
-	new_ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+	new_ref := H5Ref[float64]{Filename: test_fn, Dataset: ds}
 	new_read_data, err := new_ref.Load()
 	assert.Nil(err)
 
@@ -235,14 +234,14 @@ func TestWriteTwice(t *testing.T) {
 // 	test_fn := "_test_write_twice_resize.h5"
 // 	ds := "float64_1d"
 
-// 	ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+// 	ref := H5Ref[float64]{Filename: test_fn, Dataset: ds}
 
-// 	the_data := data.ARangeFloat64(10)
+// 	the_data := data.ARange[float64](10)
 
 // 	err := ref.Write(the_data)
 // 	assert.Nil(err)
 
-// 	ref_read := H5RefFloat64{Filename: test_fn, Dataset: ds}
+// 	ref_read := H5Ref[float64]{Filename: test_fn, Dataset: ds}
 // 	read_data, err := ref_read.Load()
 // 	assert.Nil(err)
 
@@ -252,13 +251,13 @@ func TestWriteTwice(t *testing.T) {
 
 // 	assert.Equal(4.0, read_data.Get([]int{4}))
 
-// 	new_data := data.ARangeFloat64(5)
-// 	data.ScaleFloat64Array(new_data, new_data, 2)
+// 	new_data := data.ARange[float64](5)
+// 	data.Scale[float64]Array(new_data, new_data, 2)
 
 // 	err = ref.Write(new_data)
 // 	assert.Nil(err)
 
-// 	new_ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+// 	new_ref := H5Ref[float64]{Filename: test_fn, Dataset: ds}
 // 	new_read_data, err := new_ref.Load()
 // 	assert.Nil(err)
 
@@ -268,13 +267,13 @@ func TestWriteTwice(t *testing.T) {
 
 // 	assert.Equal(8.0, new_read_data.Get([]int{4}))
 
-// 	new_data = data.ARangeFloat64(20)
-// 	data.ScaleFloat64Array(new_data, new_data, 2)
+// 	new_data = data.ARange[float64](20)
+// 	data.Scale[float64]Array(new_data, new_data, 2)
 
 // 	err = ref.Write(new_data)
 // 	assert.Nil(err)
 
-// 	new_ref = H5RefFloat64{Filename: test_fn, Dataset: ds}
+// 	new_ref = H5Ref[float64]{Filename: test_fn, Dataset: ds}
 // 	new_read_data, err = new_ref.Load()
 // 	assert.Nil(err)
 
@@ -291,9 +290,9 @@ func TestWrite3DInt32Whole(t *testing.T) {
 	test_fn := "_test_write_whole.h5"
 	ds := "NESTED/int32_3d"
 
-	ref := H5RefInt32{Filename: test_fn, Dataset: ds}
+	ref := H5Ref[int32]{Filename: test_fn, Dataset: ds}
 
-	the_data, err := data.ARangeInt32(1000).Reshape([]int{10, 20, 5})
+	the_data, err := data.ARange[int32](1000).Reshape([]int{10, 20, 5})
 	assert.Nil(err)
 
 	indices := [][]int{
@@ -311,7 +310,7 @@ func TestWrite3DInt32Whole(t *testing.T) {
 	err = ref.Write(the_data)
 	assert.Nil(err)
 
-	ref_read := H5RefInt32{Filename: test_fn, Dataset: ds}
+	ref_read := H5Ref[int32]{Filename: test_fn, Dataset: ds}
 	read_data, err := ref_read.Load()
 	assert.Nil(err)
 
@@ -332,9 +331,9 @@ func TestWrite3DFloat64Partial(t *testing.T) {
 	test_fn := "_test_write_partial.h5"
 	ds := "float64_3d"
 
-	ref := H5RefFloat64{Filename: test_fn, Dataset: ds}
+	ref := H5Ref[float64]{Filename: test_fn, Dataset: ds}
 
-	the_data, err := data.ARangeFloat64(1000).Reshape([]int{10, 20, 5})
+	the_data, err := data.ARange[float64](1000).Reshape([]int{10, 20, 5})
 	assert.Nil(err)
 
 	slice := the_data.Slice([]int{0, 0, 0}, []int{10, 1, 1}, []int{1, 1, 1})
@@ -359,7 +358,7 @@ func TestWrite3DFloat64Partial(t *testing.T) {
 		}
 	}
 
-	ref_read := H5RefFloat64{Filename: test_fn, Dataset: ds}
+	ref_read := H5Ref[float64]{Filename: test_fn, Dataset: ds}
 	read_data, err := ref_read.Load()
 	assert.Nil(err)
 

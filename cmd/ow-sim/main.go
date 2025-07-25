@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime/pprof"
 	"time"
+
 	"gonum.org/v1/hdf5"
 
 	"github.com/flowmatters/openwater-core/data"
@@ -67,8 +68,8 @@ func run_simulation(args []string) {
 		}
 	}
 
-	modelsRef := io.H5RefFloat64{Filename: fn, Dataset: "/META/models"}
-	dimsRef := io.H5RefFloat64{Filename: fn, Dataset: "/DIMENSIONS"}
+	modelsRef := io.H5Ref[float64]{Filename: fn, Dataset: "/META/models"}
+	dimsRef := io.H5Ref[float64]{Filename: fn, Dataset: "/DIMENSIONS"}
 	//	procRef := io.H5Ref{Filename: fn, Dataset: "/PROCESSES"}
 
 	modelNames, err := modelsRef.LoadText()
@@ -85,9 +86,9 @@ func run_simulation(args []string) {
 	}
 	verbosePrintln("Dimensions", dims)
 
-	linksRef := io.H5RefUint32{Filename: fn, Dataset: "/LINKS"}
+	linksRef := io.H5Ref[uint32]{Filename: fn, Dataset: "/LINKS"}
 	linksND, err := linksRef.Load()
-	links := linksND.(data.ND2Uint32)
+	links := linksND.(data.ND2[uint32])
 	linkSliceDim := []int{1, LINK_DEST_VAR + 1}
 	linkSliceStep := []int{1, 1}
 	nLinks := links.Len(0)
@@ -155,7 +156,7 @@ func run_simulation(args []string) {
 			}
 
 			linkND := links.Slice([]int{nextLink, 0}, linkSliceDim, linkSliceStep)
-			link := linkND.(data.ND1Uint32)
+			link := linkND.(data.ND1[uint32])
 			linkGen := link.Get1(LINK_SRC_GENERATION)
 
 			if linkGen > uint32(i) {
@@ -191,7 +192,7 @@ func run_simulation(args []string) {
 			destIdx := link.Get1(LINK_DEST_GEN_NODE)
 			destData := destModel.Inputs.Slice([]int{int(destIdx), int(destVar), 0}, []int{1, 1, nTimesteps}, []int{1, 1, 1})
 
-			data.AddToFloat64Array(destData, srcData)
+			data.AddToArray[float64](destData, srcData)
 			nextLink++
 		}
 		genLinkEnd := time.Now()

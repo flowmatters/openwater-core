@@ -85,13 +85,13 @@ func makeUnitHydrograph(uh1, uh2, uh3, uh4, uh5 float64) []float64 {
 	return base
 }
 
-func sacramento(rainfall, pet data.ND1Float64,
+func sacramento(rainfall, pet data.ND1[float64],
 	uprTensionWater, uprFreeWater, lwrTensionWater,
 	lwrPrimaryFreeWater, lwrSupplFreeWater, additionalImperviousStore float64,
 	lzpk, lzsk, uzk, uztwm, uzfwm, lztwm, lzfsm, lzfpm, pfree, rexp,
 	zperc, side, ssout, pctim, adimp, sarva, rserv,
 	uh1, uh2, uh3, uh4, uh5 float64,
-	actualET, runoff, imperviousRunoff, surfaceRunoff, baseflow data.ND1Float64) (
+	actualET, runoff, imperviousRunoff, surfaceRunoff, baseflow data.ND1[float64]) (
 	float64, // final uprTensionWater,
 	float64, // final uprFreeWater,
 	float64, // final lwrTensionWater,

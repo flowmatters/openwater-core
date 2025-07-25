@@ -2,60 +2,59 @@ package data
 
 import (
 	"github.com/flowmatters/openwater-core/util/slice"
-	"github.com/joelrahman/genny/generic"
 )
 
-//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64,int,uint"
+//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "[T]=float64,float32,int32,uint32,int64,uint64,int,uint"
 
-type ArrayType generic.Number
+// type T generic.Number
 
 // type NDArray interface {
 // }
 
-type NDArrayType interface {
+type ND[T Number] interface {
 	Len(axis int) int
 	Shape() []int
 	NDims() int
 	NewIndex(val int) []int
 
-	Get(loc []int) ArrayType
-	Set(loc []int, val ArrayType)
-	Slice(loc []int, dims []int, step []int) NDArrayType
-	Apply(loc []int, dim int, step int, vals []ArrayType)
-	ApplySlice(loc []int, step []int, vals NDArrayType)
-	CopyFrom(other NDArrayType)
+	Get(loc []int) T
+	Set(loc []int, val T)
+	Slice(loc []int, dims []int, step []int) ND[T]
+	Apply(loc []int, dim int, step int, vals []T)
+	ApplySlice(loc []int, step []int, vals ND[T])
+	CopyFrom(other ND[T])
 	Contiguous() bool
-	Unroll() []ArrayType
-	Reshape(newShape []int) (NDArrayType, error)
-	MustReshape(newShape []int) NDArrayType
-	ReshapeFast(newShape []int) (NDArrayType, error)
-	Maximum() ArrayType
-	Minimum() ArrayType
+	Unroll() []T
+	Reshape(newShape []int) (ND[T], error)
+	MustReshape(newShape []int) ND[T]
+	ReshapeFast(newShape []int) (ND[T], error)
+	Maximum() T
+	Minimum() T
 }
 
-type ND1ArrayType interface {
-	NDArrayType
+type ND1[T Number] interface {
+	ND[T]
 	Len1() int
-	Get1(loc int) ArrayType
-	Set1(loc int, val ArrayType)
-	Apply1(loc int, step int, vals []ArrayType)
+	Get1(loc int) T
+	Set1(loc int, val T)
+	Apply1(loc int, step int, vals []T)
 }
 
-type ND2ArrayType interface {
-	NDArrayType
+type ND2[T Number] interface {
+	ND[T]
 	Len2() int
-	Get2(loc1 int, loc2 int) ArrayType
-	Set2(loc1 int, loc2 int, val ArrayType)
+	Get2(loc1 int, loc2 int) T
+	Set2(loc1 int, loc2 int, val T)
 }
 
-type ND3ArrayType interface {
-	NDArrayType
+type ND3[T Number] interface {
+	ND[T]
 	Len3() int
-	Get3(loc1 int, loc2 int, loc3 int) ArrayType
-	Set3(loc1 int, loc2 int, loc3 int, val ArrayType)
+	Get3(loc1 int, loc2 int, loc3 int) T
+	Set3(loc1 int, loc2 int, loc3 int, val T)
 }
 
-type NdArrayTypeCommon struct {
+type NdCommon[T Number] struct {
 	OriginalDims []int
 	Dims         []int
 	Start        int
@@ -64,23 +63,23 @@ type NdArrayTypeCommon struct {
 	OffsetStep   []int
 }
 
-func (nd *NdArrayTypeCommon) Len(ax int) int {
+func (nd *NdCommon[T]) Len(ax int) int {
 	return nd.Dims[ax]
 }
 
-func (nd *NdArrayTypeCommon) Shape() []int {
+func (nd *NdCommon[T]) Shape() []int {
 	return nd.Dims
 }
 
-func (nd *NdArrayTypeCommon) NDims() int {
+func (nd *NdCommon[T]) NDims() int {
 	return len(nd.Dims)
 }
 
-func (nd *NdArrayTypeCommon) NewIndex(val int) []int {
+func (nd *NdCommon[T]) NewIndex(val int) []int {
 	return slice.Uniform(nd.NDims(), val)
 }
 
-func (nd *NdArrayTypeCommon) Index(loc []int) int {
+func (nd *NdCommon[T]) Index(loc []int) int {
 	result := nd.Start
 	for i := 0; i < len(loc); i++ {
 		result += loc[i] * nd.OffsetStep[i]
@@ -90,7 +89,7 @@ func (nd *NdArrayTypeCommon) Index(loc []int) int {
 	//	return nd.Start + dotProduct(multiply(loc, nd.Step), nd.Offset)
 }
 
-func (nd *NdArrayTypeCommon) Contiguous() bool {
+func (nd *NdCommon[T]) Contiguous() bool {
 	// What about step!
 	var i int
 	contiguousOffset := 1
@@ -121,19 +120,19 @@ func (nd *NdArrayTypeCommon) Contiguous() bool {
 	return true
 }
 
-func (nd *NdArrayTypeCommon) Len1() int {
+func (nd *NdCommon[T]) Len1() int {
 	return nd.Dims[0]
 }
 
-func (nd *NdArrayTypeCommon) Len2() int {
+func (nd *NdCommon[T]) Len2() int {
 	return nd.Dims[1]
 }
 
-func (nd *NdArrayTypeCommon) Len3() int {
+func (nd *NdCommon[T]) Len3() int {
 	return nd.Dims[2]
 }
 
-func (nd *NdArrayTypeCommon) SliceInto(dest *NdArrayTypeCommon, loc []int, dims []int, step []int) {
+func (nd *NdCommon[T]) SliceInto(dest *NdCommon[T], loc []int, dims []int, step []int) {
 	dest.OriginalDims = nd.OriginalDims
 	dest.Dims = dims
 	dest.Start = nd.Start + dotProduct(loc, nd.Offset)

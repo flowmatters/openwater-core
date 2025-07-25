@@ -29,9 +29,9 @@ func main() {
 	}
 
 	modelName := args[0]
-	inputPath := io.ParseH5RefFloat64(args[1])
-	paramPath := io.ParseH5RefFloat64(args[2])
-	outputPath := io.ParseH5RefFloat64(args[3])
+	inputPath := io.ParseH5Ref[float64](args[1])
+	paramPath := io.ParseH5Ref[float64](args[2])
+	outputPath := io.ParseH5Ref[float64](args[3])
 
 	factory := sim.Catalog[modelName]
 	if factory == nil {
@@ -52,10 +52,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	model.ApplyParameters(params.(data.ND2Float64))
+	model.ApplyParameters(params.(data.ND2[float64]))
 	states := model.InitialiseStates(max(params.Len(1), inputs.Len(0)))
 	outputs := sim.InitialiseOutputs(model, inputs.Len(20), states.Len(1))
-	model.Run(inputs.(data.ND3Float64), states, outputs)
+	model.Run(inputs.(data.ND3[float64]), states, outputs)
 
 	err = outputPath.Write(outputs)
 	if err != nil {

@@ -37,17 +37,17 @@ StorageDissolvedDecay:
 		storage, sediment
 */
 
-func storageDissolvedDecay(inflowMass, storageInflow, storageOutflow, storageVolume data.ND1Float64, // inputs
+func storageDissolvedDecay(inflowMass, storageInflow, storageOutflow, storageVolume data.ND1[float64], // inputs
 	initialStoredMass float64,
 	deltaT, doStorageDecay, annualReturnInterval, bankFullFlow, medianFloodResidenceTime float64,
-	decayedMass, outflowMass data.ND1Float64) (storedMass float64) {
+	decayedMass, outflowMass data.ND1[float64]) (storedMass float64) {
 
 	if doStorageDecay < 0.5 {
 		storedMass = routing.LumpedConstituentTransport(
 			inflowMass, nil, storageOutflow, storageVolume,
 			initialStoredMass,
 			0.0, 0.0, deltaT,
-			outflowMass,nil)
+			outflowMass, nil)
 		return
 	}
 

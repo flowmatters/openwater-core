@@ -33,26 +33,26 @@ Lag:
 		lag
 */
 
-func initLag(timeLag float64) data.ND2Float64 {
+func initLag(timeLag float64) data.ND2[float64] {
 	lags := make([]float64, int(timeLag))
 
 	result := packLagStates(lags)
 	return result
 }
 
-func extractLagStates(states data.ND1Float64) []float64 {
+func extractLagStates(states data.ND1[float64]) []float64 {
 	return states.Unroll()
 }
 
-func packLagStates(lagged []float64) data.ND2Float64 {
-	result := data.NewArray2DFloat64(1, len(lagged))
+func packLagStates(lagged []float64) data.ND2[float64] {
+	result := data.NewArray2D[float64](1, len(lagged))
 	return result
 }
 
-func lag(inflow data.ND1Float64,
+func lag(inflow data.ND1[float64],
 	lagged []float64,
 	timeLag float64,
-	outflow data.ND1Float64) []float64 {
+	outflow data.ND1[float64]) []float64 {
 
 	lagSteps := int(timeLag)
 
@@ -62,7 +62,7 @@ func lag(inflow data.ND1Float64,
 	}
 
 	idx := []int{0}
-	for i := 0; i < m.MinInt(lagSteps, outflow.Len1()); i++ {
+	for i := 0; i < m.Min[int](lagSteps, outflow.Len1()); i++ {
 		idx[0] = i
 		outflow.Set(idx, lagged[i])
 	}

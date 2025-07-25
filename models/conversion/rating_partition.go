@@ -3,6 +3,7 @@ package conversion
 import (
 	"fmt"
 	"math"
+
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/util/fn"
 )
@@ -31,10 +32,10 @@ RatingCurvePartition:
 		partition
 */
 
-func ratingPartition(input data.ND1Float64,
+func ratingPartition(input data.ND1[float64],
 	nPts int,
-	inputAmount, proportion data.ND1Float64,
-	output1, output2 data.ND1Float64) {
+	inputAmount, proportion data.ND1[float64],
+	output1, output2 data.ND1[float64]) {
 
 	nDays := input.Len1()
 	idx := []int{0}
@@ -42,17 +43,17 @@ func ratingPartition(input data.ND1Float64,
 	for i := 0; i < nDays; i++ {
 		idx[0] = i
 		incoming := input.Get(idx)
-		frac,err := fn.Piecewise(incoming,inputAmount,proportion)
+		frac, err := fn.Piecewise(incoming, inputAmount, proportion)
 		if err != nil {
 			panic(err)
 		}
 
-		if math.IsNaN(frac) || math.IsNaN(incoming){
-			fmt.Printf("timestep=%d/%d\n",i,nDays)
-			fmt.Printf("frac=%f\n",frac)
-			fmt.Printf("incoming=%f\n",incoming)
-			fmt.Printf("inputAmount=%v\n",inputAmount)
-			fmt.Printf("proportion=%v\n",proportion)
+		if math.IsNaN(frac) || math.IsNaN(incoming) {
+			fmt.Printf("timestep=%d/%d\n", i, nDays)
+			fmt.Printf("frac=%f\n", frac)
+			fmt.Printf("incoming=%f\n", incoming)
+			fmt.Printf("inputAmount=%v\n", inputAmount)
+			fmt.Printf("proportion=%v\n", proportion)
 			panic("nan")
 		}
 

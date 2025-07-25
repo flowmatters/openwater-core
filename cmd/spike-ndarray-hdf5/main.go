@@ -18,7 +18,7 @@ const (
 )
 
 func main() {
-	arr := data.ARangeFloat64(80).MustReshape([]int{8, 10}).(data.ND2Float64)
+	arr := data.ARange[float64](80).MustReshape([]int{8, 10}).(data.ND2[float64])
 
 	fmt.Printf(":: data: %v\n", arr)
 
@@ -78,7 +78,7 @@ func main() {
 
 	// // read it back into a new slice
 	// s2 := make([]s1Type, length)
-	dest := data.NewArrayFloat64(conv.UintsToInts(dims))
+	dest := data.NewArray[float64](conv.UintsToInts(dims))
 	destAsSlice := dest.Unroll()
 	err = dset.Read(&destAsSlice)
 	if err != nil {

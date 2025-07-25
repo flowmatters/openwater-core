@@ -49,10 +49,10 @@ InstreamDissolvedNutrientDecay:
 // Is the theLinkIsLumpedFlowRouting necessary??? assumed if we are using this model?
 // Can we take out the point source logic?
 
-func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachVolume, outflow, floodplainDepositionFraction data.ND1Float64,
+func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachVolume, outflow, floodplainDepositionFraction data.ND1[float64],
 	storedMass float64,
 	doDecay, pointSourceLoad, linkHeight, linkWidth, linkLength, uptakeVelocity, durationInSeconds float64,
-	decayedLoad, loadDownstream, loadToFloodplain, loadFromPointSource data.ND1Float64) float64 {
+	decayedLoad, loadDownstream, loadToFloodplain, loadFromPointSource data.ND1[float64]) float64 {
 	n := incomingMassUpstream.Len1()
 	idx := []int{0}
 	prevVolume := reachVolume.Get(idx)
@@ -216,9 +216,9 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 
 			dailyDecayedConstituentLoad = allAvailConstit - loadOut
 
-			decayedLoad.Set(idx,dailyDecayedConstituentLoad)
+			decayedLoad.Set(idx, dailyDecayedConstituentLoad)
 			loadDownstream.Set(idx, allAvailConstit-dailyDecayedConstituentLoad) // Is this just loadOut?
-			loadFromPointSource.Set(idx,pointSourceLoad_kg)
+			loadFromPointSource.Set(idx, pointSourceLoad_kg)
 		}
 
 		prevVolume = reachVolumeNow

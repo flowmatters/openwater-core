@@ -58,14 +58,14 @@ USLEFineSedimentGeneration:
 		sediment
 */
 
-func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYear data.ND1Float64,
+func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYear data.ND1[float64],
 	s, p, rainThreshold, alpha, beta, eta,
 	a1, a2, a3, dwc, avK, avLS, avFines, area, maxConc,
 	usleHSDRFine, usleHSDRCoarse, timeStepInSeconds float64,
 	quickLoadFine, slowLoadFine,
 	quickLoadCoarse, slowLoadCoarse,
 	totalFineLoad, totalCoarseLoad, generatedLoadFine,
-	generatedLoadCoarse data.ND1Float64) {
+	generatedLoadCoarse data.ND1[float64]) {
 	n := quickflow.Len1()
 
 	idx := []int{0}
@@ -212,11 +212,11 @@ func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYe
 		slowLoadFine.Set(idx, loadS)
 		totalFineLoad.Set(idx, loadQ+loadS)
 
-		coarseQuick := USLE_Daily_Load_kg_after_HSDR_applied_Coarse/timeStepInSeconds
+		coarseQuick := USLE_Daily_Load_kg_after_HSDR_applied_Coarse / timeStepInSeconds
 		quickLoadCoarse.Set(idx, coarseQuick)
 		slowLoadCoarse.Set(idx, 0.0) // SURELY INCORRECT
-		totalCoarseLoad.Set(idx, coarseQuick+0.0) 
-		generatedLoadFine.Set(idx,USLE_Daily_Load_kg_Fine/timeStepInSeconds)
-		generatedLoadCoarse.Set(idx,USLE_Daily_Load_kg_Coarse/timeStepInSeconds)
+		totalCoarseLoad.Set(idx, coarseQuick+0.0)
+		generatedLoadFine.Set(idx, USLE_Daily_Load_kg_Fine/timeStepInSeconds)
+		generatedLoadCoarse.Set(idx, USLE_Daily_Load_kg_Coarse/timeStepInSeconds)
 	}
 }

@@ -39,10 +39,10 @@ StorageParticulateTrapping:
 		storage, sediment
 */
 
-func storageParticulateTrapping(inflowMass, storageInflow, storageOutflow, storageVolume data.ND1Float64, // inputs
+func storageParticulateTrapping(inflowMass, storageInflow, storageOutflow, storageVolume data.ND1[float64], // inputs
 	initialStoredMass float64,
 	deltaT, reservoirCapacity, reservoirLength, subtractor, multiplier, lengthDischargeFactor, lengthDischargePower float64,
-	trappedMass, outflowLoad data.ND1Float64) (storedMass float64) {
+	trappedMass, outflowLoad data.ND1[float64]) (storedMass float64) {
 	storedMass = initialStoredMass
 	n := inflowMass.Len1()
 	idx := []int{0}
@@ -56,7 +56,7 @@ func storageParticulateTrapping(inflowMass, storageInflow, storageOutflow, stora
 		if (inflowRate > 0) && (reservoirLength > 0) {
 			sedimentationIndex := math.Pow(reservoirCapacity, 2.0) / (lengthDischargeFactor * reservoirLength * math.Pow(inflowRate, 2.0))
 			damTrappingPC = subtractor - (multiplier * math.Pow(sedimentationIndex, lengthDischargePower))
-			damTrappingPC = m.MinFloat64(100.0, m.MaxFloat64(0.0, damTrappingPC))
+			damTrappingPC = m.Min[float64](100.0, m.Max[float64](0.0, damTrappingPC))
 		}
 
 		dailyTrappedConstituentLoad := incomingMass * damTrappingPC / 100.0
@@ -69,7 +69,7 @@ func storageParticulateTrapping(inflowMass, storageInflow, storageOutflow, stora
 
 		concentration := storedMass / storageWorkingVolume
 		massOutRate := storageOutflowRate * concentration
-		storedMass = math.Max(storedMass - (massOutRate*deltaT),0.0)
+		storedMass = math.Max(storedMass-(massOutRate*deltaT), 0.0)
 		outflowLoad.Set(idx, massOutRate)
 	}
 

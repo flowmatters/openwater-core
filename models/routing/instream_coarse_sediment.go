@@ -29,10 +29,10 @@ InstreamCoarseSediment:
 		sediment transport
 */
 
-func instreamCoarseSediment(upstreamMass, lateralMass, reachLocalMass data.ND1Float64,
+func instreamCoarseSediment(upstreamMass, lateralMass, reachLocalMass data.ND1[float64],
 	channelStore, storedMass float64,
 	deltaT float64,
-	loadDownstream data.ND1Float64) (float64, float64) {
+	loadDownstream data.ND1[float64]) (float64, float64) {
 	n := upstreamMass.Len1()
 	idx := []int{0}
 

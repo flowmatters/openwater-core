@@ -25,8 +25,8 @@ BaseflowFilter:
 		streamlow
 */
 
-func baseflowFilter(streamflow data.ND1Float64,
-	quickflow, baseflow data.ND1Float64) {
+func baseflowFilter(streamflow data.ND1[float64],
+	quickflow, baseflow data.ND1[float64]) {
 	n := streamflow.Len1()
 	idx := []int{0}
 

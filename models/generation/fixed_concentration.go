@@ -25,7 +25,7 @@ FixedConcentration:
 		constituent generation
 */
 
-func fixedConcentration(flow data.ND1Float64, conc float64, load data.ND1Float64) {
+func fixedConcentration(flow data.ND1[float64], conc float64, load data.ND1[float64]) {
 	nDays := flow.Len1()
 	idx := []int{0}
 

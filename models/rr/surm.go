@@ -45,10 +45,10 @@ import (
 
 // const SOIL_ET_CONST = 10.0
 
-func surm(rainfall, pet data.ND1Float64,
+func surm(rainfall, pet data.ND1[float64],
 	initialStore, initialGW, initialTotalStore float64,
 	bfac, coeff, dseep, fcFrac, fimp, rfac, smax, sq, thres float64,
-	runoffTS, quickflowTS, baseflowTS, storeTS data.ND1Float64) (
+	runoffTS, quickflowTS, baseflowTS, storeTS data.ND1[float64]) (
 	float64, // final store
 	float64, // final GW
 	float64) { // final total store
@@ -90,7 +90,7 @@ func surm(rainfall, pet data.ND1Float64,
 		soilMoistureStore -= recharge
 
 		seep := dseep * gw
-		gw = math.Max(gw-seep,0.0)
+		gw = math.Max(gw-seep, 0.0)
 
 		baseflow := bfac * gw
 		gw = math.Max(gw-baseflow, 0.0)

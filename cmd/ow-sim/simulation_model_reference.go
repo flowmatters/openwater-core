@@ -20,10 +20,10 @@ import (
 type modelGeneration struct {
 	Model      sim.TimeSteppingModel
 	Count      int
-	Inputs     data.ND3Float64
-	States     data.ND2Float64
-	Parameters data.ND2Float64
-	Outputs    data.ND3Float64
+	Inputs     data.ND3[float64]
+	States     data.ND2[float64]
+	Parameters data.ND2[float64]
+	Outputs    data.ND3[float64]
 }
 
 func (g *modelGeneration) Run() {
@@ -57,10 +57,10 @@ type modelReference struct {
 }
 
 func initModel(fn, model, paramFn string) (*modelReference, error) {
-	modelRef := io.H5RefInt32{Filename: fn, Dataset: "/MODELS/" + model + "/batches"}
+	modelRef := io.H5Ref[int32]{Filename: fn, Dataset: "/MODELS/" + model + "/batches"}
 	batchesArray, err := modelRef.Load()
 	if err != nil {
-		fmt.Printf("Couldn't load batches for %s\n",model)
+		fmt.Printf("Couldn't load batches for %s\n", model)
 		return nil, err
 	}
 	batches := batchesArray.Unroll()
@@ -70,7 +70,7 @@ func initModel(fn, model, paramFn string) (*modelReference, error) {
 	result.InitialStatesFilename = fn
 	dimensions, err := result.initDimensions()
 	if err != nil {
-		fmt.Printf("Couldn't initialise dimensions for %s\n",model)
+		fmt.Printf("Couldn't initialise dimensions for %s\n", model)
 		return nil, err
 	}
 	result.Dimensions = dimensions
@@ -99,28 +99,28 @@ func (mr *modelReference) initDimensions() ([]int, error) {
 		return []int{}, nil
 	}
 
-	h5Ref := io.H5RefFloat64{}
+	h5Ref := io.H5Ref[float64]{}
 	h5Ref.Dataset = "/MODELS/" + mr.ModelName + "/parameters"
 	h5Ref.Filename = mr.ParametersFilename
 
 	allParameters, err := h5Ref.Load()
 	if err != nil {
-		fmt.Printf("Couldn't load parameters for model %s from %s\n",mr.ModelName,mr.ParametersFilename)
+		fmt.Printf("Couldn't load parameters for model %s from %s\n", mr.ModelName, mr.ParametersFilename)
 		return nil, err
 	}
-	
-	dimSizes := modelInstance.FindDimensions(allParameters.(data.ND2Float64))
 
-	verbosePrintf("===== Simulation dimension sizes for %s =====\n",mr.ModelName)
-	for ix, dim := range(dims){
-		verbosePrintf("\t%s=%d\n",dim,dimSizes[ix])
+	dimSizes := modelInstance.FindDimensions(allParameters.(data.ND2[float64]))
+
+	verbosePrintf("===== Simulation dimension sizes for %s =====\n", mr.ModelName)
+	for ix, dim := range dims {
+		verbosePrintf("\t%s=%d\n", dim, dimSizes[ix])
 	}
 
-	return dimSizes,err
+	return dimSizes, err
 }
 
-func (mr *modelReference) GetReference(genSlice []int, element string) io.H5RefFloat64 {
-	result := io.H5RefFloat64{}
+func (mr *modelReference) GetReference(genSlice []int, element string) io.H5Ref[float64] {
+	result := io.H5Ref[float64]{}
 	result.Dataset = "/MODELS/" + mr.ModelName + "/" + element
 
 	if element == "parameters" {
@@ -145,7 +145,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		gen := modelGeneration{}
 		modelInstance, err := mr.makeModel()
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 		gen.Model = modelInstance
 		if mr.Dimensions != nil {
@@ -159,9 +159,9 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		gen.Count = genSlice[1] - genSlice[0]
 
 		if gen.Count == 0 {
-			gen.Inputs = data.NewArray3DFloat64(0, 0, 0)
-			gen.Parameters = data.NewArray2DFloat64(0, 0)
-			gen.States = data.NewArray2DFloat64(0, 0)
+			gen.Inputs = data.NewArray3D[float64](0, 0, 0)
+			gen.Parameters = data.NewArray2D[float64](0, 0)
+			gen.States = data.NewArray2D[float64](0, 0)
 			return mr.Generations[i], nil
 		}
 
@@ -170,7 +170,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		if inputsExist {
 			inputs, err := inputRef.Load()
 			if err == nil {
-				gen.Inputs = inputs.(data.ND3Float64)
+				gen.Inputs = inputs.(data.ND3[float64])
 				mr.SimLength = inputs.Len(sim.DIMI_TIMESTEP)
 			} else {
 				inputsExist = false
@@ -179,7 +179,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 
 		if !inputsExist {
 			verbosePrintf("No inputs saved for %s. Initialising\n", mr.ModelName)
-			gen.Inputs = data.NewArray3DFloat64(gen.Count, len(gen.Model.Description().Inputs), mr.SimLength)
+			gen.Inputs = data.NewArray3D[float64](gen.Count, len(gen.Model.Description().Inputs), mr.SimLength)
 		}
 
 		paramRef := mr.GetReference(genSlice, "parameters")
@@ -187,14 +187,14 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		if err != nil {
 			return nil, err
 		}
-		gen.Parameters = parameters.(data.ND2Float64)
+		gen.Parameters = parameters.(data.ND2[float64])
 
 		stateRef := mr.GetReference(genSlice, "states")
 		states, err := stateRef.Load()
 		if err != nil {
 			return nil, err
 		}
-		gen.States = states.(data.ND2Float64)
+		gen.States = states.(data.ND2[float64])
 	}
 	return mr.Generations[i], nil
 }
@@ -209,7 +209,7 @@ func (mr *modelReference) TotalRuns() int {
 }
 
 func (mr *modelReference) initialiseTimeSeriesDataset(label string, refShape []int) error {
-	ref := io.H5RefFloat64{}
+	ref := io.H5Ref[float64]{}
 	ref.Filename = mr.OutputFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	count := mr.TotalRuns()
@@ -217,7 +217,7 @@ func (mr *modelReference) initialiseTimeSeriesDataset(label string, refShape []i
 }
 
 func (mr *modelReference) initialiseStatesDataset(label string, refShape []int) error {
-	ref := io.H5RefFloat64{}
+	ref := io.H5Ref[float64]{}
 	ref.Filename = mr.FinalStatesFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	count := mr.TotalRuns()
@@ -255,15 +255,15 @@ func (mr *modelReference) InitialiseOutputs(refGeneration int) error {
 	return nil
 }
 
-func (mr *modelReference) writeTimeSeries(label string, data data.ND3Float64, loc int32) error {
-	ref := io.H5RefFloat64{}
+func (mr *modelReference) writeTimeSeries(label string, data data.ND3[float64], loc int32) error {
+	ref := io.H5Ref[float64]{}
 	ref.Filename = mr.OutputFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	return ref.WriteSlice(data, []int{int(loc), 0, 0})
 }
 
-func (mr *modelReference) writeStates(label string, data data.ND2Float64, loc int32) error {
-	ref := io.H5RefFloat64{}
+func (mr *modelReference) writeStates(label string, data data.ND2[float64], loc int32) error {
+	ref := io.H5Ref[float64]{}
 	ref.Filename = mr.FinalStatesFilename
 	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
 	return ref.WriteSlice(data, []int{int(loc), 0})
@@ -460,7 +460,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 
 		if simLength == 0 {
 			verbosePrintln("Trying to establish simulation length...")
-			inputRef := io.H5RefFloat64{}
+			inputRef := io.H5Ref[float64]{}
 			inputRef.Filename = tsFilename
 			inputRef.Dataset = "/MODELS/" + modelName + "/inputs"
 			if inputRef.Exists() {
@@ -485,7 +485,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 			ref.OutputFilename = destFn
 			ref.WriteOutputs = writeOutputs(modelName)
 			ref.WriteStates = true
-			ref.WriteInputs = writeInputs(modelName,ref.Batches[0] == 0)
+			ref.WriteInputs = writeInputs(modelName, ref.Batches[0] == 0)
 
 			if destFn != defaultOutputFn {
 				exe_path, _ := osext.Executable()

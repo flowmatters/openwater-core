@@ -25,9 +25,9 @@ ComputeProportion:
 		dates function
 */
 
-func computeProportion(numerator, denominator data.ND1Float64,
+func computeProportion(numerator, denominator data.ND1[float64],
 	resultOnZeroDenominator float64,
-	proportion data.ND1Float64) {
+	proportion data.ND1[float64]) {
 	n := numerator.Len1()
 	idx := []int{0}
 
@@ -37,9 +37,9 @@ func computeProportion(numerator, denominator data.ND1Float64,
 		d := denominator.Get(idx)
 
 		if d == 0.0 {
-			proportion.Set(idx,resultOnZeroDenominator)
+			proportion.Set(idx, resultOnZeroDenominator)
 		} else {
-			proportion.Set(idx,n/d)
+			proportion.Set(idx, n/d)
 		}
 	}
 }

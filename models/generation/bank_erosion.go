@@ -58,11 +58,11 @@ func meanAnnualBankErosion(riparianVegPercent, maxRiparianVegEffectiveness, soil
 	return result
 }
 
-func bankErosion(downstreamFlowVolume, totalVolume data.ND1Float64,
+func bankErosion(downstreamFlowVolume, totalVolume data.ND1[float64],
 	riparianVegPercent, maxRiparianVegEffectiveness, soilErodibility, bankErosionCoeff,
 	linkSlope, bankFullFlow, bankMgtFactor, sedBulkDensity, bankHeight, linkLength,
 	dailyFlowPowerFactor, longTermAvDailyFlow, soilPercentFine, durationInSeconds float64,
-	bankErosionFine, bankErosionCoarse data.ND1Float64) {
+	bankErosionFine, bankErosionCoarse data.ND1[float64]) {
 	idx := []int{0}
 	n := downstreamFlowVolume.Len1()
 	meanAnnual := meanAnnualBankErosion(riparianVegPercent, maxRiparianVegEffectiveness, soilErodibility, bankErosionCoeff,

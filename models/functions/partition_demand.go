@@ -27,8 +27,8 @@ PartitionDemand:
 		dates function
 */
 
-func partitionDemand(input, demand data.ND1Float64,
-	outflow, extraction data.ND1Float64) {
+func partitionDemand(input, demand data.ND1[float64],
+	outflow, extraction data.ND1[float64]) {
 	n := input.Len1()
 	idx := []int{0}
 

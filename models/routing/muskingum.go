@@ -32,10 +32,10 @@ Muskingum:
 		flow routing
 */
 
-func muskingum(inflows, laterals data.ND1Float64,
+func muskingum(inflows, laterals data.ND1[float64],
 	s, prevInflow, prevOutflow float64,
 	k, x, deltaT float64,
-	outflows data.ND1Float64) (float64, float64, float64) {
+	outflows data.ND1[float64]) (float64, float64, float64) {
 	idx := []int{0}
 	nDays := inflows.Len1()
 

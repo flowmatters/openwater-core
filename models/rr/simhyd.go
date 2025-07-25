@@ -45,12 +45,12 @@ import (
 
 const SOIL_ET_CONST = 10.0
 
-func simhyd(rainfall data.ND1Float64, pet data.ND1Float64,
+func simhyd(rainfall data.ND1[float64], pet data.ND1[float64],
 	initialStore float64, initialGW float64, initialTotalStore float64,
 	baseflowCoefficient float64, imperviousThreshold float64, infiltrationCoefficient float64,
 	infiltrationShape float64, interflowCoefficient float64, perviousFraction float64,
 	risc float64, rechargeCoefficient float64, smsc float64,
-	runoff, quickflow, baseflow, store data.ND1Float64) (
+	runoff, quickflow, baseflow, store data.ND1[float64]) (
 	float64, // final store
 	float64, // final GW
 	float64) { // final total store

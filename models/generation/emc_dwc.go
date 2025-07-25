@@ -29,11 +29,11 @@ EmcDwc:
 		constituent generation
 */
 
-func emcDWC(quickflow, slowflow data.ND1Float64, emc, dwc float64, quickLoad, slowLoad, totalLoad data.ND1Float64) {
+func emcDWC(quickflow, slowflow data.ND1[float64], emc, dwc float64, quickLoad, slowLoad, totalLoad data.ND1[float64]) {
 	nDays := quickflow.Len1()
 	idx := []int{0}
 
-	if (emc==0.0) && (dwc==0.0) {
+	if (emc == 0.0) && (dwc == 0.0) {
 		return
 	}
 

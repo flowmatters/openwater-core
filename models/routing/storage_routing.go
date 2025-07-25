@@ -47,11 +47,11 @@ StorageRouting:
 		flow routing
 */
 
-//dsLaterals,
-func storageRouting(inflows, laterals,  rainfall, evap data.ND1Float64,
+// dsLaterals,
+func storageRouting(inflows, laterals, rainfall, evap data.ND1[float64],
 	s, prevInflow, prevOutflow float64,
 	bias, k /*RoutingConstant */, x /*RoutingPower*/, area, deadStorage, deltaT float64,
-	outflows, storages data.ND1Float64) (float64, float64, float64) {
+	outflows, storages data.ND1[float64]) (float64, float64, float64) {
 	n := inflows.Len1()
 	idx := []int{0}
 
@@ -87,12 +87,12 @@ func storageRouting(inflows, laterals,  rainfall, evap data.ND1Float64,
 		lateral := laterals.Get(idx)
 
 		if math.IsNaN(inflow) {
-			fmt.Printf("inflow=%f\n",inflow)
-			fmt.Printf("lateral=%f\n",lateral)
-			fmt.Printf("storage=%f\n",storage)
-			fmt.Printf("deltaT=%f\n",deltaT)
+			fmt.Printf("inflow=%f\n", inflow)
+			fmt.Printf("lateral=%f\n", lateral)
+			fmt.Printf("storage=%f\n", storage)
+			fmt.Printf("deltaT=%f\n", deltaT)
 		}
-		evapRate := (evap.Get(idx) - rainfall.Get(idx))/deltaT
+		evapRate := (evap.Get(idx) - rainfall.Get(idx)) / deltaT
 
 		qi, outflow, storage = calcOutflow(i, inflow, lateral, bias, qi, outflow, storage,
 			evapRate, area, deadStorage, deltaT, x, k, Qlimit, Klimit, Koffset)
@@ -134,13 +134,13 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 	}
 
 	if math.IsNaN(bias) || math.IsNaN(inflow) || math.IsNaN(lateral) {
-		fmt.Printf("bias=%f\n",bias)
-		fmt.Printf("inflow=%f\n",inflow)
-		fmt.Printf("lateral=%f\n",lateral)
+		fmt.Printf("bias=%f\n", bias)
+		fmt.Printf("inflow=%f\n", inflow)
+		fmt.Printf("lateral=%f\n", lateral)
 		panic("NAN!")
 	}
 	minQI := bias * (inflow + lateral)
-	delta,outflow,storage := evaluateRouting(minQI)
+	delta, outflow, storage := evaluateRouting(minQI)
 	// if bias > 0.999 && timestep < 10 {
 	// 	fmt.Printf("calcOutflow-1, minQI=%f,delta=%f,massBalanceLimit=%f\n", minQI, delta, massBalanceLimit)
 	// }
@@ -221,22 +221,22 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 
 	if math.IsNaN(delta) {
 		fmt.Printf("delta is NaN.\n")
-		fmt.Printf("qi=%f\n",qi)
-		fmt.Printf("minQI=%f\n",minQI)
-		fmt.Printf("maxQI=%f\n",maxQI)
-		fmt.Printf("massBalanceLimit=%f\n",massBalanceLimit)
-		fmt.Printf("convergenceLimit=%f\n",convergenceLimit)
-		fmt.Printf("maxIterations=%d\n",maxIterations)
+		fmt.Printf("qi=%f\n", qi)
+		fmt.Printf("minQI=%f\n", minQI)
+		fmt.Printf("maxQI=%f\n", maxQI)
+		fmt.Printf("massBalanceLimit=%f\n", massBalanceLimit)
+		fmt.Printf("convergenceLimit=%f\n", convergenceLimit)
+		fmt.Printf("maxIterations=%d\n", maxIterations)
 		panic("delta is NaN")
 	}
 	delta, outflow, storage = evaluateRouting(qi)
 	if math.Abs(delta) > massBalanceLimit {
 		// fmt.Printf("Timestep = %d, delta=%f, outflow=%f, storage=%f\n", timestep, delta, outflow, storage)
 	}
-	if math.IsNaN(outflow){
-		fmt.Printf("outflow=%f\n",outflow)
-		fmt.Printf("storage=%f\n",storage)
-		fmt.Printf("delta=%f\n",delta)
+	if math.IsNaN(outflow) {
+		fmt.Printf("outflow=%f\n", outflow)
+		fmt.Printf("storage=%f\n", storage)
+		fmt.Printf("delta=%f\n", delta)
 		panic("outflow is nan")
 	}
 	return
@@ -272,15 +272,15 @@ func runRouting(qIndex, inflow, lateral, initialFluxMax, storage, area, netEvapR
 	if bias < .999 {
 		massBalance = (qIndex-bias*(inflow+lateral))*duration/(1.0-bias) + SIndex - newStorage
 	} else {
-		massBalance = 0.0   
+		massBalance = 0.0
 	}
 
 	outflow = math.Max(0, newStorage-SIndex) / duration
-	if math.IsNaN(outflow){
-		fmt.Printf("outflow=%f\n",outflow)
-		fmt.Printf("newStorage=%f\n",newStorage)
-		fmt.Printf("SIndex=%f\n",SIndex)
-		fmt.Printf("duration=%f\n",duration)
+	if math.IsNaN(outflow) {
+		fmt.Printf("outflow=%f\n", outflow)
+		fmt.Printf("newStorage=%f\n", newStorage)
+		fmt.Printf("SIndex=%f\n", SIndex)
+		fmt.Printf("duration=%f\n", duration)
 		panic("outflow is nan")
 	}
 	//SIndex = SIndex - outflow

@@ -48,12 +48,12 @@ DynamicSednetGully:
 
 type gullyExportFn func(float64, float64, float64, float64, float64, float64, float64, float64, float64, float64) (float64, float64)
 
-func sednetGully(quickflow, year, annualRunoff_ts, annualLoad_ts data.ND1Float64,
+func sednetGully(quickflow, year, annualRunoff_ts, annualLoad_ts data.ND1[float64],
 	yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 	annualAverageSedimentSupply, percentFine,
 	managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
-	sdrFine, sdrCoarse, timestepInSeconds float64, 
-	fineLoad, coarseLoad, generatedFine, generatedCoarse data.ND1Float64, calc gullyExportFn) {
+	sdrFine, sdrCoarse, timestepInSeconds float64,
+	fineLoad, coarseLoad, generatedFine, generatedCoarse data.ND1[float64], calc gullyExportFn) {
 	n := quickflow.Len1()
 	idx := []int{0}
 	propFine := percentFine / 100
@@ -85,8 +85,8 @@ func sednetGully(quickflow, year, annualRunoff_ts, annualLoad_ts data.ND1Float64
 		generated_gully_load_kg_fine, generated_gully_load_kg_coarse := calc(runoffRate, annualRunoff, area, propFine, activityFactor, managementPracticeFactor,
 			annualLoad, annualAverageSedimentSupply, longtermRunoffFactor, dailyRunoffPowerFactor)
 
-		generated_gully_load_kg_fine = generated_gully_load_kg_fine/timestepInSeconds
-		generated_gully_load_kg_coarse = generated_gully_load_kg_coarse/timestepInSeconds
+		generated_gully_load_kg_fine = generated_gully_load_kg_fine / timestepInSeconds
+		generated_gully_load_kg_coarse = generated_gully_load_kg_coarse / timestepInSeconds
 
 		fineLoad.Set(idx, generated_gully_load_kg_fine*(sdrFine*0.01))
 		coarseLoad.Set(idx, generated_gully_load_kg_coarse*(sdrCoarse*0.01))
@@ -95,12 +95,12 @@ func sednetGully(quickflow, year, annualRunoff_ts, annualLoad_ts data.ND1Float64
 	}
 }
 
-func sednetGullyOrig(quickflow, year, annualRunoff, annualLoad data.ND1Float64,
+func sednetGullyOrig(quickflow, year, annualRunoff, annualLoad data.ND1[float64],
 	yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 	annualAverageSedimentSupply, percentFine,
 	managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
 	sdrFine, sdrCoarse, timestepInSeconds float64,
-	fineLoad, coarseLoad, generatedFine, generatedCoarse data.ND1Float64) {
+	fineLoad, coarseLoad, generatedFine, generatedCoarse data.ND1[float64]) {
 	sednetGully(quickflow, year, annualRunoff, annualLoad,
 		yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 		annualAverageSedimentSupply, percentFine,

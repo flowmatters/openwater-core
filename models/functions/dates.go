@@ -65,9 +65,9 @@ func _dayOfYear(d, m, y int) int {
 	return doy
 }
 
-func dateGenerator(tick data.ND1Float64,
+func dateGenerator(tick data.ND1[float64],
 	startDate, startMonth, startYear float64,
-	date, month, year, dayOfYear data.ND1Float64) {
+	date, month, year, dayOfYear data.ND1[float64]) {
 
 	d := int(startDate)
 	m := int(startMonth)

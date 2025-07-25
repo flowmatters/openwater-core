@@ -14,6 +14,7 @@ import (
 )
 
 var mu sync.RWMutex
+
 // var masterMU sync.RWMutex
 // var mus = make(map[string]*sync.RWMutex)
 
@@ -95,7 +96,7 @@ func makeHyperslab(slice [][]int, dims []int) (offset, stride, count, block []ui
 }
 
 func sliceSize(slice []int, size int) int {
-	return m.MaxInt(0, (m.MinInt(size, slice[1])-m.MinInt(size, slice[0]))) / slice[2]
+	return m.Max[int](0, (m.Min[int](size, slice[1])-m.Min[int](size, slice[0]))) / slice[2]
 }
 
 func openWriteOrCreate(fn string, createIfNotExist bool) (*hdf5.File, error) {
@@ -167,15 +168,15 @@ func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interfa
 		defer space.Close()
 
 		if compress {
-			dcpl, err := hdf5.NewPropList(hdf5.P_DATASET_CREATE);
+			dcpl, err := hdf5.NewPropList(hdf5.P_DATASET_CREATE)
 			if err != nil {
-				return nil, prefix("Cannot create property list",err)
+				return nil, prefix("Cannot create property list", err)
 			}
 			defer dcpl.Close()
 
 			dcpl.SetDeflate(hdf5.DefaultCompression)
 
-			ds, err := g.CreateDatasetWith(paths[0], dtype, space,dcpl)
+			ds, err := g.CreateDatasetWith(paths[0], dtype, space, dcpl)
 			if err != nil {
 				return nil, prefix("Cannot create dataset  "+path+": ", err)
 			}
@@ -212,4 +213,3 @@ func findInSlice(strings []string, target string) int {
 	}
 	return -1
 }
-

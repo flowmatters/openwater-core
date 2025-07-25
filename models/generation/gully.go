@@ -55,7 +55,7 @@ package generation
 // 		sediment
 // */
 
-// func gully(quickflow, slowflow, jday data.ND1Float64,
+// func gully(quickflow, slowflow, jday data.ND1[float64],
 // 	timeStepInSeconds, area, yearDisturbance, yearActivityEnd float64) {
 // 	nDays := quickflow.Len1()
 

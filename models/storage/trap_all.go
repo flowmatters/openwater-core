@@ -29,9 +29,9 @@ StorageTrapAll:
 		storage, sediment
 */
 
-func storageTrapAll(inflowMass, storageInflow, storageOutflow, storageVolume data.ND1Float64, // inputs
+func storageTrapAll(inflowMass, storageInflow, storageOutflow, storageVolume data.ND1[float64], // inputs
 	initialStoredMass float64,
-	trappedMass, outflowMass data.ND1Float64) (storedMass float64) {
+	trappedMass, outflowMass data.ND1[float64]) (storedMass float64) {
 
 	trappedMass.CopyFrom(inflowMass)
 

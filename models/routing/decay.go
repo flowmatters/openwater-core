@@ -35,11 +35,11 @@ ConstituentDecay:
 		constituent transport
 */
 
-func constituentDecay(inflowLoads, lateralLoads, inflows, outflows, storage data.ND1Float64,
+func constituentDecay(inflowLoads, lateralLoads, inflows, outflows, storage data.ND1[float64],
 	storedMass float64,
 	x, halflife, deltaT float64,
-	decayedLoad, outflowLoads data.ND1Float64) float64 {
-	const MINIMUM_VOLUME=0.01
+	decayedLoad, outflowLoads data.ND1[float64]) float64 {
+	const MINIMUM_VOLUME = 0.01
 	n := inflowLoads.Len1()
 	idx := []int{0}
 
@@ -49,8 +49,8 @@ func constituentDecay(inflowLoads, lateralLoads, inflows, outflows, storage data
 		decayedAmount := 0.0
 		if halflife > 0 {
 			fraction := math.Pow(2.0, -deltaT/halflife)
-			decayedAmount = (1-fraction)*storedMass
-			decayedLoad.Set(idx,decayedAmount/deltaT)
+			decayedAmount = (1 - fraction) * storedMass
+			decayedLoad.Set(idx, decayedAmount/deltaT)
 			storedMass *= fraction
 		}
 
@@ -71,7 +71,7 @@ func constituentDecay(inflowLoads, lateralLoads, inflows, outflows, storage data
 
 		concentration := workingMass / workingVol
 		outflowLoad := concentration * outflowR
-		storedMass = workingMass - outflowLoad * deltaT
+		storedMass = workingMass - outflowLoad*deltaT
 
 		outflowLoads.Set(idx, outflowLoad)
 	}

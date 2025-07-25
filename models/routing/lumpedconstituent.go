@@ -35,10 +35,10 @@ LumpedConstituentRouting:
 		constituent routing
 */
 
-func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage data.ND1Float64,
+func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage data.ND1[float64],
 	initialStoredMass float64,
 	x, pointInput, deltaT float64,
-	outflowLoads, pointSourceLoad data.ND1Float64) (storedMass float64) {
+	outflowLoads, pointSourceLoad data.ND1[float64]) (storedMass float64) {
 	storedMass = initialStoredMass
 	nDays := inflowLoads.Len1()
 
@@ -60,7 +60,7 @@ func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage dat
 			storedMass = 0.0
 			outflowLoads.Set(idx, 0.0)
 			if pointSourceLoad != nil {
-				pointSourceLoad.Set(idx,0.0)
+				pointSourceLoad.Set(idx, 0.0)
 			}
 			continue
 		}
@@ -71,7 +71,7 @@ func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage dat
 
 		outflowLoads.Set(idx, outflowLoad)
 		if pointSourceLoad != nil {
-			pointSourceLoad.Set(idx,pointInput)
+			pointSourceLoad.Set(idx, pointInput)
 		}
 	}
 	return storedMass

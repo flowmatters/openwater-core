@@ -27,9 +27,9 @@ DepthToRate:
 		unit conversion
 */
 
-func depthToRate(inputs data.ND1Float64,
+func depthToRate(inputs data.ND1[float64],
 	deltaT, area float64,
-	outflows data.ND1Float64) {
+	outflows data.ND1[float64]) {
 
 	if area == 0.0 {
 		return

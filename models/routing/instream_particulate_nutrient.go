@@ -47,19 +47,19 @@ InstreamParticulateNutrient:
 // Is the theLinkIsLumpedFlowRouting necessary??? assumed if we are using this model?
 // Can we take out the point source logic?
 
-func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reachVolume, outflow, 
-	streamBankErosion, lateralSediment, floodplainDepositionFraction, channelDepositionFraction data.ND1Float64,
+func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reachVolume, outflow,
+	streamBankErosion, lateralSediment, floodplainDepositionFraction, channelDepositionFraction data.ND1[float64],
 	initialInstreamStoredMass, initialChannelStoredMass float64,
 	particulateNutrientConcentration, soilPercentFine, durationInSeconds float64,
-	loadDeposited, loadFromStreambank,loadDownstream, loadToFloodplain data.ND1Float64) (instreamStoredMass, channelStoredMass float64) {
+	loadDeposited, loadFromStreambank, loadDownstream, loadToFloodplain data.ND1[float64]) (instreamStoredMass, channelStoredMass float64) {
 	n := incomingMassUpstream.Len1()
 	idx := []int{0}
 
 	instreamStoredMass = initialInstreamStoredMass
 	channelStoredMass = initialChannelStoredMass
 
-	for i:=0; i < n; i++ {
-		idx[0]=i
+	for i := 0; i < n; i++ {
+		idx[0] = i
 		incomingUpstream := incomingMassUpstream.Get(idx) * durationInSeconds
 		incomingLateral := incomingMassLateral.Get(idx) * durationInSeconds
 
@@ -68,7 +68,7 @@ func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reac
 		//Do some adjustments to try to overcome the issue where FUs might've provided a Nutrient load (DWC?) but ont a sediment load
 		//This ultimately makes very little difference
 		totalDailyConstsituentMassForDepositionProcesses := instreamStoredMass + incomingUpstream /*+ AdditionalInflowMass*/
-		if (lateralSediment.Get(idx) > 0.0) {
+		if lateralSediment.Get(idx) > 0.0 {
 			totalDailyConstsituentMassForDepositionProcesses += incomingLateral
 		}
 
@@ -78,15 +78,15 @@ func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reac
 
 		//stream bank generation
 		streamBankParticulate := streamBankErosion.Get(idx) * particulateNutrientConcentration
-		loadFromStreambank.Set(idx,streamBankParticulate)
+		loadFromStreambank.Set(idx, streamBankParticulate)
 		streamBankParticulate = streamBankParticulate * durationInSeconds
 		totalDailyConstsituentMass += streamBankParticulate
 		totalDailyConstsituentMassForDepositionProcesses += streamBankParticulate * (soilPercentFine / 100)
 
 		//Deposition on floodplain
-		fpDepositionFraction := math.Min(math.Max(floodplainDepositionFraction.Get(idx),0.0),1.0)
+		fpDepositionFraction := math.Min(math.Max(floodplainDepositionFraction.Get(idx), 0.0), 1.0)
 		nutrientDailyDepositedFloodPlain := fpDepositionFraction * totalDailyConstsituentMassForDepositionProcesses
-		loadToFloodplain.Set(idx,nutrientDailyDepositedFloodPlain/durationInSeconds)
+		loadToFloodplain.Set(idx, nutrientDailyDepositedFloodPlain/durationInSeconds)
 
 		//Intentionally haven't adjusted ConstituentStorage to remove the floodplain deposited material
 		//as the proportion of channel storage in fine sediment model is also relevant to pre-floodplain total.
@@ -99,19 +99,19 @@ func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reac
 		bedExchange := 0.0
 
 		if bedDepositSignal >= 0 { // Fraction of working mass is deposited
-			bedExchange = math.Min(bedDepositSignal * totalDailyConstsituentMassForDepositionProcesses,
-														 totalDailyConstsituentMassForDepositionProcesses - nutrientDailyDepositedFloodPlain)
+			bedExchange = math.Min(bedDepositSignal*totalDailyConstsituentMassForDepositionProcesses,
+				totalDailyConstsituentMassForDepositionProcesses-nutrientDailyDepositedFloodPlain)
 			channelStoredMass += bedExchange
 		} else {
 			// resuspension := - bedDepositFraction * channelStoredMass // Signal is a fraction of stored sediment
 			// resuspension := - bedDepositSignal * particulateNutrientConcentration // Signal is a kg/s of sediment remobilised
-			resuspension := - bedDepositSignal * totalDailyConstsituentMassForDepositionProcesses
+			resuspension := -bedDepositSignal * totalDailyConstsituentMassForDepositionProcesses
 			channelStoredMass -= resuspension
-			bedExchange = - resuspension
-		// } else {
-		// 	//Remobilisation
-		// 	nutrientDailyRemobilisedBed = bedDeposit * -1.0 //This will make remobilisation a positive number
-		// 	nutrientDailyDepositedBed = 0.0
+			bedExchange = -resuspension
+			// } else {
+			// 	//Remobilisation
+			// 	nutrientDailyRemobilisedBed = bedDeposit * -1.0 //This will make remobilisation a positive number
+			// 	nutrientDailyDepositedBed = 0.0
 		}
 
 		netLoss := nutrientDailyDepositedFloodPlain + bedExchange
@@ -119,7 +119,7 @@ func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reac
 
 		// copied from lumped constituent - should refactor
 		outflowRate := outflow.Get(idx)
-		outflowV :=  outflowRate * durationInSeconds
+		outflowV := outflowRate * durationInSeconds
 		storedV := reachVolume.Get(idx)
 
 		workingVol := outflowV + storedV
@@ -134,21 +134,20 @@ func instreamParticulateNutrient(incomingMassUpstream, incomingMassLateral, reac
 
 		outflowLoad := concentration * outflowRate
 
-		loadDownstream.Set(idx,outflowLoad)
-		loadDeposited.Set(idx,bedExchange)
+		loadDownstream.Set(idx, outflowLoad)
+		loadDeposited.Set(idx, bedExchange)
 	}
 
 	return
 }
 
-
 /* From sediment model
 
 * SoilPercentFine (param)
 
-* CatchmentInflowMass (? from generation models?) 
+* CatchmentInflowMass (? from generation models?)
 * BankErosionTotal_kg_per_Day (bank erosion model)
 * proportionDepositedFloodplain (existing)
 * proportionDepositedBed (not existing?)
 
-*/
+ */

@@ -26,8 +26,8 @@ VariablePartition:
 		partition
 */
 
-func variablePartition(input, fraction data.ND1Float64,
-	output1, output2 data.ND1Float64) {
+func variablePartition(input, fraction data.ND1[float64],
+	output1, output2 data.ND1[float64]) {
 
 	nDays := input.Len1()
 	idx := []int{0}

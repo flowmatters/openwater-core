@@ -44,12 +44,12 @@ DynamicSednetGullyAlt:
 		gully
 */
 
-func sednetGullyDerm(quickflow, year, annualRunoff, annualLoad data.ND1Float64,
+func sednetGullyDerm(quickflow, year, annualRunoff, annualLoad data.ND1[float64],
 	yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 	annualAverageSedimentSupply, percentFine,
 	managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
 	sdrFine, sdrCoarse, timeStepInSeconds float64,
-	fineLoad, coarseLoad, generatedFine, generatedCoarse data.ND1Float64) {
+	fineLoad, coarseLoad, generatedFine, generatedCoarse data.ND1[float64]) {
 	sednetGully(quickflow, year, annualRunoff, annualLoad,
 		yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 		annualAverageSedimentSupply, percentFine,

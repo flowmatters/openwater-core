@@ -24,8 +24,8 @@ Gate:
 		function
 */
 
-func gate(trigger, incoming data.ND1Float64,
-	outgoing data.ND1Float64) {
+func gate(trigger, incoming data.ND1[float64],
+	outgoing data.ND1[float64]) {
 
 	n := trigger.Len1()
 	idx := []int{0}

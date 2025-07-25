@@ -23,7 +23,7 @@ Input:
 		dates function
 */
 
-func inputNode(input data.ND1Float64,
-	output data.ND1Float64) {
+func inputNode(input data.ND1[float64],
+	output data.ND1[float64]) {
 	output.CopyFrom(input)
 }

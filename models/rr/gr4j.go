@@ -43,7 +43,7 @@ GR4J:
 		rainfall runoff
 */
 
-func initGR4J(x1 float64, x2 float64, x3 float64, x4 float64) data.ND2Float64 {
+func initGR4J(x1 float64, x2 float64, x3 float64, x4 float64) data.ND2[float64] {
 	// Initialise states
 	// * S
 	// * nUH1
@@ -64,7 +64,7 @@ func initGR4J(x1 float64, x2 float64, x3 float64, x4 float64) data.ND2Float64 {
 	return result
 }
 
-func extractGR4JStates(states data.ND1Float64) (float64, float64, int, int, []float64, []float64) {
+func extractGR4JStates(states data.ND1[float64]) (float64, float64, int, int, []float64, []float64) {
 	// fmt.Println("states passed in to extract",states)
 	// fmt.Println("states passed in to extract",states.Shape())
 	s := states.Get1(0)
@@ -77,8 +77,8 @@ func extractGR4JStates(states data.ND1Float64) (float64, float64, int, int, []fl
 	return s, r, n1, n2, q1, q9
 }
 
-func packGR4JStates(s, r float64, n1, n2 int, q1, q9 []float64) data.ND2Float64 {
-	result := data.NewArray2DFloat64(1, 4+n1+n2)
+func packGR4JStates(s, r float64, n1, n2 int, q1, q9 []float64) data.ND2[float64] {
+	result := data.NewArray2D[float64](1, 4+n1+n2)
 	//result := make(sim.StateSet, 3+n1+n2)
 	result.Set2(0, 0, s)
 	result.Set2(0, 1, s)
@@ -90,13 +90,13 @@ func packGR4JStates(s, r float64, n1, n2 int, q1, q9 []float64) data.ND2Float64 
 	return result
 }
 
-func gr4j(rainfall data.ND1Float64, pet data.ND1Float64, s0 float64, r0 float64,
+func gr4j(rainfall data.ND1[float64], pet data.ND1[float64], s0 float64, r0 float64,
 	n1 int, n2 int, q1State []float64, q9State []float64,
-	x1 float64, x2 float64, x3 float64, x4 float64, runoff data.ND1Float64) (float64, float64, int, int, []float64, []float64) {
+	x1 float64, x2 float64, x3 float64, x4 float64, runoff data.ND1[float64]) (float64, float64, int, int, []float64, []float64) {
 	nDays := rainfall.Len1()
 	// fmt.Println("ndays",nDays)
 	// fmt.Println("ndays",rainfall.Shape())
-	//var runoff data.ND1Float64 = data.NewArray1D(nDays)
+	//var runoff data.ND1[float64] = data.NewArray1D(nDays)
 	//var q9This []float64;
 	//var q9Last []float64;
 	//var q1This []float64;

@@ -24,8 +24,8 @@ Sum:
 		function
 */
 
-func sum(i1, i2 data.ND1Float64,
-	out data.ND1Float64) {
+func sum(i1, i2 data.ND1[float64],
+	out data.ND1[float64]) {
 
 	n := i1.Len1()
 	idx := []int{0}

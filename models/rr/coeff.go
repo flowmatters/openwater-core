@@ -26,7 +26,7 @@ RunoffCoefficient:
 
 */
 
-func runoffCoefficient(rainfall data.ND1Float64, coeff float64, runoff data.ND1Float64) {
+func runoffCoefficient(rainfall data.ND1[float64], coeff float64, runoff data.ND1[float64]) {
 	n := rainfall.Len1()
 	for i := 0; i < n; i++ {
 		runoff.Set1(i, coeff*rainfall.Get1(i))

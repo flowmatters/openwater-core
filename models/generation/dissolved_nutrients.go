@@ -5,33 +5,34 @@ import (
 	"github.com/flowmatters/openwater-core/data"
 )
 
-/*OW-SPEC
+/*
+OW-SPEC
 SednetDissolvedNutrientGeneration:
-  inputs:
-		quickflow: m^3.s^-1
-		slowflow: m^3.s^-1
-  states:
-	parameters:
-		dissConst_EMC: mg.L^-1
-		dissConst_DWC: mg.L^-1
-	outputs:
-		quickflowConstituent: kg.s^-1
-		slowflowConstituent: kg.s^-1
-		totalLoad: kg.s^-1
-	implementation:
-		function: dissolvedNutrients
-		type: scalar
-		lang: go
-		outputs: params
-	init:
-	  zero: true
-	tags:
-		nutrients
 
+	  inputs:
+			quickflow: m^3.s^-1
+			slowflow: m^3.s^-1
+	  states:
+		parameters:
+			dissConst_EMC: mg.L^-1
+			dissConst_DWC: mg.L^-1
+		outputs:
+			quickflowConstituent: kg.s^-1
+			slowflowConstituent: kg.s^-1
+			totalLoad: kg.s^-1
+		implementation:
+			function: dissolvedNutrients
+			type: scalar
+			lang: go
+			outputs: params
+		init:
+		  zero: true
+		tags:
+			nutrients
 */
-func dissolvedNutrients(quickflow, slowflow data.ND1Float64,
+func dissolvedNutrients(quickflow, slowflow data.ND1[float64],
 	dissConst_EMC, dissConst_DWC float64,
-	quickflowConstituent, slowflowConstituent, totalLoad data.ND1Float64) {
+	quickflowConstituent, slowflowConstituent, totalLoad data.ND1[float64]) {
 	//All calcs done in units / day then converted back to units per sec for E2 consumption
 	n := quickflow.Len1()
 

@@ -7,6 +7,7 @@ import (
 const (
 	EFFECTIVELY_ZERO = 1e-8
 )
+
 /*OW-SPEC
 PassLoadIfFlow:
 	inputs:
@@ -28,9 +29,9 @@ PassLoadIfFlow:
 		constituent generation
 */
 
-func passLoadIfFlow(flow, inputLoad data.ND1Float64,
+func passLoadIfFlow(flow, inputLoad data.ND1[float64],
 	scalingFactor float64,
-	outputLoad data.ND1Float64) {
+	outputLoad data.ND1[float64]) {
 
 	if scalingFactor == 0.0 {
 		return

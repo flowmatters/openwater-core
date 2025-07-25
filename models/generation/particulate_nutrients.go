@@ -43,13 +43,13 @@ SednetParticulateNutrientGeneration:
 
 func particulateNutrients(fineSedModelFineSheetGeneratedKg, fineSedModelCoarseSheetGeneratedKg,
 	fineSedModelFineGullyGeneratedKg, fineSedModelCoarseGullyGeneratedKg,
-	slowflow data.ND1Float64,
+	slowflow data.ND1[float64],
 	area,
 	nutSurfSoilConc, hillDeliveryRatio, Nutrient_Enrichment_Ratio,
 	nutSubSoilConc, Nutrient_Enrichment_Ratio_Gully, gullyDeliveryRatio,
 	nutrientDWC, Do_P_CREAMS_Enrichment float64,
 	quickflowConstituent, slowflowConstituent, totalLoad,
-	hillslopeContribution, gullyContribution data.ND1Float64) {
+	hillslopeContribution, gullyContribution data.ND1[float64]) {
 	const CREAMS_CONSTANT = 1.2
 	//All calcs done in units / day then converted back to units per sec for E2 consumption
 	n := fineSedModelCoarseSheetGeneratedKg.Len1()
@@ -105,8 +105,8 @@ func particulateNutrients(fineSedModelFineSheetGeneratedKg, fineSedModelCoarseSh
 		slowflowConstituent.Set(idx, slowLoad)
 		totalLoad.Set(idx, quickLoad+slowLoad)
 
-		hillslopeContribution.Set(idx,Hillslope_Particulate_load_kg)
-		gullyContribution.Set(idx,Gully_Particulate_load_kg)
+		hillslopeContribution.Set(idx, Hillslope_Particulate_load_kg)
+		gullyContribution.Set(idx, Gully_Particulate_load_kg)
 
 		// Total_Total_Particulate_Constituent_kg += Daily_Total_Particulate_load_kg
 		// Total_Hillslope_Particulate_Constituent_kg += Daily_Hillslope_Particulate_load_kg
