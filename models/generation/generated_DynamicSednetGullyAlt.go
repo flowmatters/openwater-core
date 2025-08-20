@@ -298,16 +298,16 @@ func (m *DynamicSednetGullyAlt) Run(inputs data.ND3[float64], states data.ND2[fl
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{quickflow m^3.s^-1}",tmpTS.Shape())
-      quickflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      quickflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{year year}",tmpTS.Shape())
-      year := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      year := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{AnnualRunoff mm.yr^-1}",tmpTS.Shape())
-      annualrunoff := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      annualrunoff := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{annualLoad }",tmpTS.Shape())
-      annualload := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      annualload := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -315,16 +315,16 @@ func (m *DynamicSednetGullyAlt) Run(inputs data.ND3[float64], states data.ND2[fl
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      fineload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      fineload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      coarseload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      coarseload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      generatedfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      generatedfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      generatedcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      generatedcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

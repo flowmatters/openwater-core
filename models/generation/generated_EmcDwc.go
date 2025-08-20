@@ -178,10 +178,10 @@ func (m *EmcDwc) Run(inputs data.ND3[float64], states data.ND2[float64], outputs
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{quickflow m^3.s^-1}",tmpTS.Shape())
-      quickflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      quickflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{baseflow m^3.s^-1}",tmpTS.Shape())
-      baseflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      baseflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -189,13 +189,13 @@ func (m *EmcDwc) Run(inputs data.ND3[float64], states data.ND2[float64], outputs
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      quickload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      quickload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      slowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      slowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

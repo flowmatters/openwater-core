@@ -237,7 +237,7 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       {{if len .States}}
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       {{end}}
 
       {{if .Flags.GenerateExtractStates}}
@@ -254,7 +254,7 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       {{range $i, $v := .Inputs}}
   //    fmt.Println("{{$v}}",tmpTS.Shape())
-      {{lower $v.Key}} := cellInputs.Slice([]int{ {{$i}},0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      {{lower $v.Key}} := cellInputs.Slice([]int{ {{$i}},0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       {{end}}
 
       {{ $oAsP := .Flags.PassOutputsAsParams}}
@@ -262,7 +262,7 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       {{if $oAsP}}
       {{range $i, $v := .Outputs}}
       outputPosSlice[sim.DIMO_OUTPUT] = {{$i}}
-      {{lower $v.Key}} := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      {{lower $v.Key}} := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       {{end}}
       {{end}}
 

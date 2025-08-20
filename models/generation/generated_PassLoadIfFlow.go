@@ -166,10 +166,10 @@ func (m *PassLoadIfFlow) Run(inputs data.ND3[float64], states data.ND2[float64],
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{flow m^3.s^-1}",tmpTS.Shape())
-      flow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      flow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{inputLoad <nil>}",tmpTS.Shape())
-      inputload := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      inputload := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -177,7 +177,7 @@ func (m *PassLoadIfFlow) Run(inputs data.ND3[float64], states data.ND2[float64],
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outputload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      outputload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

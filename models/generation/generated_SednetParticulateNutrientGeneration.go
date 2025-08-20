@@ -262,19 +262,19 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3[float64], stat
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{fineSedModelFineSheetGeneratedKg <nil>}",tmpTS.Shape())
-      finesedmodelfinesheetgeneratedkg := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      finesedmodelfinesheetgeneratedkg := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{fineSedModelCoarseSheetGeneratedKg <nil>}",tmpTS.Shape())
-      finesedmodelcoarsesheetgeneratedkg := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      finesedmodelcoarsesheetgeneratedkg := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{fineSedModelFineGullyGeneratedKg <nil>}",tmpTS.Shape())
-      finesedmodelfinegullygeneratedkg := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      finesedmodelfinegullygeneratedkg := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{fineSedModelCoarseGullyGeneratedKg <nil>}",tmpTS.Shape())
-      finesedmodelcoarsegullygeneratedkg := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      finesedmodelcoarsegullygeneratedkg := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{slowflow m^3.s^-1}",tmpTS.Shape())
-      slowflow := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      slowflow := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -282,19 +282,19 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3[float64], stat
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      quickflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      quickflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      slowflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      slowflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      hillslopecontribution := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      hillslopecontribution := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 4
-      gullycontribution := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      gullycontribution := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

@@ -166,7 +166,7 @@ func (m *FixedConcentration) Run(inputs data.ND3[float64], states data.ND2[float
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{flow m^3.s^-1}",tmpTS.Shape())
-      flow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      flow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -174,7 +174,7 @@ func (m *FixedConcentration) Run(inputs data.ND3[float64], states data.ND2[float
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      load := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      load := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

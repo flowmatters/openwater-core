@@ -322,10 +322,10 @@ func (m *BankErosion) Run(inputs data.ND3[float64], states data.ND2[float64], ou
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{downstreamFlowVolume <nil>}",tmpTS.Shape())
-      downstreamflowvolume := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      downstreamflowvolume := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{totalVolume <nil>}",tmpTS.Shape())
-      totalvolume := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      totalvolume := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -333,10 +333,10 @@ func (m *BankErosion) Run(inputs data.ND3[float64], states data.ND2[float64], ou
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      bankerosionfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      bankerosionfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      bankerosioncoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      bankerosioncoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
