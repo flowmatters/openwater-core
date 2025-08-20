@@ -29,7 +29,7 @@ func storageTrapAll(inflowMass, storageInflow, storageOutflow, storageVolume []f
 	initialStoredMass float64,
 	trappedMass, outflowMass []float64) (storedMass float64) {
 
-	trappedMass.CopyFrom(inflowMass)
+	copy(trappedMass, inflowMass)
 
 	trappedMass[0] = trappedMass[0] + initialStoredMass
 	storedMass = 0.0

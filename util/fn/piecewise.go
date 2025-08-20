@@ -1,60 +1,53 @@
 package fn
 
 import (
-	"errors"
 	"fmt"
-
-	"github.com/flowmatters/openwater-core/data"
 )
 
-func brackets(x float64, xs data.ND1[float64]) (i, j int) {
+func brackets(x float64, xs []float64) (i, j int) {
 	i = -1
 	j = -1
-	idx := []int{0}
-	n := xs.Len1()
+	n := len(xs)
 
-	idx[0] = 0
-	if x < xs.Get(idx) {
+	if x < xs[0] {
 		return
 	}
 
-	idx[0] = n - 1
-	if x > xs.Get(idx) {
+	if x > xs[n-1] {
 		return
 	}
 
 	i = 0
 	for j = 1; j < n; j++ {
-		idx[0] = j
-		valueAtJ := xs.Get(idx)
+		valueAtJ := xs[j]
 		if valueAtJ >= x {
 			return
 		}
-		i += 1
+		i++
 	}
 	i = -1
 	j = -1
 	return
 }
 
-func Piecewise(x float64, xs, ys data.ND1[float64]) (y float64, err error) {
+func Piecewise(x float64, xs, ys []float64) (y float64, err error) {
 	err = nil
 	i, j := brackets(x, xs)
 	if (i < 0) || (j < 0) {
-		err = errors.New(fmt.Sprintf("Couldn't find brackets for %f in %v", x, xs.Unroll()))
+		err = fmt.Errorf("Couldn't find brackets for %f in %v", x, xs)
 		return
 	}
-	idx := []int{i}
-	x0 := xs.Get(idx)
-	idx[0] = j
-	x1 := xs.Get(idx)
+	idx := i
+	x0 := xs[idx]
+	idx = j
+	x1 := xs[idx]
 
 	frac := (x - x0) / (x1 - x0) // What if x1==x0?
 
-	idx[0] = i
-	y0 := ys.Get(idx)
-	idx[0] = j
-	y1 := ys.Get(idx)
+	idx = i
+	y0 := ys[idx]
+	idx = j
+	y1 := ys[idx]
 	y = y0 + frac*(y1-y0)
 	return
 }

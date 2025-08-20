@@ -21,5 +21,5 @@ Input:
 
 func inputNode(input []float64,
 	output []float64) {
-	output.CopyFrom(input)
+	copy(output, input)
 }

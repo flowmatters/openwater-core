@@ -53,7 +53,7 @@ type Hotstartable interface {
 	SetStates(states []float64)
 }
 
-type Series data.ND1[float64]
+type Series []float64
 
 //type InputSet data.ND2[float64]
 //type OutputSet data.ND3[float64]

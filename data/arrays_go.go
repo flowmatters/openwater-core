@@ -5,6 +5,7 @@ package data
 import (
 	//	"fmt"
 	"errors"
+	"iter"
 
 	"github.com/flowmatters/openwater-core/util/slice"
 )
@@ -20,6 +21,48 @@ func (nd *nd[T]) Get(loc []int) T {
 
 func (nd *nd[T]) Set(loc []int, val T) {
 	nd.Impl[nd.Index(loc)] = val
+}
+
+func (nd *nd[T]) SetRaw(loc int, val T) {
+	nd.Impl[loc] = val
+}
+
+func (nd *nd[T]) GetRaw(loc int) T {
+	return nd.Impl[loc]
+}
+
+func (nd *nd[T]) Values(from []int, axis int, by int) iter.Seq[T] {
+	if nd.Contiguous() {
+		values := nd.Unroll()
+		return func(yield func(T) bool) {
+			for _, v := range values {
+				if !yield(v) {
+					return
+				}
+			}
+		}
+	}
+	return func(yield func(T) bool) {
+		index := nd.RawIndices(from, axis, by)
+		for i := range index {
+			if !yield(nd.GetRaw(i)) {
+				return
+			}
+		}
+	}
+}
+
+func (nd *nd[T]) RawIndices(from []int, axis int, by int) iter.Seq[int] {
+	return func(yield func(int) bool) {
+		i0 := nd.Index(from)
+		offset := nd.OffsetStep[axis]
+		for i := 0; i < by; i++ {
+			if !yield(i0) {
+				return
+			}
+			i0 += offset
+		}
+	}
 }
 
 func (ndArray *nd[T]) Slice(loc []int, dims []int, step []int) ND[T] {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 
 	"github.com/flowmatters/openwater-core/conv/units"
 	"github.com/flowmatters/openwater-core/util/fn"
@@ -61,7 +62,7 @@ func checkStorageConfiguration(nLVA int, volumes []float64) error {
 		return errors.New("No points in LVA table or release curves!")
 	}
 
-	if volumes.Maximum() <= 0.0 {
+	if slices.Max(volumes) <= 0.0 {
 		return errors.New("No volumes")
 	}
 

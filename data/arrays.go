@@ -18,6 +18,13 @@ type ND[T Number] interface {
 	NewIndex(val int) []int
 
 	Get(loc []int) T
+	// Values(from []int, axis int, by int) iter.Seq[T]
+	// RawIndices(from []int, axis int, by int) iter.Seq[int]
+	// GetRaw(loc int) T
+	// SetRaw(loc int, val T)
+	// Enumerate(from []int, axis int) iter.Seq2[int, T]
+	// Positions(from []int, to []int) iter.Seq[*Pos[T]]
+
 	Set(loc []int, val T)
 	Slice(loc []int, dims []int, step []int) ND[T]
 	Apply(loc []int, dim int, step int, vals []T)
@@ -31,6 +38,13 @@ type ND[T Number] interface {
 	Maximum() T
 	Minimum() T
 }
+
+// type Pos[V Number] struct {
+// 	Loc []int
+// }
+// func (p *Pos[V]) Value() V
+
+// func (p *Pos[V]) Set(v V)
 
 type ND1[T Number] interface {
 	ND[T]

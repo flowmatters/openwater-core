@@ -57,7 +57,7 @@ func lag(inflow []float64,
 	lagSteps := int(timeLag)
 
 	if lagSteps == 0 {
-		outflow.CopyFrom(inflow)
+		copy(outflow, inflow)
 		return lagged
 	}
 
