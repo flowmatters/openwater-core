@@ -14,9 +14,15 @@ import (
 
 
 type LumpedConstituentRouting struct {
-  X data.ND1[float64]
-  pointInput data.ND1[float64]
-  DeltaT data.ND1[float64]
+  
+      X []float64
+    
+  
+      pointInput []float64
+    
+  
+      DeltaT []float64
+    
   
 
   
@@ -32,20 +38,23 @@ func (m *LumpedConstituentRouting) ApplyParameters(parameters data.ND2[float64])
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.X = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.X = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.pointInput = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.pointInput = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -172,21 +181,21 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3[float64], states data.ND2
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      x := m.X.Get1(i%m.X.Len1())
-      pointinput := m.pointInput.Get1(i%m.pointInput.Len1())
-      deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
+      x := m.X[i%len(m.X)]
+      pointinput := m.pointInput[i%len(m.pointInput)]
+      deltat := m.DeltaT[i%len(m.DeltaT)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      storedmass := initialStates.Get1(0)
+      storedmass := initialStates[0]
       
       
 
@@ -196,16 +205,16 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3[float64], states data.ND2
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{inflowLoad kg.s^-1}",tmpTS.Shape())
-      inflowload := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      inflowload := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{lateralLoad kg.s^-1}",tmpTS.Shape())
-      lateralload := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      lateralload := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{outflow m^3.s^-1}",tmpTS.Shape())
-      outflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      outflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{storage m^3}",tmpTS.Shape())
-      storage := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      storage := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -213,10 +222,10 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3[float64], states data.ND2
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      pointsourceload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      pointsourceload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -224,7 +233,7 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3[float64], states data.ND2
 
       
       
-      initialStates.Set1(0, storedmass)
+      initialStates[0] = storedmass
       
       
 

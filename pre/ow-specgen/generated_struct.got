@@ -15,7 +15,11 @@ import (
 {{if .Flags.GenerateStruct}}
 type {{.Name}} struct {
   {{range $v := .ParameterSpecs -}}
-  {{$v.Name}} data.ND{{$v.Dimensionality}}[float64]
+    {{if eq $v.Dimensionality 1}}
+      {{$v.Name}} []float64
+    {{else}}
+      {{$v.Name}} data.ND{{$v.Dimensionality}}[float64]
+    {{end}}
   {{end}}
 
   {{range $ix, $d := .Dimensions -}}
@@ -44,8 +48,11 @@ func (m *{{.Name}}) ApplyParameters(parameters data.ND2[float64]) {
    m.max{{$d}},
       {{- end}}
     {{- end}} nSets}
-
-  m.{{$v.Name}} = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND{{$v.Dimensionality}}[float64])
+  {{if eq $v.Dimensionality 1}}
+    m.{{$v.Name}} = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND{{$v.Dimensionality}}[float64]).Unroll()
+  {{else}}
+    m.{{$v.Name}} = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND{{$v.Dimensionality}}[float64])
+  {{end}}
   paramIdx += paramSize
 
   {{end}}
@@ -127,12 +134,12 @@ func (m *{{.Name}}) InitialiseStates(n int) data.ND2[float64] {
 	var result data.ND2[float64] = nil
 
   {{range $i, $v := .Parameters}}
-  {{lower $v.Key}}Len := m.{{$v.Key}}.Shape()[0]
+  {{lower $v.Key}}Len := len(m.{{$v.Key}})
   {{end}}
 
 	for i := 0; i < n; i++ {
     {{range $i, $v := .Parameters}}
-		{{lower $v.Key}} := m.{{$v.Key}}.Get1(i%{{lower $v.Key}}Len)
+		{{lower $v.Key}} := m.{{$v.Key}}[i%{{lower $v.Key}}Len]
     {{end}}
 
 		states := {{.InitFunc}}({{range $i, $v := .Parameters}}{{lower $v.Key}},{{end}})
@@ -222,13 +229,17 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       {{lower $v.Name}}From := []int{ {{range $d := $v.Dimensions}} 0, {{end}} i%{{lower $v.Name}}NSets }
       {{lower $v.Name}}SliceShape := []int{ {{range $d := $v.Dimensions}} {{ lower $d }}, {{end}} }
       // WAS {{lower $v.Name}}SliceShape := []int{ {{range $d := $v.Dimensions}} m.max{{ $d }}, {{end}} }
-      {{lower $v.Name}} := m.{{$v.Name}}.Slice({{lower $v.Name}}From, {{lower $v.Name}}SliceShape, nil).(data.ND{{len $v.Dimensions}}[float64])
+      {{if eq (len $v.Dimensions) 1}}
+        {{lower $v.Name}} := m.{{$v.Name}}.Slice({{lower $v.Name}}From, {{lower $v.Name}}SliceShape, nil).(data.ND{{len $v.Dimensions}}[float64]).Unroll()
+      {{else}}
+        {{lower $v.Name}} := m.{{$v.Name}}.Slice({{lower $v.Name}}From, {{lower $v.Name}}SliceShape, nil).(data.ND{{len $v.Dimensions}}[float64])
+      {{end}}
       {{- else -}}
       {{- if $v.IsDimension -}}
       // Dimension parameter
-      {{lower $v.Name}} := int(m.{{$v.Name}}.Get1(i%m.{{$v.Name}}.Len1()))
+      {{lower $v.Name}} := int(m.{{$v.Name}}[i%len(m.{{$v.Name}})])
       {{- else -}}
-      {{lower $v.Name}} := m.{{$v.Name}}.Get1(i%m.{{$v.Name}}.Len1())
+      {{lower $v.Name}} := m.{{$v.Name}}[i%len(m.{{$v.Name}})]
       {{- end}}
       {{- end}}
       {{end}}
@@ -242,7 +253,7 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
 
       {{if .Flags.GenerateExtractStates}}
       {{range $i, $v := .States}}
-      {{lower $v.Key}} := initialStates.Get1({{$i}})
+      {{lower $v.Key}} := initialStates[{{$i}}]
       {{end}}
       {{else}}
       {{range $i, $v := .States}}{{if $i}},{{end}}{{lower $v.Key}}{{end}} := {{.ExtractStatesFunc}}(initialStates)
@@ -279,7 +290,7 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
 
       {{if .Flags.GenerateExtractStates}}
       {{range $i, $v := .States}}
-      initialStates.Set1({{$i}}, {{lower $v.Key}})
+      initialStates[{{$i}}] = {{lower $v.Key}}
       {{end}}
       {{else}}
       // TODO Retrieve states
@@ -289,7 +300,7 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
   //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, {{len .Outputs}})
       {{if not $oAsP}}
       {{range $i,$v := .Outputs -}}
-      {{lower $v.Key}}Reshaped := {{lower $v.Key}}.MustReshape([]int{1,{{lower $v.Key}}.Len1(),1})
+      {{lower $v.Key}}Reshaped := {{lower $v.Key}}.MustReshape([]int{1,len({{lower $v.Key}}),1})
   //    fmt.Println(result.Outputs.Shape(),{{lower $v.Key}}Reshaped.Shape())
       outputPosSlice[sim.DIMO_OUTPUT] = {{$i}}
       outputs.ApplySlice(outputPosSlice,outputStepSlice,

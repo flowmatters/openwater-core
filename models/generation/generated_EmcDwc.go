@@ -14,8 +14,12 @@ import (
 
 
 type EmcDwc struct {
-  EMC data.ND1[float64]
-  DWC data.ND1[float64]
+  
+      EMC []float64
+    
+  
+      DWC []float64
+    
   
 
   
@@ -31,14 +35,16 @@ func (m *EmcDwc) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.EMC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.EMC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.DWC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.DWC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -159,8 +165,8 @@ func (m *EmcDwc) Run(inputs data.ND3[float64], states data.ND2[float64], outputs
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      emc := m.EMC.Get1(i%m.EMC.Len1())
-      dwc := m.DWC.Get1(i%m.DWC.Len1())
+      emc := m.EMC[i%len(m.EMC)]
+      dwc := m.DWC[i%len(m.DWC)]
       
 
       // fmt.Println("i",i)

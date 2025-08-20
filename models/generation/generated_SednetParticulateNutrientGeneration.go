@@ -14,15 +14,33 @@ import (
 
 
 type SednetParticulateNutrientGeneration struct {
-  area data.ND1[float64]
-  nutSurfSoilConc data.ND1[float64]
-  hillDeliveryRatio data.ND1[float64]
-  Nutrient_Enrichment_Ratio data.ND1[float64]
-  nutSubSoilConc data.ND1[float64]
-  Nutrient_Enrichment_Ratio_Gully data.ND1[float64]
-  gullyDeliveryRatio data.ND1[float64]
-  nutrientDWC data.ND1[float64]
-  Do_P_CREAMS_Enrichment data.ND1[float64]
+  
+      area []float64
+    
+  
+      nutSurfSoilConc []float64
+    
+  
+      hillDeliveryRatio []float64
+    
+  
+      Nutrient_Enrichment_Ratio []float64
+    
+  
+      nutSubSoilConc []float64
+    
+  
+      Nutrient_Enrichment_Ratio_Gully []float64
+    
+  
+      gullyDeliveryRatio []float64
+    
+  
+      nutrientDWC []float64
+    
+  
+      Do_P_CREAMS_Enrichment []float64
+    
   
 
   
@@ -38,56 +56,65 @@ func (m *SednetParticulateNutrientGeneration) ApplyParameters(parameters data.ND
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.area = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.area = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.nutSurfSoilConc = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.nutSurfSoilConc = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.hillDeliveryRatio = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.hillDeliveryRatio = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.Nutrient_Enrichment_Ratio = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.Nutrient_Enrichment_Ratio = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.nutSubSoilConc = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.nutSubSoilConc = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.Nutrient_Enrichment_Ratio_Gully = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.Nutrient_Enrichment_Ratio_Gully = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.gullyDeliveryRatio = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.gullyDeliveryRatio = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.nutrientDWC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.nutrientDWC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.Do_P_CREAMS_Enrichment = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.Do_P_CREAMS_Enrichment = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -236,15 +263,15 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3[float64], stat
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      area := m.area.Get1(i%m.area.Len1())
-      nutsurfsoilconc := m.nutSurfSoilConc.Get1(i%m.nutSurfSoilConc.Len1())
-      hilldeliveryratio := m.hillDeliveryRatio.Get1(i%m.hillDeliveryRatio.Len1())
-      nutrient_enrichment_ratio := m.Nutrient_Enrichment_Ratio.Get1(i%m.Nutrient_Enrichment_Ratio.Len1())
-      nutsubsoilconc := m.nutSubSoilConc.Get1(i%m.nutSubSoilConc.Len1())
-      nutrient_enrichment_ratio_gully := m.Nutrient_Enrichment_Ratio_Gully.Get1(i%m.Nutrient_Enrichment_Ratio_Gully.Len1())
-      gullydeliveryratio := m.gullyDeliveryRatio.Get1(i%m.gullyDeliveryRatio.Len1())
-      nutrientdwc := m.nutrientDWC.Get1(i%m.nutrientDWC.Len1())
-      do_p_creams_enrichment := m.Do_P_CREAMS_Enrichment.Get1(i%m.Do_P_CREAMS_Enrichment.Len1())
+      area := m.area[i%len(m.area)]
+      nutsurfsoilconc := m.nutSurfSoilConc[i%len(m.nutSurfSoilConc)]
+      hilldeliveryratio := m.hillDeliveryRatio[i%len(m.hillDeliveryRatio)]
+      nutrient_enrichment_ratio := m.Nutrient_Enrichment_Ratio[i%len(m.Nutrient_Enrichment_Ratio)]
+      nutsubsoilconc := m.nutSubSoilConc[i%len(m.nutSubSoilConc)]
+      nutrient_enrichment_ratio_gully := m.Nutrient_Enrichment_Ratio_Gully[i%len(m.Nutrient_Enrichment_Ratio_Gully)]
+      gullydeliveryratio := m.gullyDeliveryRatio[i%len(m.gullyDeliveryRatio)]
+      nutrientdwc := m.nutrientDWC[i%len(m.nutrientDWC)]
+      do_p_creams_enrichment := m.Do_P_CREAMS_Enrichment[i%len(m.Do_P_CREAMS_Enrichment)]
       
 
       // fmt.Println("i",i)

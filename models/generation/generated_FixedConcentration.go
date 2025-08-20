@@ -14,7 +14,9 @@ import (
 
 
 type FixedConcentration struct {
-  concentration data.ND1[float64]
+  
+      concentration []float64
+    
   
 
   
@@ -30,8 +32,9 @@ func (m *FixedConcentration) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.concentration = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.concentration = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -148,7 +151,7 @@ func (m *FixedConcentration) Run(inputs data.ND3[float64], states data.ND2[float
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      concentration := m.concentration.Get1(i%m.concentration.Len1())
+      concentration := m.concentration[i%len(m.concentration)]
       
 
       // fmt.Println("i",i)

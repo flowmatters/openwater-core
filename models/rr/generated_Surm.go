@@ -14,15 +14,33 @@ import (
 
 
 type Surm struct {
-  bfac data.ND1[float64]
-  coeff data.ND1[float64]
-  dseep data.ND1[float64]
-  fcFrac data.ND1[float64]
-  fimp data.ND1[float64]
-  rfac data.ND1[float64]
-  smax data.ND1[float64]
-  sq data.ND1[float64]
-  thres data.ND1[float64]
+  
+      bfac []float64
+    
+  
+      coeff []float64
+    
+  
+      dseep []float64
+    
+  
+      fcFrac []float64
+    
+  
+      fimp []float64
+    
+  
+      rfac []float64
+    
+  
+      smax []float64
+    
+  
+      sq []float64
+    
+  
+      thres []float64
+    
   
 
   
@@ -38,56 +56,65 @@ func (m *Surm) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.bfac = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.bfac = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.coeff = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.coeff = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.dseep = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.dseep = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.fcFrac = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.fcFrac = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.fimp = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.fimp = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.rfac = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.rfac = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.smax = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.smax = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.sq = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.sq = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.thres = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.thres = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -242,31 +269,31 @@ func (m *Surm) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      bfac := m.bfac.Get1(i%m.bfac.Len1())
-      coeff := m.coeff.Get1(i%m.coeff.Len1())
-      dseep := m.dseep.Get1(i%m.dseep.Len1())
-      fcfrac := m.fcFrac.Get1(i%m.fcFrac.Len1())
-      fimp := m.fimp.Get1(i%m.fimp.Len1())
-      rfac := m.rfac.Get1(i%m.rfac.Len1())
-      smax := m.smax.Get1(i%m.smax.Len1())
-      sq := m.sq.Get1(i%m.sq.Len1())
-      thres := m.thres.Get1(i%m.thres.Len1())
+      bfac := m.bfac[i%len(m.bfac)]
+      coeff := m.coeff[i%len(m.coeff)]
+      dseep := m.dseep[i%len(m.dseep)]
+      fcfrac := m.fcFrac[i%len(m.fcFrac)]
+      fimp := m.fimp[i%len(m.fimp)]
+      rfac := m.rfac[i%len(m.rfac)]
+      smax := m.smax[i%len(m.smax)]
+      sq := m.sq[i%len(m.sq)]
+      thres := m.thres[i%len(m.thres)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      soilmoisturestore := initialStates.Get1(0)
+      soilmoisturestore := initialStates[0]
       
-      groundwater := initialStates.Get1(1)
+      groundwater := initialStates[1]
       
-      totalstore := initialStates.Get1(2)
+      totalstore := initialStates[2]
       
       
 
@@ -276,10 +303,10 @@ func (m *Surm) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{rainfall mm}",tmpTS.Shape())
-      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{pet mm}",tmpTS.Shape())
-      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -287,16 +314,16 @@ func (m *Surm) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      store := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      store := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -304,11 +331,11 @@ func (m *Surm) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
 
       
       
-      initialStates.Set1(0, soilmoisturestore)
+      initialStates[0] = soilmoisturestore
       
-      initialStates.Set1(1, groundwater)
+      initialStates[1] = groundwater
       
-      initialStates.Set1(2, totalstore)
+      initialStates[2] = totalstore
       
       
 

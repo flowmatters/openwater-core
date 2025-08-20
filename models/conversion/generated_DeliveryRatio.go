@@ -14,7 +14,9 @@ import (
 
 
 type DeliveryRatio struct {
-  fraction data.ND1[float64]
+  
+      fraction []float64
+    
   
 
   
@@ -30,8 +32,9 @@ func (m *DeliveryRatio) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.fraction = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.fraction = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -148,7 +151,7 @@ func (m *DeliveryRatio) Run(inputs data.ND3[float64], states data.ND2[float64], 
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      fraction := m.fraction.Get1(i%m.fraction.Len1())
+      fraction := m.fraction[i%len(m.fraction)]
       
 
       // fmt.Println("i",i)
@@ -166,7 +169,7 @@ func (m *DeliveryRatio) Run(inputs data.ND3[float64], states data.ND2[float64], 
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{input <nil>}",tmpTS.Shape())
-      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -174,7 +177,7 @@ func (m *DeliveryRatio) Run(inputs data.ND3[float64], states data.ND2[float64], 
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

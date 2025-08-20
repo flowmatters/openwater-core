@@ -149,10 +149,10 @@ func (m *VariablePartition) Run(inputs data.ND3[float64], states data.ND2[float6
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{input <nil>}",tmpTS.Shape())
-      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{fraction <nil>}",tmpTS.Shape())
-      fraction := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      fraction := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -160,10 +160,10 @@ func (m *VariablePartition) Run(inputs data.ND3[float64], states data.ND2[float6
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      output1 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      output1 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      output2 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      output2 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

@@ -14,9 +14,15 @@ import (
 
 
 type DateGenerator struct {
-  startDate data.ND1[float64]
-  startMonth data.ND1[float64]
-  startYear data.ND1[float64]
+  
+      startDate []float64
+    
+  
+      startMonth []float64
+    
+  
+      startYear []float64
+    
   
 
   
@@ -32,20 +38,23 @@ func (m *DateGenerator) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.startDate = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.startDate = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.startMonth = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.startMonth = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.startYear = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.startYear = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -170,9 +179,9 @@ func (m *DateGenerator) Run(inputs data.ND3[float64], states data.ND2[float64], 
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      startdate := m.startDate.Get1(i%m.startDate.Len1())
-      startmonth := m.startMonth.Get1(i%m.startMonth.Len1())
-      startyear := m.startYear.Get1(i%m.startYear.Len1())
+      startdate := m.startDate[i%len(m.startDate)]
+      startmonth := m.startMonth[i%len(m.startMonth)]
+      startyear := m.startYear[i%len(m.startYear)]
       
 
       // fmt.Println("i",i)
@@ -190,7 +199,7 @@ func (m *DateGenerator) Run(inputs data.ND3[float64], states data.ND2[float64], 
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{tick <nil>}",tmpTS.Shape())
-      tick := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      tick := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -198,16 +207,16 @@ func (m *DateGenerator) Run(inputs data.ND3[float64], states data.ND2[float64], 
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      date := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      date := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      month := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      month := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      year := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      year := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      dayofyear := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      dayofyear := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

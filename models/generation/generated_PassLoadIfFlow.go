@@ -14,7 +14,9 @@ import (
 
 
 type PassLoadIfFlow struct {
-  scalingFactor data.ND1[float64]
+  
+      scalingFactor []float64
+    
   
 
   
@@ -30,8 +32,9 @@ func (m *PassLoadIfFlow) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.scalingFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.scalingFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -148,7 +151,7 @@ func (m *PassLoadIfFlow) Run(inputs data.ND3[float64], states data.ND2[float64],
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      scalingfactor := m.scalingFactor.Get1(i%m.scalingFactor.Len1())
+      scalingfactor := m.scalingFactor[i%len(m.scalingFactor)]
       
 
       // fmt.Println("i",i)

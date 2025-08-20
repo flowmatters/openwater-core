@@ -149,10 +149,10 @@ func (m *Gate) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{trigger <nil>}",tmpTS.Shape())
-      trigger := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      trigger := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{incoming <nil>}",tmpTS.Shape())
-      incoming := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      incoming := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -160,7 +160,7 @@ func (m *Gate) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outgoing := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      outgoing := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

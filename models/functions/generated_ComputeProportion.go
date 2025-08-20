@@ -14,7 +14,9 @@ import (
 
 
 type ComputeProportion struct {
-  resultOnZeroDenominator data.ND1[float64]
+  
+      resultOnZeroDenominator []float64
+    
   
 
   
@@ -30,8 +32,9 @@ func (m *ComputeProportion) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.resultOnZeroDenominator = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.resultOnZeroDenominator = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -148,7 +151,7 @@ func (m *ComputeProportion) Run(inputs data.ND3[float64], states data.ND2[float6
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      resultonzerodenominator := m.resultOnZeroDenominator.Get1(i%m.resultOnZeroDenominator.Len1())
+      resultonzerodenominator := m.resultOnZeroDenominator[i%len(m.resultOnZeroDenominator)]
       
 
       // fmt.Println("i",i)
@@ -166,10 +169,10 @@ func (m *ComputeProportion) Run(inputs data.ND3[float64], states data.ND2[float6
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{numerator <nil>}",tmpTS.Shape())
-      numerator := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      numerator := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{denominator <nil>}",tmpTS.Shape())
-      denominator := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      denominator := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -177,7 +180,7 @@ func (m *ComputeProportion) Run(inputs data.ND3[float64], states data.ND2[float6
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      proportion := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      proportion := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

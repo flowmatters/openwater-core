@@ -14,10 +14,18 @@ import (
 
 
 type GR4J struct {
-  X1 data.ND1[float64]
-  X2 data.ND1[float64]
-  X3 data.ND1[float64]
-  X4 data.ND1[float64]
+  
+      X1 []float64
+    
+  
+      X2 []float64
+    
+  
+      X3 []float64
+    
+  
+      X4 []float64
+    
   
 
   
@@ -33,26 +41,30 @@ func (m *GR4J) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.X1 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.X1 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.X2 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.X2 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.X3 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.X3 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.X4 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.X4 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -118,24 +130,24 @@ func (m *GR4J) InitialiseStates(n int) data.ND2[float64] {
 	var result data.ND2[float64] = nil
 
   
-  x1Len := m.X1.Shape()[0]
+  x1Len := len(m.X1)
   
-  x2Len := m.X2.Shape()[0]
+  x2Len := len(m.X2)
   
-  x3Len := m.X3.Shape()[0]
+  x3Len := len(m.X3)
   
-  x4Len := m.X4.Shape()[0]
+  x4Len := len(m.X4)
   
 
 	for i := 0; i < n; i++ {
     
-		x1 := m.X1.Get1(i%x1Len)
+		x1 := m.X1[i%x1Len]
     
-		x2 := m.X2.Get1(i%x2Len)
+		x2 := m.X2[i%x2Len]
     
-		x3 := m.X3.Get1(i%x3Len)
+		x3 := m.X3[i%x3Len]
     
-		x4 := m.X4.Get1(i%x4Len)
+		x4 := m.X4[i%x4Len]
     
 
 		states := initGR4J(x1,x2,x3,x4,)
@@ -199,17 +211,17 @@ func (m *GR4J) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      x1 := m.X1.Get1(i%m.X1.Len1())
-      x2 := m.X2.Get1(i%m.X2.Len1())
-      x3 := m.X3.Get1(i%m.X3.Len1())
-      x4 := m.X4.Get1(i%m.X4.Len1())
+      x1 := m.X1[i%len(m.X1)]
+      x2 := m.X2[i%len(m.X2)]
+      x3 := m.X3[i%len(m.X3)]
+      x4 := m.X4[i%len(m.X4)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
@@ -222,10 +234,10 @@ func (m *GR4J) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{rainfall mm}",tmpTS.Shape())
-      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{pet mm}",tmpTS.Shape())
-      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -233,7 +245,7 @@ func (m *GR4J) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

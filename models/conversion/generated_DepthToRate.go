@@ -14,8 +14,12 @@ import (
 
 
 type DepthToRate struct {
-  DeltaT data.ND1[float64]
-  area data.ND1[float64]
+  
+      DeltaT []float64
+    
+  
+      area []float64
+    
   
 
   
@@ -31,14 +35,16 @@ func (m *DepthToRate) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.area = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.area = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -159,8 +165,8 @@ func (m *DepthToRate) Run(inputs data.ND3[float64], states data.ND2[float64], ou
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
-      area := m.area.Get1(i%m.area.Len1())
+      deltat := m.DeltaT[i%len(m.DeltaT)]
+      area := m.area[i%len(m.area)]
       
 
       // fmt.Println("i",i)
@@ -178,7 +184,7 @@ func (m *DepthToRate) Run(inputs data.ND3[float64], states data.ND2[float64], ou
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{input mm}",tmpTS.Shape())
-      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -186,7 +192,7 @@ func (m *DepthToRate) Run(inputs data.ND3[float64], states data.ND2[float64], ou
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

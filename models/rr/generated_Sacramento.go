@@ -14,28 +14,72 @@ import (
 
 
 type Sacramento struct {
-  lzpk data.ND1[float64]
-  lzsk data.ND1[float64]
-  uzk data.ND1[float64]
-  uztwm data.ND1[float64]
-  uzfwm data.ND1[float64]
-  lztwm data.ND1[float64]
-  lzfsm data.ND1[float64]
-  lzfpm data.ND1[float64]
-  pfree data.ND1[float64]
-  rexp data.ND1[float64]
-  zperc data.ND1[float64]
-  side data.ND1[float64]
-  ssout data.ND1[float64]
-  pctim data.ND1[float64]
-  adimp data.ND1[float64]
-  sarva data.ND1[float64]
-  rserv data.ND1[float64]
-  uh1 data.ND1[float64]
-  uh2 data.ND1[float64]
-  uh3 data.ND1[float64]
-  uh4 data.ND1[float64]
-  uh5 data.ND1[float64]
+  
+      lzpk []float64
+    
+  
+      lzsk []float64
+    
+  
+      uzk []float64
+    
+  
+      uztwm []float64
+    
+  
+      uzfwm []float64
+    
+  
+      lztwm []float64
+    
+  
+      lzfsm []float64
+    
+  
+      lzfpm []float64
+    
+  
+      pfree []float64
+    
+  
+      rexp []float64
+    
+  
+      zperc []float64
+    
+  
+      side []float64
+    
+  
+      ssout []float64
+    
+  
+      pctim []float64
+    
+  
+      adimp []float64
+    
+  
+      sarva []float64
+    
+  
+      rserv []float64
+    
+  
+      uh1 []float64
+    
+  
+      uh2 []float64
+    
+  
+      uh3 []float64
+    
+  
+      uh4 []float64
+    
+  
+      uh5 []float64
+    
   
 
   
@@ -51,134 +95,156 @@ func (m *Sacramento) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.lzpk = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.lzpk = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.lzsk = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.lzsk = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.uzk = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.uzk = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.uztwm = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.uztwm = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.uzfwm = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.uzfwm = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.lztwm = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.lztwm = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.lzfsm = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.lzfsm = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.lzfpm = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.lzfpm = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.pfree = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.pfree = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.rexp = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.rexp = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.zperc = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.zperc = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.side = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.side = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.ssout = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.ssout = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.pctim = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.pctim = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.adimp = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.adimp = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.sarva = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.sarva = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.rserv = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.rserv = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.uh1 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.uh1 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.uh2 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.uh2 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.uh3 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.uh3 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.uh4 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.uh4 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.uh5 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.uh5 = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -391,50 +457,50 @@ func (m *Sacramento) Run(inputs data.ND3[float64], states data.ND2[float64], out
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      lzpk := m.lzpk.Get1(i%m.lzpk.Len1())
-      lzsk := m.lzsk.Get1(i%m.lzsk.Len1())
-      uzk := m.uzk.Get1(i%m.uzk.Len1())
-      uztwm := m.uztwm.Get1(i%m.uztwm.Len1())
-      uzfwm := m.uzfwm.Get1(i%m.uzfwm.Len1())
-      lztwm := m.lztwm.Get1(i%m.lztwm.Len1())
-      lzfsm := m.lzfsm.Get1(i%m.lzfsm.Len1())
-      lzfpm := m.lzfpm.Get1(i%m.lzfpm.Len1())
-      pfree := m.pfree.Get1(i%m.pfree.Len1())
-      rexp := m.rexp.Get1(i%m.rexp.Len1())
-      zperc := m.zperc.Get1(i%m.zperc.Len1())
-      side := m.side.Get1(i%m.side.Len1())
-      ssout := m.ssout.Get1(i%m.ssout.Len1())
-      pctim := m.pctim.Get1(i%m.pctim.Len1())
-      adimp := m.adimp.Get1(i%m.adimp.Len1())
-      sarva := m.sarva.Get1(i%m.sarva.Len1())
-      rserv := m.rserv.Get1(i%m.rserv.Len1())
-      uh1 := m.uh1.Get1(i%m.uh1.Len1())
-      uh2 := m.uh2.Get1(i%m.uh2.Len1())
-      uh3 := m.uh3.Get1(i%m.uh3.Len1())
-      uh4 := m.uh4.Get1(i%m.uh4.Len1())
-      uh5 := m.uh5.Get1(i%m.uh5.Len1())
+      lzpk := m.lzpk[i%len(m.lzpk)]
+      lzsk := m.lzsk[i%len(m.lzsk)]
+      uzk := m.uzk[i%len(m.uzk)]
+      uztwm := m.uztwm[i%len(m.uztwm)]
+      uzfwm := m.uzfwm[i%len(m.uzfwm)]
+      lztwm := m.lztwm[i%len(m.lztwm)]
+      lzfsm := m.lzfsm[i%len(m.lzfsm)]
+      lzfpm := m.lzfpm[i%len(m.lzfpm)]
+      pfree := m.pfree[i%len(m.pfree)]
+      rexp := m.rexp[i%len(m.rexp)]
+      zperc := m.zperc[i%len(m.zperc)]
+      side := m.side[i%len(m.side)]
+      ssout := m.ssout[i%len(m.ssout)]
+      pctim := m.pctim[i%len(m.pctim)]
+      adimp := m.adimp[i%len(m.adimp)]
+      sarva := m.sarva[i%len(m.sarva)]
+      rserv := m.rserv[i%len(m.rserv)]
+      uh1 := m.uh1[i%len(m.uh1)]
+      uh2 := m.uh2[i%len(m.uh2)]
+      uh3 := m.uh3[i%len(m.uh3)]
+      uh4 := m.uh4[i%len(m.uh4)]
+      uh5 := m.uh5[i%len(m.uh5)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      uprtensionwater := initialStates.Get1(0)
+      uprtensionwater := initialStates[0]
       
-      uprfreewater := initialStates.Get1(1)
+      uprfreewater := initialStates[1]
       
-      lwrtensionwater := initialStates.Get1(2)
+      lwrtensionwater := initialStates[2]
       
-      lwrprimaryfreewater := initialStates.Get1(3)
+      lwrprimaryfreewater := initialStates[3]
       
-      lwrsupplfreewater := initialStates.Get1(4)
+      lwrsupplfreewater := initialStates[4]
       
-      additionalimperviousstore := initialStates.Get1(5)
+      additionalimperviousstore := initialStates[5]
       
       
 
@@ -444,10 +510,10 @@ func (m *Sacramento) Run(inputs data.ND3[float64], states data.ND2[float64], out
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{rainfall mm}",tmpTS.Shape())
-      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{pet mm}",tmpTS.Shape())
-      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -455,19 +521,19 @@ func (m *Sacramento) Run(inputs data.ND3[float64], states data.ND2[float64], out
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      actualet := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      actualet := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      imperviousrunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      imperviousrunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      surfacerunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      surfacerunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 4
-      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -475,17 +541,17 @@ func (m *Sacramento) Run(inputs data.ND3[float64], states data.ND2[float64], out
 
       
       
-      initialStates.Set1(0, uprtensionwater)
+      initialStates[0] = uprtensionwater
       
-      initialStates.Set1(1, uprfreewater)
+      initialStates[1] = uprfreewater
       
-      initialStates.Set1(2, lwrtensionwater)
+      initialStates[2] = lwrtensionwater
       
-      initialStates.Set1(3, lwrprimaryfreewater)
+      initialStates[3] = lwrprimaryfreewater
       
-      initialStates.Set1(4, lwrsupplfreewater)
+      initialStates[4] = lwrsupplfreewater
       
-      initialStates.Set1(5, additionalimperviousstore)
+      initialStates[5] = additionalimperviousstore
       
       
 

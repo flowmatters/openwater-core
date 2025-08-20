@@ -14,7 +14,9 @@ import (
 
 
 type ApplyScalingFactor struct {
-  scale data.ND1[float64]
+  
+      scale []float64
+    
   
 
   
@@ -30,8 +32,9 @@ func (m *ApplyScalingFactor) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.scale = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.scale = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -148,7 +151,7 @@ func (m *ApplyScalingFactor) Run(inputs data.ND3[float64], states data.ND2[float
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      scale := m.scale.Get1(i%m.scale.Len1())
+      scale := m.scale[i%len(m.scale)]
       
 
       // fmt.Println("i",i)
@@ -166,7 +169,7 @@ func (m *ApplyScalingFactor) Run(inputs data.ND3[float64], states data.ND2[float
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{input <nil>}",tmpTS.Shape())
-      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -174,7 +177,7 @@ func (m *ApplyScalingFactor) Run(inputs data.ND3[float64], states data.ND2[float
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

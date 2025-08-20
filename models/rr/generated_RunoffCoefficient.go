@@ -14,7 +14,9 @@ import (
 
 
 type RunoffCoefficient struct {
-  coeff data.ND1[float64]
+  
+      coeff []float64
+    
   
 
   
@@ -30,8 +32,9 @@ func (m *RunoffCoefficient) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.coeff = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.coeff = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -148,7 +151,7 @@ func (m *RunoffCoefficient) Run(inputs data.ND3[float64], states data.ND2[float6
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      coeff := m.coeff.Get1(i%m.coeff.Len1())
+      coeff := m.coeff[i%len(m.coeff)]
       
 
       // fmt.Println("i",i)
@@ -166,7 +169,7 @@ func (m *RunoffCoefficient) Run(inputs data.ND3[float64], states data.ND2[float6
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{rainfall mm}",tmpTS.Shape())
-      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -174,7 +177,7 @@ func (m *RunoffCoefficient) Run(inputs data.ND3[float64], states data.ND2[float6
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

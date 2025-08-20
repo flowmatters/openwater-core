@@ -14,19 +14,45 @@ import (
 
 
 type InstreamFineSediment struct {
-  bankFullFlow data.ND1[float64]
-  fineSedSettVelocityFlood data.ND1[float64]
-  floodPlainArea data.ND1[float64]
-  linkWidth data.ND1[float64]
-  linkLength data.ND1[float64]
-  linkSlope data.ND1[float64]
-  bankHeight data.ND1[float64]
-  propBankHeightForFineDep data.ND1[float64]
-  sedBulkDensity data.ND1[float64]
-  manningsN data.ND1[float64]
-  fineSedSettVelocity data.ND1[float64]
-  fineSedReMobVelocity data.ND1[float64]
-  durationInSeconds data.ND1[float64]
+  
+      bankFullFlow []float64
+    
+  
+      fineSedSettVelocityFlood []float64
+    
+  
+      floodPlainArea []float64
+    
+  
+      linkWidth []float64
+    
+  
+      linkLength []float64
+    
+  
+      linkSlope []float64
+    
+  
+      bankHeight []float64
+    
+  
+      propBankHeightForFineDep []float64
+    
+  
+      sedBulkDensity []float64
+    
+  
+      manningsN []float64
+    
+  
+      fineSedSettVelocity []float64
+    
+  
+      fineSedReMobVelocity []float64
+    
+  
+      durationInSeconds []float64
+    
   
 
   
@@ -42,80 +68,93 @@ func (m *InstreamFineSediment) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.bankFullFlow = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.bankFullFlow = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.fineSedSettVelocityFlood = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.fineSedSettVelocityFlood = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.floodPlainArea = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.floodPlainArea = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.linkWidth = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.linkWidth = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.linkLength = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.linkLength = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.linkSlope = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.linkSlope = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.bankHeight = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.bankHeight = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.propBankHeightForFineDep = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.propBankHeightForFineDep = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.sedBulkDensity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.sedBulkDensity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.manningsN = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.manningsN = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.fineSedSettVelocity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.fineSedSettVelocity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.fineSedReMobVelocity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.fineSedReMobVelocity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -284,33 +323,33 @@ func (m *InstreamFineSediment) Run(inputs data.ND3[float64], states data.ND2[flo
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      bankfullflow := m.bankFullFlow.Get1(i%m.bankFullFlow.Len1())
-      finesedsettvelocityflood := m.fineSedSettVelocityFlood.Get1(i%m.fineSedSettVelocityFlood.Len1())
-      floodplainarea := m.floodPlainArea.Get1(i%m.floodPlainArea.Len1())
-      linkwidth := m.linkWidth.Get1(i%m.linkWidth.Len1())
-      linklength := m.linkLength.Get1(i%m.linkLength.Len1())
-      linkslope := m.linkSlope.Get1(i%m.linkSlope.Len1())
-      bankheight := m.bankHeight.Get1(i%m.bankHeight.Len1())
-      propbankheightforfinedep := m.propBankHeightForFineDep.Get1(i%m.propBankHeightForFineDep.Len1())
-      sedbulkdensity := m.sedBulkDensity.Get1(i%m.sedBulkDensity.Len1())
-      manningsn := m.manningsN.Get1(i%m.manningsN.Len1())
-      finesedsettvelocity := m.fineSedSettVelocity.Get1(i%m.fineSedSettVelocity.Len1())
-      finesedremobvelocity := m.fineSedReMobVelocity.Get1(i%m.fineSedReMobVelocity.Len1())
-      durationinseconds := m.durationInSeconds.Get1(i%m.durationInSeconds.Len1())
+      bankfullflow := m.bankFullFlow[i%len(m.bankFullFlow)]
+      finesedsettvelocityflood := m.fineSedSettVelocityFlood[i%len(m.fineSedSettVelocityFlood)]
+      floodplainarea := m.floodPlainArea[i%len(m.floodPlainArea)]
+      linkwidth := m.linkWidth[i%len(m.linkWidth)]
+      linklength := m.linkLength[i%len(m.linkLength)]
+      linkslope := m.linkSlope[i%len(m.linkSlope)]
+      bankheight := m.bankHeight[i%len(m.bankHeight)]
+      propbankheightforfinedep := m.propBankHeightForFineDep[i%len(m.propBankHeightForFineDep)]
+      sedbulkdensity := m.sedBulkDensity[i%len(m.sedBulkDensity)]
+      manningsn := m.manningsN[i%len(m.manningsN)]
+      finesedsettvelocity := m.fineSedSettVelocity[i%len(m.fineSedSettVelocity)]
+      finesedremobvelocity := m.fineSedReMobVelocity[i%len(m.fineSedReMobVelocity)]
+      durationinseconds := m.durationInSeconds[i%len(m.durationInSeconds)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      channelstorefine := initialStates.Get1(0)
+      channelstorefine := initialStates[0]
       
-      totalstoredmass := initialStates.Get1(1)
+      totalstoredmass := initialStates[1]
       
       
 
@@ -320,19 +359,19 @@ func (m *InstreamFineSediment) Run(inputs data.ND3[float64], states data.ND2[flo
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{upstreamMass <nil>}",tmpTS.Shape())
-      upstreammass := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      upstreammass := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{lateralMass <nil>}",tmpTS.Shape())
-      lateralmass := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      lateralmass := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{reachLocalMass <nil>}",tmpTS.Shape())
-      reachlocalmass := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      reachlocalmass := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{reachVolume <nil>}",tmpTS.Shape())
-      reachvolume := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      reachvolume := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{outflow <nil>}",tmpTS.Shape())
-      outflow := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      outflow := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -340,19 +379,19 @@ func (m *InstreamFineSediment) Run(inputs data.ND3[float64], states data.ND2[flo
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      loadtochanneldeposition := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loadtochanneldeposition := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      floodplaindepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      floodplaindepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 4
-      channeldepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      channeldepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -360,9 +399,9 @@ func (m *InstreamFineSediment) Run(inputs data.ND3[float64], states data.ND2[flo
 
       
       
-      initialStates.Set1(0, channelstorefine)
+      initialStates[0] = channelstorefine
       
-      initialStates.Set1(1, totalstoredmass)
+      initialStates[1] = totalstoredmass
       
       
 

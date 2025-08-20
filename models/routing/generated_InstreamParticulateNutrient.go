@@ -14,9 +14,15 @@ import (
 
 
 type InstreamParticulateNutrient struct {
-  particulateNutrientConcentration data.ND1[float64]
-  soilPercentFine data.ND1[float64]
-  durationInSeconds data.ND1[float64]
+  
+      particulateNutrientConcentration []float64
+    
+  
+      soilPercentFine []float64
+    
+  
+      durationInSeconds []float64
+    
   
 
   
@@ -32,20 +38,23 @@ func (m *InstreamParticulateNutrient) ApplyParameters(parameters data.ND2[float6
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.particulateNutrientConcentration = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.particulateNutrientConcentration = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.soilPercentFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.soilPercentFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -174,23 +183,23 @@ func (m *InstreamParticulateNutrient) Run(inputs data.ND3[float64], states data.
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      particulatenutrientconcentration := m.particulateNutrientConcentration.Get1(i%m.particulateNutrientConcentration.Len1())
-      soilpercentfine := m.soilPercentFine.Get1(i%m.soilPercentFine.Len1())
-      durationinseconds := m.durationInSeconds.Get1(i%m.durationInSeconds.Len1())
+      particulatenutrientconcentration := m.particulateNutrientConcentration[i%len(m.particulateNutrientConcentration)]
+      soilpercentfine := m.soilPercentFine[i%len(m.soilPercentFine)]
+      durationinseconds := m.durationInSeconds[i%len(m.durationInSeconds)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      instreamstoredmass := initialStates.Get1(0)
+      instreamstoredmass := initialStates[0]
       
-      channelstoredmass := initialStates.Get1(1)
+      channelstoredmass := initialStates[1]
       
       
 
@@ -200,28 +209,28 @@ func (m *InstreamParticulateNutrient) Run(inputs data.ND3[float64], states data.
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{incomingMassUpstream <nil>}",tmpTS.Shape())
-      incomingmassupstream := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      incomingmassupstream := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{incomingMassLateral <nil>}",tmpTS.Shape())
-      incomingmasslateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      incomingmasslateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{reachVolume <nil>}",tmpTS.Shape())
-      reachvolume := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      reachvolume := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{outflow <nil>}",tmpTS.Shape())
-      outflow := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      outflow := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{streambankErosion <nil>}",tmpTS.Shape())
-      streambankerosion := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      streambankerosion := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{lateralSediment <nil>}",tmpTS.Shape())
-      lateralsediment := cellInputs.Slice([]int{ 5,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      lateralsediment := cellInputs.Slice([]int{ 5,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{floodplainDepositionFraction <nil>}",tmpTS.Shape())
-      floodplaindepositionfraction := cellInputs.Slice([]int{ 6,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      floodplaindepositionfraction := cellInputs.Slice([]int{ 6,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{channelDepositionFraction <nil>}",tmpTS.Shape())
-      channeldepositionfraction := cellInputs.Slice([]int{ 7,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      channeldepositionfraction := cellInputs.Slice([]int{ 7,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -229,16 +238,16 @@ func (m *InstreamParticulateNutrient) Run(inputs data.ND3[float64], states data.
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      loaddeposited := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loaddeposited := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      loadfromstreambank := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loadfromstreambank := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -246,9 +255,9 @@ func (m *InstreamParticulateNutrient) Run(inputs data.ND3[float64], states data.
 
       
       
-      initialStates.Set1(0, instreamstoredmass)
+      initialStates[0] = instreamstoredmass
       
-      initialStates.Set1(1, channelstoredmass)
+      initialStates[1] = channelstoredmass
       
       
 

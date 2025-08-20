@@ -14,9 +14,15 @@ import (
 
 
 type RatingCurvePartition struct {
-  nPts data.ND1[float64]
-  inputAmount data.ND2[float64]
-  proportion data.ND2[float64]
+  
+      nPts []float64
+    
+  
+      inputAmount data.ND2[float64]
+    
+  
+      proportion data.ND2[float64]
+    
   
 
   maxnPts int
@@ -33,20 +39,23 @@ func (m *RatingCurvePartition) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.nPts = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.nPts = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1* m.maxnPts
   newShape = []int{m.maxnPts, nSets}
-
-  m.inputAmount = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
+    m.inputAmount = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
   paramIdx += paramSize
 
   paramSize = 1* m.maxnPts
   newShape = []int{m.maxnPts, nSets}
-
-  m.proportion = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
+    m.proportion = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
   paramIdx += paramSize
 
   
@@ -199,19 +208,23 @@ func (m *RatingCurvePartition) Run(inputs data.ND3[float64], states data.ND2[flo
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
       // Dimension parameter
-      npts := int(m.nPts.Get1(i%m.nPts.Len1()))
+      npts := int(m.nPts[i%len(m.nPts)])
       inputamountShape := m.inputAmount.Shape()
       inputamountNSets := inputamountShape[len(inputamountShape)-1]
       inputamountFrom := []int{  0,  i%inputamountNSets }
       inputamountSliceShape := []int{  npts,  }
       // WAS inputamountSliceShape := []int{  m.maxnPts,  }
-      inputamount := m.inputAmount.Slice(inputamountFrom, inputamountSliceShape, nil).(data.ND1[float64])
+      
+        inputamount := m.inputAmount.Slice(inputamountFrom, inputamountSliceShape, nil).(data.ND1[float64]).Unroll()
+      
       proportionShape := m.proportion.Shape()
       proportionNSets := proportionShape[len(proportionShape)-1]
       proportionFrom := []int{  0,  i%proportionNSets }
       proportionSliceShape := []int{  npts,  }
       // WAS proportionSliceShape := []int{  m.maxnPts,  }
-      proportion := m.proportion.Slice(proportionFrom, proportionSliceShape, nil).(data.ND1[float64])
+      
+        proportion := m.proportion.Slice(proportionFrom, proportionSliceShape, nil).(data.ND1[float64]).Unroll()
+      
       
 
       // fmt.Println("i",i)
@@ -229,7 +242,7 @@ func (m *RatingCurvePartition) Run(inputs data.ND3[float64], states data.ND2[flo
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{input <nil>}",tmpTS.Shape())
-      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -237,10 +250,10 @@ func (m *RatingCurvePartition) Run(inputs data.ND3[float64], states data.ND2[flo
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      output1 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      output1 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      output2 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      output2 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

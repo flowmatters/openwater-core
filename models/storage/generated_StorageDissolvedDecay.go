@@ -14,11 +14,21 @@ import (
 
 
 type StorageDissolvedDecay struct {
-  DeltaT data.ND1[float64]
-  doStorageDecay data.ND1[float64]
-  annualReturnInterval data.ND1[float64]
-  bankFullFlow data.ND1[float64]
-  medianFloodResidenceTime data.ND1[float64]
+  
+      DeltaT []float64
+    
+  
+      doStorageDecay []float64
+    
+  
+      annualReturnInterval []float64
+    
+  
+      bankFullFlow []float64
+    
+  
+      medianFloodResidenceTime []float64
+    
   
 
   
@@ -34,32 +44,37 @@ func (m *StorageDissolvedDecay) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.doStorageDecay = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.doStorageDecay = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.annualReturnInterval = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.annualReturnInterval = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.bankFullFlow = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.bankFullFlow = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.medianFloodResidenceTime = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.medianFloodResidenceTime = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -194,23 +209,23 @@ func (m *StorageDissolvedDecay) Run(inputs data.ND3[float64], states data.ND2[fl
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
-      dostoragedecay := m.doStorageDecay.Get1(i%m.doStorageDecay.Len1())
-      annualreturninterval := m.annualReturnInterval.Get1(i%m.annualReturnInterval.Len1())
-      bankfullflow := m.bankFullFlow.Get1(i%m.bankFullFlow.Len1())
-      medianfloodresidencetime := m.medianFloodResidenceTime.Get1(i%m.medianFloodResidenceTime.Len1())
+      deltat := m.DeltaT[i%len(m.DeltaT)]
+      dostoragedecay := m.doStorageDecay[i%len(m.doStorageDecay)]
+      annualreturninterval := m.annualReturnInterval[i%len(m.annualReturnInterval)]
+      bankfullflow := m.bankFullFlow[i%len(m.bankFullFlow)]
+      medianfloodresidencetime := m.medianFloodResidenceTime[i%len(m.medianFloodResidenceTime)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      storedmass := initialStates.Get1(0)
+      storedmass := initialStates[0]
       
       
 
@@ -220,16 +235,16 @@ func (m *StorageDissolvedDecay) Run(inputs data.ND3[float64], states data.ND2[fl
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{inflowMass kg.s^-1}",tmpTS.Shape())
-      inflowmass := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      inflowmass := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
-      inflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      inflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{outflow m^3.s^-1}",tmpTS.Shape())
-      outflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      outflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{storageVolume m^3}",tmpTS.Shape())
-      storagevolume := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      storagevolume := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -237,10 +252,10 @@ func (m *StorageDissolvedDecay) Run(inputs data.ND3[float64], states data.ND2[fl
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      decayedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      decayedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      outflowmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      outflowmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -248,7 +263,7 @@ func (m *StorageDissolvedDecay) Run(inputs data.ND3[float64], states data.ND2[fl
 
       
       
-      initialStates.Set1(0, storedmass)
+      initialStates[0] = storedmass
       
       
 

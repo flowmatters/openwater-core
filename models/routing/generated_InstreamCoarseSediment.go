@@ -14,7 +14,9 @@ import (
 
 
 type InstreamCoarseSediment struct {
-  durationInSeconds data.ND1[float64]
+  
+      durationInSeconds []float64
+    
   
 
   
@@ -30,8 +32,9 @@ func (m *InstreamCoarseSediment) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -152,21 +155,21 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3[float64], states data.ND2[f
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      durationinseconds := m.durationInSeconds.Get1(i%m.durationInSeconds.Len1())
+      durationinseconds := m.durationInSeconds[i%len(m.durationInSeconds)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      channelstore := initialStates.Get1(0)
+      channelstore := initialStates[0]
       
-      totalstoredmass := initialStates.Get1(1)
+      totalstoredmass := initialStates[1]
       
       
 
@@ -176,13 +179,13 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3[float64], states data.ND2[f
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{upstreamMass <nil>}",tmpTS.Shape())
-      upstreammass := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      upstreammass := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{lateralMass <nil>}",tmpTS.Shape())
-      lateralmass := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      lateralmass := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{reachLocalMass <nil>}",tmpTS.Shape())
-      reachlocalmass := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      reachlocalmass := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -190,7 +193,7 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3[float64], states data.ND2[f
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -198,9 +201,9 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3[float64], states data.ND2[f
 
       
       
-      initialStates.Set1(0, channelstore)
+      initialStates[0] = channelstore
       
-      initialStates.Set1(1, totalstoredmass)
+      initialStates[1] = totalstoredmass
       
       
 

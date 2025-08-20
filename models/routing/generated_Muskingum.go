@@ -14,9 +14,15 @@ import (
 
 
 type Muskingum struct {
-  K data.ND1[float64]
-  X data.ND1[float64]
-  DeltaT data.ND1[float64]
+  
+      K []float64
+    
+  
+      X []float64
+    
+  
+      DeltaT []float64
+    
   
 
   
@@ -32,20 +38,23 @@ func (m *Muskingum) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.K = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.K = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.X = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.X = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -176,25 +185,25 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      k := m.K.Get1(i%m.K.Len1())
-      x := m.X.Get1(i%m.X.Len1())
-      deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
+      k := m.K[i%len(m.K)]
+      x := m.X[i%len(m.X)]
+      deltat := m.DeltaT[i%len(m.DeltaT)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      s := initialStates.Get1(0)
+      s := initialStates[0]
       
-      previnflow := initialStates.Get1(1)
+      previnflow := initialStates[1]
       
-      prevoutflow := initialStates.Get1(2)
+      prevoutflow := initialStates[2]
       
       
 
@@ -204,10 +213,10 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
-      inflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      inflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{lateral m^3.s^-1}",tmpTS.Shape())
-      lateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      lateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -215,7 +224,7 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -223,11 +232,11 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
 
       
       
-      initialStates.Set1(0, s)
+      initialStates[0] = s
       
-      initialStates.Set1(1, previnflow)
+      initialStates[1] = previnflow
       
-      initialStates.Set1(2, prevoutflow)
+      initialStates[2] = prevoutflow
       
       
 

@@ -14,13 +14,27 @@ import (
 
 
 type Storage struct {
-  DeltaT data.ND1[float64]
-  nLVA data.ND1[float64]
-  levels data.ND2[float64]
-  volumes data.ND2[float64]
-  areas data.ND2[float64]
-  minRelease data.ND2[float64]
-  maxRelease data.ND2[float64]
+  
+      DeltaT []float64
+    
+  
+      nLVA []float64
+    
+  
+      levels data.ND2[float64]
+    
+  
+      volumes data.ND2[float64]
+    
+  
+      areas data.ND2[float64]
+    
+  
+      minRelease data.ND2[float64]
+    
+  
+      maxRelease data.ND2[float64]
+    
   
 
   maxnLVA int
@@ -37,44 +51,51 @@ func (m *Storage) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.nLVA = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.nLVA = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1* m.maxnLVA
   newShape = []int{m.maxnLVA, nSets}
-
-  m.levels = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
+    m.levels = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
   paramIdx += paramSize
 
   paramSize = 1* m.maxnLVA
   newShape = []int{m.maxnLVA, nSets}
-
-  m.volumes = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
+    m.volumes = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
   paramIdx += paramSize
 
   paramSize = 1* m.maxnLVA
   newShape = []int{m.maxnLVA, nSets}
-
-  m.areas = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
+    m.areas = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
   paramIdx += paramSize
 
   paramSize = 1* m.maxnLVA
   newShape = []int{m.maxnLVA, nSets}
-
-  m.minRelease = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
+    m.minRelease = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
   paramIdx += paramSize
 
   paramSize = 1* m.maxnLVA
   newShape = []int{m.maxnLVA, nSets}
-
-  m.maxRelease = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
+    m.maxRelease = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND2[float64])
+  
   paramIdx += paramSize
 
   
@@ -268,55 +289,65 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
+      deltat := m.DeltaT[i%len(m.DeltaT)]
       // Dimension parameter
-      nlva := int(m.nLVA.Get1(i%m.nLVA.Len1()))
+      nlva := int(m.nLVA[i%len(m.nLVA)])
       levelsShape := m.levels.Shape()
       levelsNSets := levelsShape[len(levelsShape)-1]
       levelsFrom := []int{  0,  i%levelsNSets }
       levelsSliceShape := []int{  nlva,  }
       // WAS levelsSliceShape := []int{  m.maxnLVA,  }
-      levels := m.levels.Slice(levelsFrom, levelsSliceShape, nil).(data.ND1[float64])
+      
+        levels := m.levels.Slice(levelsFrom, levelsSliceShape, nil).(data.ND1[float64]).Unroll()
+      
       volumesShape := m.volumes.Shape()
       volumesNSets := volumesShape[len(volumesShape)-1]
       volumesFrom := []int{  0,  i%volumesNSets }
       volumesSliceShape := []int{  nlva,  }
       // WAS volumesSliceShape := []int{  m.maxnLVA,  }
-      volumes := m.volumes.Slice(volumesFrom, volumesSliceShape, nil).(data.ND1[float64])
+      
+        volumes := m.volumes.Slice(volumesFrom, volumesSliceShape, nil).(data.ND1[float64]).Unroll()
+      
       areasShape := m.areas.Shape()
       areasNSets := areasShape[len(areasShape)-1]
       areasFrom := []int{  0,  i%areasNSets }
       areasSliceShape := []int{  nlva,  }
       // WAS areasSliceShape := []int{  m.maxnLVA,  }
-      areas := m.areas.Slice(areasFrom, areasSliceShape, nil).(data.ND1[float64])
+      
+        areas := m.areas.Slice(areasFrom, areasSliceShape, nil).(data.ND1[float64]).Unroll()
+      
       minreleaseShape := m.minRelease.Shape()
       minreleaseNSets := minreleaseShape[len(minreleaseShape)-1]
       minreleaseFrom := []int{  0,  i%minreleaseNSets }
       minreleaseSliceShape := []int{  nlva,  }
       // WAS minreleaseSliceShape := []int{  m.maxnLVA,  }
-      minrelease := m.minRelease.Slice(minreleaseFrom, minreleaseSliceShape, nil).(data.ND1[float64])
+      
+        minrelease := m.minRelease.Slice(minreleaseFrom, minreleaseSliceShape, nil).(data.ND1[float64]).Unroll()
+      
       maxreleaseShape := m.maxRelease.Shape()
       maxreleaseNSets := maxreleaseShape[len(maxreleaseShape)-1]
       maxreleaseFrom := []int{  0,  i%maxreleaseNSets }
       maxreleaseSliceShape := []int{  nlva,  }
       // WAS maxreleaseSliceShape := []int{  m.maxnLVA,  }
-      maxrelease := m.maxRelease.Slice(maxreleaseFrom, maxreleaseSliceShape, nil).(data.ND1[float64])
+      
+        maxrelease := m.maxRelease.Slice(maxreleaseFrom, maxreleaseSliceShape, nil).(data.ND1[float64]).Unroll()
+      
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      currentvolume := initialStates.Get1(0)
+      currentvolume := initialStates[0]
       
-      level := initialStates.Get1(1)
+      level := initialStates[1]
       
-      area := initialStates.Get1(2)
+      area := initialStates[2]
       
       
 
@@ -326,22 +357,22 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{rainfall mm}",tmpTS.Shape())
-      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{pet mm}",tmpTS.Shape())
-      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
-      inflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      inflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{demand m^3.s^-1}",tmpTS.Shape())
-      demand := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      demand := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{targetMinimumVolume m^3}",tmpTS.Shape())
-      targetminimumvolume := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      targetminimumvolume := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{targetMinimumCapacity m^3}",tmpTS.Shape())
-      targetminimumcapacity := cellInputs.Slice([]int{ 5,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      targetminimumcapacity := cellInputs.Slice([]int{ 5,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -349,16 +380,16 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      volume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      volume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      rainfallvolume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      rainfallvolume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      evaporationvolume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      evaporationvolume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -366,11 +397,11 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
 
       
       
-      initialStates.Set1(0, currentvolume)
+      initialStates[0] = currentvolume
       
-      initialStates.Set1(1, level)
+      initialStates[1] = level
       
-      initialStates.Set1(2, area)
+      initialStates[2] = area
       
       
 

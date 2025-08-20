@@ -14,20 +14,48 @@ import (
 
 
 type BankErosion struct {
-  riparianVegPercent data.ND1[float64]
-  maxRiparianVegEffectiveness data.ND1[float64]
-  soilErodibility data.ND1[float64]
-  bankErosionCoeff data.ND1[float64]
-  linkSlope data.ND1[float64]
-  bankFullFlow data.ND1[float64]
-  bankMgtFactor data.ND1[float64]
-  sedBulkDensity data.ND1[float64]
-  bankHeight data.ND1[float64]
-  linkLength data.ND1[float64]
-  dailyFlowPowerFactor data.ND1[float64]
-  longTermAvDailyFlow data.ND1[float64]
-  soilPercentFine data.ND1[float64]
-  durationInSeconds data.ND1[float64]
+  
+      riparianVegPercent []float64
+    
+  
+      maxRiparianVegEffectiveness []float64
+    
+  
+      soilErodibility []float64
+    
+  
+      bankErosionCoeff []float64
+    
+  
+      linkSlope []float64
+    
+  
+      bankFullFlow []float64
+    
+  
+      bankMgtFactor []float64
+    
+  
+      sedBulkDensity []float64
+    
+  
+      bankHeight []float64
+    
+  
+      linkLength []float64
+    
+  
+      dailyFlowPowerFactor []float64
+    
+  
+      longTermAvDailyFlow []float64
+    
+  
+      soilPercentFine []float64
+    
+  
+      durationInSeconds []float64
+    
   
 
   
@@ -43,86 +71,100 @@ func (m *BankErosion) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.riparianVegPercent = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.riparianVegPercent = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.maxRiparianVegEffectiveness = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.maxRiparianVegEffectiveness = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.soilErodibility = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.soilErodibility = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.bankErosionCoeff = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.bankErosionCoeff = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.linkSlope = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.linkSlope = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.bankFullFlow = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.bankFullFlow = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.bankMgtFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.bankMgtFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.sedBulkDensity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.sedBulkDensity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.bankHeight = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.bankHeight = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.linkLength = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.linkLength = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.dailyFlowPowerFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.dailyFlowPowerFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.longTermAvDailyFlow = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.longTermAvDailyFlow = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.soilPercentFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.soilPercentFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -291,20 +333,20 @@ func (m *BankErosion) Run(inputs data.ND3[float64], states data.ND2[float64], ou
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      riparianvegpercent := m.riparianVegPercent.Get1(i%m.riparianVegPercent.Len1())
-      maxriparianvegeffectiveness := m.maxRiparianVegEffectiveness.Get1(i%m.maxRiparianVegEffectiveness.Len1())
-      soilerodibility := m.soilErodibility.Get1(i%m.soilErodibility.Len1())
-      bankerosioncoeff := m.bankErosionCoeff.Get1(i%m.bankErosionCoeff.Len1())
-      linkslope := m.linkSlope.Get1(i%m.linkSlope.Len1())
-      bankfullflow := m.bankFullFlow.Get1(i%m.bankFullFlow.Len1())
-      bankmgtfactor := m.bankMgtFactor.Get1(i%m.bankMgtFactor.Len1())
-      sedbulkdensity := m.sedBulkDensity.Get1(i%m.sedBulkDensity.Len1())
-      bankheight := m.bankHeight.Get1(i%m.bankHeight.Len1())
-      linklength := m.linkLength.Get1(i%m.linkLength.Len1())
-      dailyflowpowerfactor := m.dailyFlowPowerFactor.Get1(i%m.dailyFlowPowerFactor.Len1())
-      longtermavdailyflow := m.longTermAvDailyFlow.Get1(i%m.longTermAvDailyFlow.Len1())
-      soilpercentfine := m.soilPercentFine.Get1(i%m.soilPercentFine.Len1())
-      durationinseconds := m.durationInSeconds.Get1(i%m.durationInSeconds.Len1())
+      riparianvegpercent := m.riparianVegPercent[i%len(m.riparianVegPercent)]
+      maxriparianvegeffectiveness := m.maxRiparianVegEffectiveness[i%len(m.maxRiparianVegEffectiveness)]
+      soilerodibility := m.soilErodibility[i%len(m.soilErodibility)]
+      bankerosioncoeff := m.bankErosionCoeff[i%len(m.bankErosionCoeff)]
+      linkslope := m.linkSlope[i%len(m.linkSlope)]
+      bankfullflow := m.bankFullFlow[i%len(m.bankFullFlow)]
+      bankmgtfactor := m.bankMgtFactor[i%len(m.bankMgtFactor)]
+      sedbulkdensity := m.sedBulkDensity[i%len(m.sedBulkDensity)]
+      bankheight := m.bankHeight[i%len(m.bankHeight)]
+      linklength := m.linkLength[i%len(m.linkLength)]
+      dailyflowpowerfactor := m.dailyFlowPowerFactor[i%len(m.dailyFlowPowerFactor)]
+      longtermavdailyflow := m.longTermAvDailyFlow[i%len(m.longTermAvDailyFlow)]
+      soilpercentfine := m.soilPercentFine[i%len(m.soilPercentFine)]
+      durationinseconds := m.durationInSeconds[i%len(m.durationInSeconds)]
       
 
       // fmt.Println("i",i)

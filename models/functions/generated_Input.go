@@ -149,7 +149,7 @@ func (m *Input) Run(inputs data.ND3[float64], states data.ND2[float64], outputs 
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{input <nil>}",tmpTS.Shape())
-      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -157,7 +157,7 @@ func (m *Input) Run(inputs data.ND3[float64], states data.ND2[float64], outputs 
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

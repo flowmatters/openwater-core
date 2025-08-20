@@ -14,18 +14,42 @@ import (
 
 
 type DynamicSednetGullyAlt struct {
-  YearDisturbance data.ND1[float64]
-  GullyEndYear data.ND1[float64]
-  Area data.ND1[float64]
-  averageGullyActivityFactor data.ND1[float64]
-  GullyAnnualAverageSedimentSupply data.ND1[float64]
-  GullyPercentFine data.ND1[float64]
-  managementPracticeFactor data.ND1[float64]
-  longtermRunoffFactor data.ND1[float64]
-  dailyRunoffPowerFactor data.ND1[float64]
-  sdrFine data.ND1[float64]
-  sdrCoarse data.ND1[float64]
-  timeStepInSeconds data.ND1[float64]
+  
+      YearDisturbance []float64
+    
+  
+      GullyEndYear []float64
+    
+  
+      Area []float64
+    
+  
+      averageGullyActivityFactor []float64
+    
+  
+      GullyAnnualAverageSedimentSupply []float64
+    
+  
+      GullyPercentFine []float64
+    
+  
+      managementPracticeFactor []float64
+    
+  
+      longtermRunoffFactor []float64
+    
+  
+      dailyRunoffPowerFactor []float64
+    
+  
+      sdrFine []float64
+    
+  
+      sdrCoarse []float64
+    
+  
+      timeStepInSeconds []float64
+    
   
 
   
@@ -41,74 +65,86 @@ func (m *DynamicSednetGullyAlt) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.YearDisturbance = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.YearDisturbance = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.GullyEndYear = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.GullyEndYear = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.Area = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.Area = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.averageGullyActivityFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.averageGullyActivityFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.GullyAnnualAverageSedimentSupply = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.GullyAnnualAverageSedimentSupply = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.GullyPercentFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.GullyPercentFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.managementPracticeFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.managementPracticeFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.longtermRunoffFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.longtermRunoffFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.dailyRunoffPowerFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.dailyRunoffPowerFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.sdrFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.sdrFine = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.sdrCoarse = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.sdrCoarse = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.timeStepInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.timeStepInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -269,18 +305,18 @@ func (m *DynamicSednetGullyAlt) Run(inputs data.ND3[float64], states data.ND2[fl
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      yeardisturbance := m.YearDisturbance.Get1(i%m.YearDisturbance.Len1())
-      gullyendyear := m.GullyEndYear.Get1(i%m.GullyEndYear.Len1())
-      area := m.Area.Get1(i%m.Area.Len1())
-      averagegullyactivityfactor := m.averageGullyActivityFactor.Get1(i%m.averageGullyActivityFactor.Len1())
-      gullyannualaveragesedimentsupply := m.GullyAnnualAverageSedimentSupply.Get1(i%m.GullyAnnualAverageSedimentSupply.Len1())
-      gullypercentfine := m.GullyPercentFine.Get1(i%m.GullyPercentFine.Len1())
-      managementpracticefactor := m.managementPracticeFactor.Get1(i%m.managementPracticeFactor.Len1())
-      longtermrunofffactor := m.longtermRunoffFactor.Get1(i%m.longtermRunoffFactor.Len1())
-      dailyrunoffpowerfactor := m.dailyRunoffPowerFactor.Get1(i%m.dailyRunoffPowerFactor.Len1())
-      sdrfine := m.sdrFine.Get1(i%m.sdrFine.Len1())
-      sdrcoarse := m.sdrCoarse.Get1(i%m.sdrCoarse.Len1())
-      timestepinseconds := m.timeStepInSeconds.Get1(i%m.timeStepInSeconds.Len1())
+      yeardisturbance := m.YearDisturbance[i%len(m.YearDisturbance)]
+      gullyendyear := m.GullyEndYear[i%len(m.GullyEndYear)]
+      area := m.Area[i%len(m.Area)]
+      averagegullyactivityfactor := m.averageGullyActivityFactor[i%len(m.averageGullyActivityFactor)]
+      gullyannualaveragesedimentsupply := m.GullyAnnualAverageSedimentSupply[i%len(m.GullyAnnualAverageSedimentSupply)]
+      gullypercentfine := m.GullyPercentFine[i%len(m.GullyPercentFine)]
+      managementpracticefactor := m.managementPracticeFactor[i%len(m.managementPracticeFactor)]
+      longtermrunofffactor := m.longtermRunoffFactor[i%len(m.longtermRunoffFactor)]
+      dailyrunoffpowerfactor := m.dailyRunoffPowerFactor[i%len(m.dailyRunoffPowerFactor)]
+      sdrfine := m.sdrFine[i%len(m.sdrFine)]
+      sdrcoarse := m.sdrCoarse[i%len(m.sdrCoarse)]
+      timestepinseconds := m.timeStepInSeconds[i%len(m.timeStepInSeconds)]
       
 
       // fmt.Println("i",i)

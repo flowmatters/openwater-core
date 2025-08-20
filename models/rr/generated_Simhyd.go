@@ -14,15 +14,33 @@ import (
 
 
 type Simhyd struct {
-  baseflowCoefficient data.ND1[float64]
-  imperviousThreshold data.ND1[float64]
-  infiltrationCoefficient data.ND1[float64]
-  infiltrationShape data.ND1[float64]
-  interflowCoefficient data.ND1[float64]
-  perviousFraction data.ND1[float64]
-  rainfallInterceptionStoreCapacity data.ND1[float64]
-  rechargeCoefficient data.ND1[float64]
-  soilMoistureStoreCapacity data.ND1[float64]
+  
+      baseflowCoefficient []float64
+    
+  
+      imperviousThreshold []float64
+    
+  
+      infiltrationCoefficient []float64
+    
+  
+      infiltrationShape []float64
+    
+  
+      interflowCoefficient []float64
+    
+  
+      perviousFraction []float64
+    
+  
+      rainfallInterceptionStoreCapacity []float64
+    
+  
+      rechargeCoefficient []float64
+    
+  
+      soilMoistureStoreCapacity []float64
+    
   
 
   
@@ -38,56 +56,65 @@ func (m *Simhyd) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.baseflowCoefficient = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.baseflowCoefficient = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.imperviousThreshold = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.imperviousThreshold = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.infiltrationCoefficient = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.infiltrationCoefficient = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.infiltrationShape = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.infiltrationShape = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.interflowCoefficient = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.interflowCoefficient = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.perviousFraction = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.perviousFraction = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.rainfallInterceptionStoreCapacity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.rainfallInterceptionStoreCapacity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.rechargeCoefficient = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.rechargeCoefficient = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.soilMoistureStoreCapacity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.soilMoistureStoreCapacity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -242,31 +269,31 @@ func (m *Simhyd) Run(inputs data.ND3[float64], states data.ND2[float64], outputs
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      baseflowcoefficient := m.baseflowCoefficient.Get1(i%m.baseflowCoefficient.Len1())
-      imperviousthreshold := m.imperviousThreshold.Get1(i%m.imperviousThreshold.Len1())
-      infiltrationcoefficient := m.infiltrationCoefficient.Get1(i%m.infiltrationCoefficient.Len1())
-      infiltrationshape := m.infiltrationShape.Get1(i%m.infiltrationShape.Len1())
-      interflowcoefficient := m.interflowCoefficient.Get1(i%m.interflowCoefficient.Len1())
-      perviousfraction := m.perviousFraction.Get1(i%m.perviousFraction.Len1())
-      rainfallinterceptionstorecapacity := m.rainfallInterceptionStoreCapacity.Get1(i%m.rainfallInterceptionStoreCapacity.Len1())
-      rechargecoefficient := m.rechargeCoefficient.Get1(i%m.rechargeCoefficient.Len1())
-      soilmoisturestorecapacity := m.soilMoistureStoreCapacity.Get1(i%m.soilMoistureStoreCapacity.Len1())
+      baseflowcoefficient := m.baseflowCoefficient[i%len(m.baseflowCoefficient)]
+      imperviousthreshold := m.imperviousThreshold[i%len(m.imperviousThreshold)]
+      infiltrationcoefficient := m.infiltrationCoefficient[i%len(m.infiltrationCoefficient)]
+      infiltrationshape := m.infiltrationShape[i%len(m.infiltrationShape)]
+      interflowcoefficient := m.interflowCoefficient[i%len(m.interflowCoefficient)]
+      perviousfraction := m.perviousFraction[i%len(m.perviousFraction)]
+      rainfallinterceptionstorecapacity := m.rainfallInterceptionStoreCapacity[i%len(m.rainfallInterceptionStoreCapacity)]
+      rechargecoefficient := m.rechargeCoefficient[i%len(m.rechargeCoefficient)]
+      soilmoisturestorecapacity := m.soilMoistureStoreCapacity[i%len(m.soilMoistureStoreCapacity)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      soilmoisturestore := initialStates.Get1(0)
+      soilmoisturestore := initialStates[0]
       
-      groundwater := initialStates.Get1(1)
+      groundwater := initialStates[1]
       
-      totalstore := initialStates.Get1(2)
+      totalstore := initialStates[2]
       
       
 
@@ -276,10 +303,10 @@ func (m *Simhyd) Run(inputs data.ND3[float64], states data.ND2[float64], outputs
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{rainfall mm}",tmpTS.Shape())
-      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{pet mm}",tmpTS.Shape())
-      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -287,16 +314,16 @@ func (m *Simhyd) Run(inputs data.ND3[float64], states data.ND2[float64], outputs
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      store := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      store := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -304,11 +331,11 @@ func (m *Simhyd) Run(inputs data.ND3[float64], states data.ND2[float64], outputs
 
       
       
-      initialStates.Set1(0, soilmoisturestore)
+      initialStates[0] = soilmoisturestore
       
-      initialStates.Set1(1, groundwater)
+      initialStates[1] = groundwater
       
-      initialStates.Set1(2, totalstore)
+      initialStates[2] = totalstore
       
       
 

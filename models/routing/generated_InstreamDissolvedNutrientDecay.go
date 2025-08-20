@@ -14,13 +14,27 @@ import (
 
 
 type InstreamDissolvedNutrientDecay struct {
-  doDecay data.ND1[float64]
-  pointSourceLoad data.ND1[float64]
-  linkHeight data.ND1[float64]
-  linkWidth data.ND1[float64]
-  linkLength data.ND1[float64]
-  uptakeVelocity data.ND1[float64]
-  durationInSeconds data.ND1[float64]
+  
+      doDecay []float64
+    
+  
+      pointSourceLoad []float64
+    
+  
+      linkHeight []float64
+    
+  
+      linkWidth []float64
+    
+  
+      linkLength []float64
+    
+  
+      uptakeVelocity []float64
+    
+  
+      durationInSeconds []float64
+    
   
 
   
@@ -36,44 +50,51 @@ func (m *InstreamDissolvedNutrientDecay) ApplyParameters(parameters data.ND2[flo
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.doDecay = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.doDecay = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.pointSourceLoad = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.pointSourceLoad = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.linkHeight = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.linkHeight = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.linkWidth = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.linkWidth = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.linkLength = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.linkLength = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.uptakeVelocity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.uptakeVelocity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.durationInSeconds = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -216,25 +237,25 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      dodecay := m.doDecay.Get1(i%m.doDecay.Len1())
-      pointsourceload := m.pointSourceLoad.Get1(i%m.pointSourceLoad.Len1())
-      linkheight := m.linkHeight.Get1(i%m.linkHeight.Len1())
-      linkwidth := m.linkWidth.Get1(i%m.linkWidth.Len1())
-      linklength := m.linkLength.Get1(i%m.linkLength.Len1())
-      uptakevelocity := m.uptakeVelocity.Get1(i%m.uptakeVelocity.Len1())
-      durationinseconds := m.durationInSeconds.Get1(i%m.durationInSeconds.Len1())
+      dodecay := m.doDecay[i%len(m.doDecay)]
+      pointsourceload := m.pointSourceLoad[i%len(m.pointSourceLoad)]
+      linkheight := m.linkHeight[i%len(m.linkHeight)]
+      linkwidth := m.linkWidth[i%len(m.linkWidth)]
+      linklength := m.linkLength[i%len(m.linkLength)]
+      uptakevelocity := m.uptakeVelocity[i%len(m.uptakeVelocity)]
+      durationinseconds := m.durationInSeconds[i%len(m.durationInSeconds)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      totalstoredmass := initialStates.Get1(0)
+      totalstoredmass := initialStates[0]
       
       
 
@@ -244,19 +265,19 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{incomingMassUpstream <nil>}",tmpTS.Shape())
-      incomingmassupstream := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      incomingmassupstream := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{incomingMassLateral <nil>}",tmpTS.Shape())
-      incomingmasslateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      incomingmasslateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{reachVolume <nil>}",tmpTS.Shape())
-      reachvolume := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      reachvolume := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{outflow <nil>}",tmpTS.Shape())
-      outflow := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      outflow := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{floodplainDepositionFraction <nil>}",tmpTS.Shape())
-      floodplaindepositionfraction := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      floodplaindepositionfraction := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -264,16 +285,16 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      decayedload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      decayedload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      loadfrompointsource := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      loadfrompointsource := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -281,7 +302,7 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
 
       
       
-      initialStates.Set1(0, totalstoredmass)
+      initialStates[0] = totalstoredmass
       
       
 

@@ -149,10 +149,10 @@ func (m *Sum) Run(inputs data.ND3[float64], states data.ND2[float64], outputs da
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{i1 <nil>}",tmpTS.Shape())
-      i1 := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      i1 := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{i2 <nil>}",tmpTS.Shape())
-      i2 := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      i2 := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -160,7 +160,7 @@ func (m *Sum) Run(inputs data.ND3[float64], states data.ND2[float64], outputs da
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      out := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      out := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

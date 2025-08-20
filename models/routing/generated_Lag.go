@@ -14,7 +14,9 @@ import (
 
 
 type Lag struct {
-  timeLag data.ND1[float64]
+  
+      timeLag []float64
+    
   
 
   
@@ -30,8 +32,9 @@ func (m *Lag) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.timeLag = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.timeLag = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -85,12 +88,12 @@ func (m *Lag) InitialiseStates(n int) data.ND2[float64] {
 	var result data.ND2[float64] = nil
 
   
-  timelagLen := m.timeLag.Shape()[0]
+  timelagLen := len(m.timeLag)
   
 
 	for i := 0; i < n; i++ {
     
-		timelag := m.timeLag.Get1(i%timelagLen)
+		timelag := m.timeLag[i%timelagLen]
     
 
 		states := initLag(timelag,)
@@ -154,14 +157,14 @@ func (m *Lag) Run(inputs data.ND3[float64], states data.ND2[float64], outputs da
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      timelag := m.timeLag.Get1(i%m.timeLag.Len1())
+      timelag := m.timeLag[i%len(m.timeLag)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
@@ -174,7 +177,7 @@ func (m *Lag) Run(inputs data.ND3[float64], states data.ND2[float64], outputs da
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
-      inflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      inflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -182,7 +185,7 @@ func (m *Lag) Run(inputs data.ND3[float64], states data.ND2[float64], outputs da
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 

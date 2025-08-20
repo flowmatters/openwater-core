@@ -14,12 +14,24 @@ import (
 
 
 type StorageRouting struct {
-  InflowBias data.ND1[float64]
-  RoutingConstant data.ND1[float64]
-  RoutingPower data.ND1[float64]
-  area data.ND1[float64]
-  deadStorage data.ND1[float64]
-  DeltaT data.ND1[float64]
+  
+      InflowBias []float64
+    
+  
+      RoutingConstant []float64
+    
+  
+      RoutingPower []float64
+    
+  
+      area []float64
+    
+  
+      deadStorage []float64
+    
+  
+      DeltaT []float64
+    
   
 
   
@@ -35,38 +47,44 @@ func (m *StorageRouting) ApplyParameters(parameters data.ND2[float64]) {
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.InflowBias = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.InflowBias = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.RoutingConstant = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.RoutingConstant = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.RoutingPower = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.RoutingPower = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.area = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.area = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.deadStorage = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.deadStorage = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -209,28 +227,28 @@ func (m *StorageRouting) Run(inputs data.ND3[float64], states data.ND2[float64],
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      inflowbias := m.InflowBias.Get1(i%m.InflowBias.Len1())
-      routingconstant := m.RoutingConstant.Get1(i%m.RoutingConstant.Len1())
-      routingpower := m.RoutingPower.Get1(i%m.RoutingPower.Len1())
-      area := m.area.Get1(i%m.area.Len1())
-      deadstorage := m.deadStorage.Get1(i%m.deadStorage.Len1())
-      deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
+      inflowbias := m.InflowBias[i%len(m.InflowBias)]
+      routingconstant := m.RoutingConstant[i%len(m.RoutingConstant)]
+      routingpower := m.RoutingPower[i%len(m.RoutingPower)]
+      area := m.area[i%len(m.area)]
+      deadstorage := m.deadStorage[i%len(m.deadStorage)]
+      deltat := m.DeltaT[i%len(m.DeltaT)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      s := initialStates.Get1(0)
+      s := initialStates[0]
       
-      previnflow := initialStates.Get1(1)
+      previnflow := initialStates[1]
       
-      prevoutflow := initialStates.Get1(2)
+      prevoutflow := initialStates[2]
       
       
 
@@ -240,16 +258,16 @@ func (m *StorageRouting) Run(inputs data.ND3[float64], states data.ND2[float64],
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
-      inflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      inflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{lateral m^3.s^-1}",tmpTS.Shape())
-      lateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      lateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{rainfall mm}",tmpTS.Shape())
-      rainfall := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      rainfall := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{evap mm}",tmpTS.Shape())
-      evap := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      evap := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -257,10 +275,10 @@ func (m *StorageRouting) Run(inputs data.ND3[float64], states data.ND2[float64],
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      storage := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      storage := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -268,11 +286,11 @@ func (m *StorageRouting) Run(inputs data.ND3[float64], states data.ND2[float64],
 
       
       
-      initialStates.Set1(0, s)
+      initialStates[0] = s
       
-      initialStates.Set1(1, previnflow)
+      initialStates[1] = previnflow
       
-      initialStates.Set1(2, prevoutflow)
+      initialStates[2] = prevoutflow
       
       
 

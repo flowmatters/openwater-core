@@ -14,13 +14,27 @@ import (
 
 
 type StorageParticulateTrapping struct {
-  DeltaT data.ND1[float64]
-  reservoirCapacity data.ND1[float64]
-  reservoirLength data.ND1[float64]
-  subtractor data.ND1[float64]
-  multiplier data.ND1[float64]
-  lengthDischargeFactor data.ND1[float64]
-  lengthDischargePower data.ND1[float64]
+  
+      DeltaT []float64
+    
+  
+      reservoirCapacity []float64
+    
+  
+      reservoirLength []float64
+    
+  
+      subtractor []float64
+    
+  
+      multiplier []float64
+    
+  
+      lengthDischargeFactor []float64
+    
+  
+      lengthDischargePower []float64
+    
   
 
   
@@ -36,44 +50,51 @@ func (m *StorageParticulateTrapping) ApplyParameters(parameters data.ND2[float64
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.DeltaT = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.reservoirCapacity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.reservoirCapacity = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.reservoirLength = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.reservoirLength = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.subtractor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.subtractor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.multiplier = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.multiplier = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.lengthDischargeFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.lengthDischargeFactor = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.lengthDischargePower = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.lengthDischargePower = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -216,25 +237,25 @@ func (m *StorageParticulateTrapping) Run(inputs data.ND3[float64], states data.N
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      deltat := m.DeltaT.Get1(i%m.DeltaT.Len1())
-      reservoircapacity := m.reservoirCapacity.Get1(i%m.reservoirCapacity.Len1())
-      reservoirlength := m.reservoirLength.Get1(i%m.reservoirLength.Len1())
-      subtractor := m.subtractor.Get1(i%m.subtractor.Len1())
-      multiplier := m.multiplier.Get1(i%m.multiplier.Len1())
-      lengthdischargefactor := m.lengthDischargeFactor.Get1(i%m.lengthDischargeFactor.Len1())
-      lengthdischargepower := m.lengthDischargePower.Get1(i%m.lengthDischargePower.Len1())
+      deltat := m.DeltaT[i%len(m.DeltaT)]
+      reservoircapacity := m.reservoirCapacity[i%len(m.reservoirCapacity)]
+      reservoirlength := m.reservoirLength[i%len(m.reservoirLength)]
+      subtractor := m.subtractor[i%len(m.subtractor)]
+      multiplier := m.multiplier[i%len(m.multiplier)]
+      lengthdischargefactor := m.lengthDischargeFactor[i%len(m.lengthDischargeFactor)]
+      lengthdischargepower := m.lengthDischargePower[i%len(m.lengthDischargePower)]
       
 
       // fmt.Println("i",i)
       // fmt.Println("States",states.Shape())
       // fmt.Println("Tmp2",tmp2.Shape())
       
-      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).(data.ND1[float64])
+      initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
 
       
       
-      storedmass := initialStates.Get1(0)
+      storedmass := initialStates[0]
       
       
 
@@ -244,16 +265,16 @@ func (m *StorageParticulateTrapping) Run(inputs data.ND3[float64], states data.N
   //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
   //    fmt.Println("{inflowLoad kg.s^-1}",tmpTS.Shape())
-      inflowload := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      inflowload := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
-      inflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      inflow := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{outflow m^3.s^-1}",tmpTS.Shape())
-      outflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      outflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
   //    fmt.Println("{storage m^3}",tmpTS.Shape())
-      storage := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).(data.ND1[float64])
+      storage := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
       
@@ -261,10 +282,10 @@ func (m *StorageParticulateTrapping) Run(inputs data.ND3[float64], states data.N
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      trappedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      trappedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).(data.ND1[float64])
+      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
       
       
 
@@ -272,7 +293,7 @@ func (m *StorageParticulateTrapping) Run(inputs data.ND3[float64], states data.N
 
       
       
-      initialStates.Set1(0, storedmass)
+      initialStates[0] = storedmass
       
       
 

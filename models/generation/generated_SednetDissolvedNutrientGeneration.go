@@ -14,8 +14,12 @@ import (
 
 
 type SednetDissolvedNutrientGeneration struct {
-  dissConst_EMC data.ND1[float64]
-  dissConst_DWC data.ND1[float64]
+  
+      dissConst_EMC []float64
+    
+  
+      dissConst_DWC []float64
+    
   
 
   
@@ -31,14 +35,16 @@ func (m *SednetDissolvedNutrientGeneration) ApplyParameters(parameters data.ND2[
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.dissConst_EMC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.dissConst_EMC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   paramSize = 1
   newShape = []int{ nSets}
-
-  m.dissConst_DWC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64])
+  
+    m.dissConst_DWC = parameters.Slice([]int{ paramIdx, 0}, []int{ paramSize, nSets}, nil).MustReshape(newShape).(data.ND1[float64]).Unroll()
+  
   paramIdx += paramSize
 
   
@@ -159,8 +165,8 @@ func (m *SednetDissolvedNutrientGeneration) Run(inputs data.ND3[float64], states
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
 
-      dissconst_emc := m.dissConst_EMC.Get1(i%m.dissConst_EMC.Len1())
-      dissconst_dwc := m.dissConst_DWC.Get1(i%m.dissConst_DWC.Len1())
+      dissconst_emc := m.dissConst_EMC[i%len(m.dissConst_EMC)]
+      dissconst_dwc := m.dissConst_DWC[i%len(m.dissConst_DWC)]
       
 
       // fmt.Println("i",i)
