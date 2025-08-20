@@ -2,7 +2,7 @@ package arraybench
 
 import (
 	// "runtime/pprof",
-	"iter"
+
 	"testing"
 
 	"github.com/flowmatters/openwater-core/data"
@@ -71,41 +71,41 @@ const ARRAY_SIZE = SUB_ARRAY_COUNT * SUB_ARRAY_SIZE
 // 	}
 // }
 
-func BenchmarkND3AsSliceIterGetPull_run(b *testing.B) {
-	as := data.NewArray3D[int](300, 400, ARRAY_SIZE).Slice([]int{0, 0, 0}, []int{1, 1, ARRAY_SIZE}, nil).MustReshape([]int{ARRAY_SIZE})
-	if !as.Contiguous() {
-		b.Fatalf("Array is not contiguous")
-	}
-	b.ResetTimer()
-	idx := []int{0}
-	for b.Loop() {
-		values := as.Values(idx, 0, ARRAY_SIZE)
-		next, _ := iter.Pull(values)
-		// for v := range values {
-		for j := 0; j < ARRAY_SIZE; j++ {
-			v, _ := next()
-			as.Set(idx, v+1)
-		}
-		// }
-	}
-}
+// func BenchmarkND3AsSliceIterGetPull_run(b *testing.B) {
+// 	as := data.NewArray3D[int](300, 400, ARRAY_SIZE).Slice([]int{0, 0, 0}, []int{1, 1, ARRAY_SIZE}, nil).MustReshape([]int{ARRAY_SIZE})
+// 	if !as.Contiguous() {
+// 		b.Fatalf("Array is not contiguous")
+// 	}
+// 	b.ResetTimer()
+// 	idx := []int{0}
+// 	for b.Loop() {
+// 		values := as.Values(idx, 0, ARRAY_SIZE)
+// 		next, _ := iter.Pull(values)
+// 		// for v := range values {
+// 		for j := 0; j < ARRAY_SIZE; j++ {
+// 			v, _ := next()
+// 			as.Set(idx, v+1)
+// 		}
+// 		// }
+// 	}
+// }
 
-func BenchmarkND3AsSliceIterGetRange_run(b *testing.B) {
-	as := data.NewArray3D[int](300, 400, ARRAY_SIZE).Slice([]int{0, 0, 0}, []int{1, 1, ARRAY_SIZE}, nil).MustReshape([]int{ARRAY_SIZE})
-	if !as.Contiguous() {
-		b.Fatalf("Array is not contiguous")
-	}
-	b.ResetTimer()
-	idx := []int{0}
-	for b.Loop() {
-		values := as.Values(idx, 0, ARRAY_SIZE)
-		// for v := range values {
-		for v := range values {
-			as.Set(idx, v+1)
-		}
-		// }
-	}
-}
+// func BenchmarkND3AsSliceIterGetRange_run(b *testing.B) {
+// 	as := data.NewArray3D[int](300, 400, ARRAY_SIZE).Slice([]int{0, 0, 0}, []int{1, 1, ARRAY_SIZE}, nil).MustReshape([]int{ARRAY_SIZE})
+// 	if !as.Contiguous() {
+// 		b.Fatalf("Array is not contiguous")
+// 	}
+// 	b.ResetTimer()
+// 	idx := []int{0}
+// 	for b.Loop() {
+// 		values := as.Values(idx, 0, ARRAY_SIZE)
+// 		// for v := range values {
+// 		for v := range values {
+// 			as.Set(idx, v+1)
+// 		}
+// 		// }
+// 	}
+// }
 
 func BenchmarkND3AsSliceRawIterGet_run(b *testing.B) {
 	as := data.NewArray3D[int](300, 400, ARRAY_SIZE).Slice([]int{0, 0, 0}, []int{1, 1, ARRAY_SIZE}, nil).MustReshape([]int{ARRAY_SIZE})
@@ -121,34 +121,34 @@ func BenchmarkND3AsSliceRawIterGet_run(b *testing.B) {
 	}
 }
 
-func BenchmarkFullRawIO_run(b *testing.B) {
-	as := data.NewArray3D[int](300, 400, ARRAY_SIZE).Slice([]int{0, 0, 0}, []int{1, 1, ARRAY_SIZE}, nil).MustReshape([]int{ARRAY_SIZE})
-	if !as.Contiguous() {
-		b.Fatalf("Array is not contiguous")
-	}
-	b.ResetTimer()
-	idx := []int{0}
-	for b.Loop() {
-		index := as.RawIndices(idx, 0, ARRAY_SIZE)
-		for i := range index {
-			as.SetRaw(i, as.GetRaw(i)+1)
-		}
-	}
-}
+// func BenchmarkFullRawIO_run(b *testing.B) {
+// 	as := data.NewArray3D[int](300, 400, ARRAY_SIZE).Slice([]int{0, 0, 0}, []int{1, 1, ARRAY_SIZE}, nil).MustReshape([]int{ARRAY_SIZE})
+// 	if !as.Contiguous() {
+// 		b.Fatalf("Array is not contiguous")
+// 	}
+// 	b.ResetTimer()
+// 	idx := []int{0}
+// 	for b.Loop() {
+// 		index := as.RawIndices(idx, 0, ARRAY_SIZE)
+// 		for i := range index {
+// 			as.SetRaw(i, as.GetRaw(i)+1)
+// 		}
+// 	}
+// }
 
-func BenchmarkFullRawIONoIter_run(b *testing.B) {
-	as := data.NewArray3D[int](300, 400, ARRAY_SIZE).Slice([]int{0, 0, 0}, []int{1, 1, ARRAY_SIZE}, nil).MustReshape([]int{ARRAY_SIZE})
-	if !as.Contiguous() {
-		b.Fatalf("Array is not contiguous")
-	}
-	b.ResetTimer()
-	for b.Loop() {
-		offset := as.OffsetStep[0]
-		for i := 0; i < ARRAY_SIZE; i += offset {
-			as.SetRaw(i, as.GetRaw(i)+1)
-		}
-	}
-}
+// func BenchmarkFullRawIONoIter_run(b *testing.B) {
+// 	as := data.NewArray3D[int](300, 400, ARRAY_SIZE).Slice([]int{0, 0, 0}, []int{1, 1, ARRAY_SIZE}, nil).MustReshape([]int{ARRAY_SIZE})
+// 	if !as.Contiguous() {
+// 		b.Fatalf("Array is not contiguous")
+// 	}
+// 	b.ResetTimer()
+// 	for b.Loop() {
+// 		offset := as.OffsetStep[0]
+// 		for i := 0; i < ARRAY_SIZE; i += offset {
+// 			as.SetRaw(i, as.GetRaw(i)+1)
+// 		}
+// 	}
+// }
 
 func BenchmarkND3AsSlice_run(b *testing.B) {
 	as := data.NewArray3D[int](300, 400, ARRAY_SIZE).Slice([]int{0, 0, 0}, []int{1, 1, ARRAY_SIZE}, nil).MustReshape([]int{ARRAY_SIZE})
