@@ -3,7 +3,6 @@ package storage
 import (
 	"math"
 
-	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/util/m"
 )
 
@@ -39,17 +38,15 @@ StorageParticulateTrapping:
 		storage, sediment
 */
 
-func storageParticulateTrapping(inflowMass, storageInflow, storageOutflow, storageVolume data.ND1[float64], // inputs
+func storageParticulateTrapping(inflowMass, storageInflow, storageOutflow, storageVolume []float64, // inputs
 	initialStoredMass float64,
 	deltaT, reservoirCapacity, reservoirLength, subtractor, multiplier, lengthDischargeFactor, lengthDischargePower float64,
-	trappedMass, outflowLoad data.ND1[float64]) (storedMass float64) {
+	trappedMass, outflowLoad []float64) (storedMass float64) {
 	storedMass = initialStoredMass
-	n := inflowMass.Len1()
-	idx := []int{0}
+	n := len(inflowMass)
 	for i := 0; i < n; i++ {
-		idx[0] = i
-		incomingMass := inflowMass.Get(idx) * deltaT
-		inflowRate := storageInflow.Get(idx)
+		incomingMass := inflowMass[i] * deltaT
+		inflowRate := storageInflow[i]
 
 		damTrappingPC := 0.0
 
@@ -60,17 +57,17 @@ func storageParticulateTrapping(inflowMass, storageInflow, storageOutflow, stora
 		}
 
 		dailyTrappedConstituentLoad := incomingMass * damTrappingPC / 100.0
-		trappedMass.Set(idx, dailyTrappedConstituentLoad)
+		trappedMass[i] = dailyTrappedConstituentLoad
 
 		storedMass = storedMass + incomingMass - dailyTrappedConstituentLoad
 
-		storageOutflowRate := storageOutflow.Get(idx)
-		storageWorkingVolume := storageOutflowRate*deltaT + storageVolume.Get(idx)
+		storageOutflowRate := storageOutflow[i]
+		storageWorkingVolume := storageOutflowRate*deltaT + storageVolume[i]
 
 		concentration := storedMass / storageWorkingVolume
 		massOutRate := storageOutflowRate * concentration
 		storedMass = math.Max(storedMass-(massOutRate*deltaT), 0.0)
-		outflowLoad.Set(idx, massOutRate)
+		outflowLoad[i] = massOutRate
 	}
 
 	return

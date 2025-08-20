@@ -2,7 +2,6 @@ package generation
 
 import (
 	"github.com/flowmatters/openwater-core/conv/units"
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -25,20 +24,18 @@ FixedConcentration:
 		constituent generation
 */
 
-func fixedConcentration(flow data.ND1[float64], conc float64, load data.ND1[float64]) {
-	nDays := flow.Len1()
-	idx := []int{0}
+func fixedConcentration(flow []float64, conc float64, load []float64) {
+	nDays := len(flow)
 
 	if conc == 0.0 {
 		return
 	}
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		f := flow.Get(idx)
+		f := flow[i]
 
 		l := f * conc * units.MG_PER_LITRE_TO_KG_PER_M3
 
-		load.Set(idx, l)
+		load[i] = l
 	}
 }

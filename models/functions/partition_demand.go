@@ -2,8 +2,6 @@ package functions
 
 import (
 	"math"
-
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -27,20 +25,18 @@ PartitionDemand:
 		dates function
 */
 
-func partitionDemand(input, demand data.ND1[float64],
-	outflow, extraction data.ND1[float64]) {
-	n := input.Len1()
-	idx := []int{0}
+func partitionDemand(input, demand []float64,
+	outflow, extraction []float64) {
+	n := len(input)
 
 	for i := 0; i < n; i++ {
-		idx[0] = i
-		dmd := demand.Get(idx)
-		inp := input.Get(idx)
+		dmd := demand[i]
+		inp := input[i]
 
 		ext := math.Min(dmd, inp)
 		out := math.Max(inp-ext, 0.0)
 
-		outflow.Set(idx, out)
-		extraction.Set(idx, ext)
+		outflow[i] = out
+		extraction[i] = ext
 	}
 }

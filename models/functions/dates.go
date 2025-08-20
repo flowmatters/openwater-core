@@ -1,9 +1,5 @@
 package functions
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 /*OW-SPEC
 DateGenerator:
 	inputs:
@@ -65,23 +61,21 @@ func _dayOfYear(d, m, y int) int {
 	return doy
 }
 
-func dateGenerator(tick data.ND1[float64],
+func dateGenerator(tick []float64,
 	startDate, startMonth, startYear float64,
-	date, month, year, dayOfYear data.ND1[float64]) {
+	date, month, year, dayOfYear []float64) {
 
 	d := int(startDate)
 	m := int(startMonth)
 	y := int(startYear)
 
-	n := tick.Len1()
-	idx := []int{0}
+	n := len(tick)
 
 	for i := 0; i < n; i++ {
-		idx[0] = i
-		dayOfYear.Set(idx, float64(_dayOfYear(d, m, y)))
-		date.Set(idx, float64(d))
-		month.Set(idx, float64(m))
-		year.Set(idx, float64(y))
+		dayOfYear[i] = float64(_dayOfYear(d, m, y))
+		date[i] = float64(d)
+		month[i] = float64(m)
+		year[i] = float64(y)
 
 		d++
 

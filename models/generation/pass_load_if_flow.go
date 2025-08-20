@@ -1,9 +1,5 @@
 package generation
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 const (
 	EFFECTIVELY_ZERO = 1e-8
 )
@@ -29,26 +25,24 @@ PassLoadIfFlow:
 		constituent generation
 */
 
-func passLoadIfFlow(flow, inputLoad data.ND1[float64],
+func passLoadIfFlow(flow, inputLoad []float64,
 	scalingFactor float64,
-	outputLoad data.ND1[float64]) {
+	outputLoad []float64) {
 
 	if scalingFactor == 0.0 {
 		return
 	}
 
-	n := flow.Len1()
-	idx := []int{0}
+	n := len(flow)
 
 	for day := 0; day < n; day++ {
-		idx[0] = day
-		f := flow.Get(idx)
-		l := inputLoad.Get(idx)
+		f := flow[day]
+		l := inputLoad[day]
 
 		if f > EFFECTIVELY_ZERO {
-			outputLoad.Set(idx, l*scalingFactor)
+			outputLoad[day] = l * scalingFactor
 		} else {
-			outputLoad.Set(idx, 0.0)
+			outputLoad[day] = 0.0
 		}
 	}
 }

@@ -2,8 +2,6 @@ package climate
 
 import (
 	"math"
-
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -30,18 +28,15 @@ ClimateVariables:
 		climate variable estimation
 */
 
-func climateVariables(dryBulb, humidity data.ND1[float64],
+func climateVariables(dryBulb, humidity []float64,
 	elevation float64,
-	vaporPressure, dewPoint, wetBulb, deltaT data.ND1[float64]) {
-	nDays := dryBulb.Len1()
-	idx := []int{0}
-
+	vaporPressure, dewPoint, wetBulb, deltaT []float64) {
+	nDays := len(dryBulb)
 	pa := barometricPressure(elevation)
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		dryBulbTemp := dryBulb.Get(idx)
-		relativeHumidity := humidity.Get(idx)
+		dryBulbTemp := dryBulb[i]
+		relativeHumidity := humidity[i]
 
 		vp := calcVaporPressure(dryBulbTemp)
 		tdew := calcDewPoint(dryBulbTemp, relativeHumidity)
@@ -50,10 +45,10 @@ func climateVariables(dryBulb, humidity data.ND1[float64],
 			calcHumidityRatioActual(dryBulbTemp, relativeHumidity, pa))
 
 		twetBulbTemp := calcWetBulb(dryBulbTemp, tdew, e, pa)
-		vaporPressure.Set(idx, vp)
-		dewPoint.Set(idx, tdew)
-		wetBulb.Set(idx, twetBulbTemp)
-		deltaT.Set(idx, dryBulbTemp-twetBulbTemp)
+		vaporPressure[i] = vp
+		dewPoint[i] = tdew
+		wetBulb[i] = twetBulbTemp
+		deltaT[i] = dryBulbTemp - twetBulbTemp
 	}
 }
 

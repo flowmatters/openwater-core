@@ -5,7 +5,6 @@ import (
 
 	"github.com/flowmatters/openwater-core/conv/rough"
 	"github.com/flowmatters/openwater-core/conv/units"
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -58,24 +57,22 @@ func meanAnnualBankErosion(riparianVegPercent, maxRiparianVegEffectiveness, soil
 	return result
 }
 
-func bankErosion(downstreamFlowVolume, totalVolume data.ND1[float64],
+func bankErosion(downstreamFlowVolume, totalVolume []float64,
 	riparianVegPercent, maxRiparianVegEffectiveness, soilErodibility, bankErosionCoeff,
 	linkSlope, bankFullFlow, bankMgtFactor, sedBulkDensity, bankHeight, linkLength,
 	dailyFlowPowerFactor, longTermAvDailyFlow, soilPercentFine, durationInSeconds float64,
-	bankErosionFine, bankErosionCoarse data.ND1[float64]) {
-	idx := []int{0}
-	n := downstreamFlowVolume.Len1()
+	bankErosionFine, bankErosionCoarse []float64) {
+	n := len(downstreamFlowVolume)
 	meanAnnual := meanAnnualBankErosion(riparianVegPercent, maxRiparianVegEffectiveness, soilErodibility, bankErosionCoeff,
 		linkSlope, bankFullFlow, bankMgtFactor, sedBulkDensity, bankHeight, linkLength)
 
 	//implementation of formula 4.20 in specifiction document - page 22
 	//bank erosion calculated as per this formula is in tonnes per day
 	for i := 0; i < n; i++ {
-		idx[0] = i
 		LinkDischargeFactor := 0.0
-		outflow := downstreamFlowVolume.Get(idx)
+		outflow := downstreamFlowVolume[i]
 
-		if totalVolume.Get(idx) <= 0 || outflow <= 0 || longTermAvDailyFlow <= 0 {
+		if totalVolume[i] <= 0 || outflow <= 0 || longTermAvDailyFlow <= 0 {
 			LinkDischargeFactor = 0
 		} else {
 			//convert to daily m3 before rasing to power
@@ -91,8 +88,8 @@ func bankErosion(downstreamFlowVolume, totalVolume data.ND1[float64],
 		bankErosionFine_Kg_per_Second := BankErosionTotal_kg_per_Second * (soilPercentFine * units.PERCENT_TO_PROPORTION)
 		bankErosionCoarse_Kg_per_Second := BankErosionTotal_kg_per_Second * (1 - (soilPercentFine * units.PERCENT_TO_PROPORTION))
 
-		bankErosionFine.Set(idx, bankErosionFine_Kg_per_Second)
-		bankErosionCoarse.Set(idx, bankErosionCoarse_Kg_per_Second)
+		bankErosionFine[i] = bankErosionFine_Kg_per_Second
+		bankErosionCoarse[i] = bankErosionCoarse_Kg_per_Second
 	}
 
 }

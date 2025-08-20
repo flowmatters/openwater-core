@@ -3,7 +3,6 @@ package storage
 import (
 	"math"
 
-	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/models/routing"
 )
 
@@ -37,10 +36,10 @@ StorageDissolvedDecay:
 		storage, sediment
 */
 
-func storageDissolvedDecay(inflowMass, storageInflow, storageOutflow, storageVolume data.ND1[float64], // inputs
+func storageDissolvedDecay(inflowMass, storageInflow, storageOutflow, storageVolume []float64, // inputs
 	initialStoredMass float64,
 	deltaT, doStorageDecay, annualReturnInterval, bankFullFlow, medianFloodResidenceTime float64,
-	decayedMass, outflowMass data.ND1[float64]) (storedMass float64) {
+	decayedMass, outflowMass []float64) (storedMass float64) {
 
 	if doStorageDecay < 0.5 {
 		storedMass = routing.LumpedConstituentTransport(
@@ -52,14 +51,12 @@ func storageDissolvedDecay(inflowMass, storageInflow, storageOutflow, storageVol
 	}
 
 	storedMass = initialStoredMass
-	nDays := inflowMass.Len1()
-	idx := []int{0}
+	nDays := len(inflowMass)
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		upstreamFlowMass := inflowMass.Get(idx) * deltaT
-		storageVol := storageVolume.Get(idx)
-		outflowRate := storageOutflow.Get(idx)
+		upstreamFlowMass := inflowMass[i] * deltaT
+		storageVol := storageVolume[i]
+		outflowRate := storageOutflow[i]
 
 		availLoadForOutflow := 0.0
 		dailyDecayedConstituentLoad := 0.0
@@ -82,8 +79,8 @@ func storageDissolvedDecay(inflowMass, storageInflow, storageOutflow, storageVol
 
 		concentration := availLoadForOutflow / storageVol
 		constituentRateInOutflow := concentration * outflowRate
-		outflowMass.Set(idx, constituentRateInOutflow)
-		decayedMass.Set(idx, dailyDecayedConstituentLoad)
+		outflowMass[i] = constituentRateInOutflow
+		decayedMass[i] = dailyDecayedConstituentLoad
 
 		storedMass -= dailyDecayedConstituentLoad
 		storedMass -= deltaT * constituentRateInOutflow

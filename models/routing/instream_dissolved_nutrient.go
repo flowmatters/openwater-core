@@ -5,7 +5,6 @@ import (
 
 	"github.com/flowmatters/openwater-core/conv/rough"
 	"github.com/flowmatters/openwater-core/conv/units"
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -49,13 +48,12 @@ InstreamDissolvedNutrientDecay:
 // Is the theLinkIsLumpedFlowRouting necessary??? assumed if we are using this model?
 // Can we take out the point source logic?
 
-func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachVolume, outflow, floodplainDepositionFraction data.ND1[float64],
+func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachVolume, outflow, floodplainDepositionFraction []float64,
 	storedMass float64,
 	doDecay, pointSourceLoad, linkHeight, linkWidth, linkLength, uptakeVelocity, durationInSeconds float64,
-	decayedLoad, loadDownstream, loadToFloodplain, loadFromPointSource data.ND1[float64]) float64 {
-	n := incomingMassUpstream.Len1()
-	idx := []int{0}
-	prevVolume := reachVolume.Get(idx)
+	decayedLoad, loadDownstream, loadToFloodplain, loadFromPointSource []float64) float64 {
+	n := len(incomingMassUpstream)
+	prevVolume := reachVolume[0]
 
 	timeStepInDays := units.SECONDS_PER_DAY / durationInSeconds
 
@@ -71,12 +69,11 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 	}
 
 	for i := 0; i < n; i++ {
-		idx[0] = i
 
-		reachVolumeNow := reachVolume.Get(idx)
-		incomingMassUpstreamNow := incomingMassUpstream.Get(idx)
-		incomingMassLateralNow := incomingMassLateral.Get(idx)
-		outflowNow := outflow.Get(idx)
+		reachVolumeNow := reachVolume[i]
+		incomingMassUpstreamNow := incomingMassUpstream[i]
+		incomingMassLateralNow := incomingMassLateral[i]
+		outflowNow := outflow[i]
 
 		// RiverSystem.Link theLink = (Link)Link;
 
@@ -175,7 +172,7 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 			//ToolsModel.setLinkSourceSinkModelStorageAndOutflow(this, ConstituentOutput, this.Constituent, loadOut);
 			////SetStorageAndOutflow(loadOut);
 
-			loadDownstream.Set(idx, totalConstsituentLoad)
+			loadDownstream[i] = totalConstsituentLoad
 
 			dailyDecayedConstituentLoad = 0
 			//ConstituentStorage = 0;
@@ -185,7 +182,7 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 			loadOut = allAvailConstit * effectiveDecayCoefficient
 			dailyDecayedConstituentLoad = allAvailConstit - loadOut
 
-			loadDownstream.Set(idx, allAvailConstit-dailyDecayedConstituentLoad)
+			loadDownstream[i] = allAvailConstit - dailyDecayedConstituentLoad
 			////this.Link.Storage.Constituents[this.Constituent].Amount = 0;
 			//ConstituentOutput.StoredMass = 0;
 			//ConstituentOutput.DownstreamFlowMass = loadOut / _timeStepInSeconds;
@@ -216,9 +213,9 @@ func instreamDissolvedNutrient(incomingMassUpstream, incomingMassLateral, reachV
 
 			dailyDecayedConstituentLoad = allAvailConstit - loadOut
 
-			decayedLoad.Set(idx, dailyDecayedConstituentLoad)
-			loadDownstream.Set(idx, allAvailConstit-dailyDecayedConstituentLoad) // Is this just loadOut?
-			loadFromPointSource.Set(idx, pointSourceLoad_kg)
+			decayedLoad[i] = dailyDecayedConstituentLoad
+			loadDownstream[i] = allAvailConstit - dailyDecayedConstituentLoad // Is this just loadOut?
+			loadFromPointSource[i] = pointSourceLoad_kg
 		}
 
 		prevVolume = reachVolumeNow

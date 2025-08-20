@@ -1,9 +1,5 @@
 package rr
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 /* OW-SPEC
 RunoffCoefficient:
   inputs:
@@ -26,9 +22,9 @@ RunoffCoefficient:
 
 */
 
-func runoffCoefficient(rainfall data.ND1[float64], coeff float64, runoff data.ND1[float64]) {
-	n := rainfall.Len1()
+func runoffCoefficient(rainfall []float64, coeff float64, runoff []float64) {
+	n := len(rainfall)
 	for i := 0; i < n; i++ {
-		runoff.Set1(i, coeff*rainfall.Get1(i))
+		runoff[i] = coeff * rainfall[i]
 	}
 }

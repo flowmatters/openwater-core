@@ -1,9 +1,6 @@
 package routing
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-	//	"fmt"
-)
+//	"fmt"
 
 /*OW-SPEC
 Muskingum:
@@ -32,12 +29,11 @@ Muskingum:
 		flow routing
 */
 
-func muskingum(inflows, laterals data.ND1[float64],
+func muskingum(inflows, laterals []float64,
 	s, prevInflow, prevOutflow float64,
 	k, x, deltaT float64,
-	outflows data.ND1[float64]) (float64, float64, float64) {
-	idx := []int{0}
-	nDays := inflows.Len1()
+	outflows []float64) (float64, float64, float64) {
+	nDays := len(inflows)
 
 	kx2 := 2 * k * x
 	denom := (2*k*(1-x) + deltaT)
@@ -46,12 +42,11 @@ func muskingum(inflows, laterals data.ND1[float64],
 	a3 := (2*k*(1-x) - deltaT) / denom
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		inflow := inflows.Get(idx)
-		lateral := laterals.Get(idx)
+		inflow := inflows[i]
+		lateral := laterals[i]
 
 		outflow := a1*(inflow+lateral) + a2*prevInflow + a3*prevOutflow
-		outflows.Set(idx, outflow)
+		outflows[i] = outflow
 
 		prevOutflow = outflow
 		prevInflow = inflow

@@ -1,9 +1,5 @@
 package functions
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 /*OW-SPEC
 Sum:
 	inputs:
@@ -24,15 +20,13 @@ Sum:
 		function
 */
 
-func sum(i1, i2 data.ND1[float64],
-	out data.ND1[float64]) {
+func sum(i1, i2 []float64,
+	out []float64) {
 
-	n := i1.Len1()
-	idx := []int{0}
+	n := len(i1)
 
 	for day := 0; day < n; day++ {
-		idx[0] = day
-		s := i1.Get(idx) + i2.Get(idx)
-		out.Set(idx, s)
+		s := i1[day] + i2[day]
+		out[day] = s
 	}
 }

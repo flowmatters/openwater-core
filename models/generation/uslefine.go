@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/flowmatters/openwater-core/conv/units"
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -58,31 +57,29 @@ USLEFineSedimentGeneration:
 		sediment
 */
 
-func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYear data.ND1[float64],
+func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYear []float64,
 	s, p, rainThreshold, alpha, beta, eta,
 	a1, a2, a3, dwc, avK, avLS, avFines, area, maxConc,
 	usleHSDRFine, usleHSDRCoarse, timeStepInSeconds float64,
 	quickLoadFine, slowLoadFine,
 	quickLoadCoarse, slowLoadCoarse,
 	totalFineLoad, totalCoarseLoad, generatedLoadFine,
-	generatedLoadCoarse data.ND1[float64]) {
-	n := quickflow.Len1()
+	generatedLoadCoarse []float64) {
+	n := len(quickflow)
 
-	idx := []int{0}
 	for day := 0; day < n; day++ {
-		idx[0] = day
-		doy := dayOfYear.Get(idx)
-		rain := rainfall.Get(idx)
-		qf := quickflow.Get(idx)
-		sf := slowflow.Get(idx)
-		cFactor := covOrCFact.Get(idx)
+		doy := dayOfYear[day]
+		rain := rainfall[day]
+		qf := quickflow[day]
+		sf := slowflow[day]
+		cFactor := covOrCFact[day]
 
 		loadS := dwc * sf * units.MG_PER_LITRE_TO_KG_PER_M3
 
 		loadQ := 0.0
 
-		theKLSCval := klsc.Get(idx)
-		theKLSCClayval := klscFine.Get(idx)
+		theKLSCval := klsc[day]
+		theKLSCClayval := klscFine[day]
 		useAvModel := false
 		//Use averaged data first if needed
 		if useAvModel {
@@ -208,15 +205,15 @@ func usleFine(quickflow, slowflow, rainfall, klsc, klscFine, covOrCFact, dayOfYe
 			//USLE_Daily_Sediment_Conc_mg_per_L := 0
 		}
 
-		quickLoadFine.Set(idx, loadQ)
-		slowLoadFine.Set(idx, loadS)
-		totalFineLoad.Set(idx, loadQ+loadS)
+		quickLoadFine[day] = loadQ
+		slowLoadFine[day] = loadS
+		totalFineLoad[day] = loadQ + loadS
 
 		coarseQuick := USLE_Daily_Load_kg_after_HSDR_applied_Coarse / timeStepInSeconds
-		quickLoadCoarse.Set(idx, coarseQuick)
-		slowLoadCoarse.Set(idx, 0.0) // SURELY INCORRECT
-		totalCoarseLoad.Set(idx, coarseQuick+0.0)
-		generatedLoadFine.Set(idx, USLE_Daily_Load_kg_Fine/timeStepInSeconds)
-		generatedLoadCoarse.Set(idx, USLE_Daily_Load_kg_Coarse/timeStepInSeconds)
+		quickLoadCoarse[day] = coarseQuick
+		slowLoadCoarse[day] = 0.0 // SURELY INCORRECT
+		totalCoarseLoad[day] = coarseQuick + 0.0
+		generatedLoadFine[day] = USLE_Daily_Load_kg_Fine / timeStepInSeconds
+		generatedLoadCoarse[day] = USLE_Daily_Load_kg_Coarse / timeStepInSeconds
 	}
 }

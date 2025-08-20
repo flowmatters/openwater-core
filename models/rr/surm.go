@@ -39,32 +39,28 @@ Surm:
 
 import (
 	"math"
-
-	"github.com/flowmatters/openwater-core/data"
 )
 
 // const SOIL_ET_CONST = 10.0
 
-func surm(rainfall, pet data.ND1[float64],
+func surm(rainfall, pet []float64,
 	initialStore, initialGW, initialTotalStore float64,
 	bfac, coeff, dseep, fcFrac, fimp, rfac, smax, sq, thres float64,
-	runoffTS, quickflowTS, baseflowTS, storeTS data.ND1[float64]) (
+	runoffTS, quickflowTS, baseflowTS, storeTS []float64) (
 	float64, // final store
 	float64, // final GW
 	float64) { // final total store
-	nTimesteps := rainfall.Len1()
+	nTimesteps := len(rainfall)
 
 	soilMoistureStore := initialStore
 	gw := initialGW
 	totalStore := initialTotalStore
-	idx := []int{0}
 	fperv := 1 - fimp
 	fieldCapacity := fcFrac * smax
 
 	for i := 0; i < nTimesteps; i++ {
-		idx[0] = i
-		rainThisTS := rainfall.Get(idx)
-		petThisTS := pet.Get(idx)
+		rainThisTS := rainfall[i]
+		petThisTS := pet[i]
 		quickflow := 0.0
 
 		imperviousRunoff := math.Max(rainThisTS-thres, 0.0)
@@ -101,10 +97,10 @@ func surm(rainfall, pet data.ND1[float64],
 
 		totalStore = soilMoistureStore + gw
 
-		runoffTS.Set(idx, runoff)
-		quickflowTS.Set(idx, quickflow)
-		baseflowTS.Set(idx, baseflow)
-		storeTS.Set(idx, totalStore)
+		runoffTS[i] = runoff
+		quickflowTS[i] = quickflow
+		baseflowTS[i] = baseflow
+		storeTS[i] = totalStore
 	}
 
 	return soilMoistureStore, gw, totalStore

@@ -1,9 +1,5 @@
 package routing
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 /*OW-SPEC
 InstreamCoarseSediment:
 	inputs:
@@ -29,15 +25,13 @@ InstreamCoarseSediment:
 		sediment transport
 */
 
-func instreamCoarseSediment(upstreamMass, lateralMass, reachLocalMass data.ND1[float64],
+func instreamCoarseSediment(upstreamMass, lateralMass, reachLocalMass []float64,
 	channelStore, storedMass float64,
 	deltaT float64,
-	loadDownstream data.ND1[float64]) (float64, float64) {
-	n := upstreamMass.Len1()
-	idx := []int{0}
+	loadDownstream []float64) (float64, float64) {
+	n := len(upstreamMass)
 
 	for i := 0; i < n; i++ {
-		idx[0] = i
 		//Robs standard approach at working out what constituent load we can manipulate this timestep
 		//ToolsModel.determineOuflowAndPreProcessingLoads(this);
 
@@ -57,13 +51,13 @@ func instreamCoarseSediment(upstreamMass, lateralMass, reachLocalMass data.ND1[f
 		//ConstituentOutput divisionConstituents = Division.ConstituentOutputs.Get(Constituent);
 		//DivisionConstituentOutput divisionConstituents = divisionConstituents;
 		//totalDailyConstituentMass = ConstituentOutput.DownstreamFlowMass + ConstituentOutput.StoredMass;
-		incomingMass := upstreamMass.Get(idx) + lateralMass.Get(idx) + reachLocalMass.Get(idx)
+		incomingMass := upstreamMass[i] + lateralMass[i] + reachLocalMass[i]
 		incomingMass *= deltaT
 		totalDailyConstituentMass = storedMass + incomingMass
 
 		// NOT NEEDED		combinedCoarseSedInFlows_Kg_per_Day = (CatchmentInflowMass) + (UpstreamFlowMass)
 
-		//totalVolumeofWaterInLink := reachVolume.Get(idx) + outflow.Get(idx)
+		//totalVolumeofWaterInLink := reachVolume[i] + outflow[i]
 
 		//Use this to implement the same deposition model as Fine sediment
 		//Currently just drop everything
@@ -92,7 +86,7 @@ func instreamCoarseSediment(upstreamMass, lateralMass, reachLocalMass data.ND1[f
 
 		//This one now updates here, and ResultsGopher uses from here
 
-		loadDownstream.Set(idx, totalDailyConstituentMass)
+		loadDownstream[i] = totalDailyConstituentMass
 	}
 	return channelStore, storedMass
 }

@@ -2,7 +2,6 @@ package generation
 
 import (
 	"github.com/flowmatters/openwater-core/conv/units"
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*
@@ -30,21 +29,19 @@ SednetDissolvedNutrientGeneration:
 		tags:
 			nutrients
 */
-func dissolvedNutrients(quickflow, slowflow data.ND1[float64],
+func dissolvedNutrients(quickflow, slowflow []float64,
 	dissConst_EMC, dissConst_DWC float64,
-	quickflowConstituent, slowflowConstituent, totalLoad data.ND1[float64]) {
+	quickflowConstituent, slowflowConstituent, totalLoad []float64) {
 	//All calcs done in units / day then converted back to units per sec for E2 consumption
-	n := quickflow.Len1()
+	n := len(quickflow)
 
-	idx := []int{0}
 	for day := 0; day < n; day++ {
-		idx[0] = day
 
 		DailyConstituent_EMC_mgL := dissConst_EMC // +(dissConst_EMC_Max * Math.Exp(-1 * b1 * daysSinceStart));
 
 		cumecs_to_lpd := float64(units.SECONDS_PER_DAY) * units.CUBIC_METRES_TO_LITRES
-		Quickflow_Litres := quickflow.Get(idx) * cumecs_to_lpd
-		Slowflow_Litres := slowflow.Get(idx) * cumecs_to_lpd
+		Quickflow_Litres := quickflow[day] * cumecs_to_lpd
+		Slowflow_Litres := slowflow[day] * cumecs_to_lpd
 
 		dissolvedConstituent_Quickflow_Load_kg := DailyConstituent_EMC_mgL * Quickflow_Litres * units.MILLIGRAM_TO_KG
 		dissolvedConstituent_Slowflow_Load_kg := dissConst_DWC * Slowflow_Litres * units.MILLIGRAM_TO_KG
@@ -56,9 +53,9 @@ func dissolvedNutrients(quickflow, slowflow data.ND1[float64],
 		// 	Daily_DissolvedConstituent_Concentration_mg_L = 0
 		// }
 
-		quickflowConstituent.Set(idx, dissolvedConstituent_Quickflow_Load_kg/units.SECONDS_PER_DAY)
-		slowflowConstituent.Set(idx, dissolvedConstituent_Slowflow_Load_kg/units.SECONDS_PER_DAY)
-		totalLoad.Set(idx, (dissolvedConstituent_Quickflow_Load_kg+dissolvedConstituent_Slowflow_Load_kg)/units.SECONDS_PER_DAY)
+		quickflowConstituent[day] = dissolvedConstituent_Quickflow_Load_kg / units.SECONDS_PER_DAY
+		slowflowConstituent[day] = dissolvedConstituent_Slowflow_Load_kg / units.SECONDS_PER_DAY
+		totalLoad[day] = (dissolvedConstituent_Quickflow_Load_kg + dissolvedConstituent_Slowflow_Load_kg) / units.SECONDS_PER_DAY
 		// total_Dissolved_Constituent_kg += (dissolvedConstituent_Quickflow_Load_kg + dissolvedConstituent_Slowflow_Load_kg)
 	}
 }

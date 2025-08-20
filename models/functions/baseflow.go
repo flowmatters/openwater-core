@@ -1,9 +1,5 @@
 package functions
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 /*OW-SPEC
 BaseflowFilter:
 	inputs:
@@ -25,12 +21,6 @@ BaseflowFilter:
 		streamlow
 */
 
-func baseflowFilter(streamflow data.ND1[float64],
-	quickflow, baseflow data.ND1[float64]) {
-	n := streamflow.Len1()
-	idx := []int{0}
-
-	for i := 0; i < n; i++ {
-		idx[0] = i
-	}
+func baseflowFilter(streamflow []float64,
+	quickflow, baseflow []float64) {
 }

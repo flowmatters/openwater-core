@@ -6,7 +6,6 @@ import (
 	"math"
 
 	"github.com/flowmatters/openwater-core/conv/units"
-	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/util/fn"
 )
 
@@ -57,7 +56,7 @@ Storage:
 		storage
 */
 
-func checkStorageConfiguration(nLVA int, volumes data.ND1[float64]) error {
+func checkStorageConfiguration(nLVA int, volumes []float64) error {
 	if nLVA == 0 {
 		return errors.New("No points in LVA table or release curves!")
 	}
@@ -69,26 +68,26 @@ func checkStorageConfiguration(nLVA int, volumes data.ND1[float64]) error {
 	return nil
 }
 
-func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVolume, targetMinimumCapacity data.ND1[float64],
+func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVolume, targetMinimumCapacity []float64,
 	initialVolume, initialLevel, initialArea float64,
 	deltaT float64,
 	nLVA int,
-	levels, volumes, areas, minRelease, maxRelease data.ND1[float64],
-	volumeTS, outflowTS, rainfallVolume, evaporationVolume data.ND1[float64]) (volume, level, area float64) {
-	idxCurve0 := []int{0}
-	idxCurveN := []int{nLVA - 1}
+	levels, volumes, areas, minRelease, maxRelease []float64,
+	volumeTS, outflowTS, rainfallVolume, evaporationVolume []float64) (volume, level, area float64) {
+	idxCurve0 := 0
+	idxCurveN := nLVA - 1
 
-	volCurveMin := volumes.Get(idxCurve0)
-	volCurveMax := volumes.Get(idxCurveN)
-	maxSpill := minRelease.Get(idxCurveN)
+	volCurveMin := volumes[idxCurve0]
+	volCurveMax := volumes[idxCurveN]
+	maxSpill := minRelease[idxCurveN]
 
 	// Water balance functions
-	cappedPiecewise := func(vol float64, ys data.ND1[float64]) float64 {
+	cappedPiecewise := func(vol float64, ys []float64) float64 {
 		if vol < volCurveMin {
-			return ys.Get(idxCurve0)
+			return ys[idxCurve0]
 		}
 		if vol > volCurveMax {
-			return ys.Get(idxCurveN)
+			return ys[idxCurveN]
 		}
 		res, err := fn.Piecewise(vol, volumes, ys)
 		if err != nil {
@@ -133,23 +132,21 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 	}
 
 	volume = initialVolume
-	n := rainfallTS.Len1()
+	n := len(rainfallTS)
 	nSubtimeSteps := 0
 
-	idx := []int{0}
 	for i := 0; i < n; i++ {
-		idx[0] = i
 		timeRemaining := deltaT
 		subtimestep := deltaT
 
 		outflowVolume := 0.0
 
-		targetMinCap := targetMinimumCapacity.Get(idx)
+		targetMinCap := targetMinimumCapacity[i]
 		targetMaxVol := volCurveMax - targetMinCap
 		autoAdjustDemand := false //true
 
-		inflow := inflowTS.Get(idx)
-		origDemand := demandTS.Get(idx)
+		inflow := inflowTS[i]
+		origDemand := demandTS[i]
 		demand := origDemand
 
 		// volumeOverTarget := math.Max(0.0, volume - targetMaxVol)
@@ -171,12 +168,12 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 		rainfallVolForTimestep := 0.0
 		evaporationVolForTimestep := 0.0
 
-		rainfallPerSecond := rainfallTS.Get(idx) / deltaT
-		petPerSecond := petTS.Get(idx) / deltaT
+		rainfallPerSecond := rainfallTS[i] / deltaT
+		petPerSecond := petTS[i] / deltaT
 		netAtmosphericFluxDepthPerSecond := (rainfallPerSecond - petPerSecond) * units.MILLIMETRES_TO_METRES
 
 		for timeRemaining > 0 {
-			nSubtimeSteps += 1
+			nSubtimeSteps++
 
 			subtimestep = math.Min(timeRemaining, subtimestep*2)
 
@@ -290,13 +287,11 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 			timeRemaining -= subtimestep
 		}
 
-		volumeTS.Set(idx, volume)
-
+		volumeTS[i] = volume
 		outflowRate := outflowVolume / deltaT
-		outflowTS.Set(idx, outflowRate)
-
-		rainfallVolume.Set(idx, rainfallVolForTimestep/deltaT)
-		evaporationVolume.Set(idx, evaporationVolForTimestep/deltaT)
+		outflowTS[i] = outflowRate
+		rainfallVolume[i] = rainfallVolForTimestep / deltaT
+		evaporationVolume[i] = evaporationVolForTimestep / deltaT
 	}
 
 	level = cappedPiecewise(volume, levels)

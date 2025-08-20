@@ -1,9 +1,5 @@
 package functions
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 /*OW-SPEC
 Input:
 	inputs:
@@ -23,7 +19,7 @@ Input:
 		dates function
 */
 
-func inputNode(input data.ND1[float64],
-	output data.ND1[float64]) {
+func inputNode(input []float64,
+	output []float64) {
 	output.CopyFrom(input)
 }

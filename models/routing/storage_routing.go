@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/util/fn"
 )
 
@@ -48,12 +47,11 @@ StorageRouting:
 */
 
 // dsLaterals,
-func storageRouting(inflows, laterals, rainfall, evap data.ND1[float64],
+func storageRouting(inflows, laterals, rainfall, evap []float64,
 	s, prevInflow, prevOutflow float64,
 	bias, k /*RoutingConstant */, x /*RoutingPower*/, area, deadStorage, deltaT float64,
-	outflows, storages data.ND1[float64]) (float64, float64, float64) {
-	n := inflows.Len1()
-	idx := []int{0}
+	outflows, storages []float64) (float64, float64, float64) {
+	n := len(inflows)
 
 	Klimit := 0.0
 	Qlimit := 0.0
@@ -81,10 +79,9 @@ func storageRouting(inflows, laterals, rainfall, evap data.ND1[float64],
 	inflow := 0.0
 
 	for i := 0; i < n; i++ {
-		idx[0] = i
 
-		inflow = inflows.Get(idx)
-		lateral := laterals.Get(idx)
+		inflow = inflows[i]
+		lateral := laterals[i]
 
 		if math.IsNaN(inflow) {
 			fmt.Printf("inflow=%f\n", inflow)
@@ -92,13 +89,13 @@ func storageRouting(inflows, laterals, rainfall, evap data.ND1[float64],
 			fmt.Printf("storage=%f\n", storage)
 			fmt.Printf("deltaT=%f\n", deltaT)
 		}
-		evapRate := (evap.Get(idx) - rainfall.Get(idx)) / deltaT
+		evapRate := (evap[i] - rainfall[i]) / deltaT
 
 		qi, outflow, storage = calcOutflow(i, inflow, lateral, bias, qi, outflow, storage,
 			evapRate, area, deadStorage, deltaT, x, k, Qlimit, Klimit, Koffset)
 
-		outflows.Set(idx, outflow)
-		storages.Set(idx, storage)
+		outflows[i] = outflow
+		storages[i] = storage
 	}
 
 	return storage, inflow, outflow

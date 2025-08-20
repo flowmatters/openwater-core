@@ -1,9 +1,6 @@
 package routing
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-	//	"fmt"
-)
+//	"fmt"
 
 const MINIMUM_VOLUME = 1e-2
 
@@ -35,32 +32,30 @@ LumpedConstituentRouting:
 		constituent routing
 */
 
-func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage data.ND1[float64],
+func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage []float64,
 	initialStoredMass float64,
 	x, pointInput, deltaT float64,
-	outflowLoads, pointSourceLoad data.ND1[float64]) (storedMass float64) {
+	outflowLoads, pointSourceLoad []float64) (storedMass float64) {
 	storedMass = initialStoredMass
-	nDays := inflowLoads.Len1()
+	nDays := len(inflowLoads)
 
-	idx := []int{0}
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		inflowLoad := inflowLoads.Get(idx)
-		lateralLoad := lateralLoads.Get(idx)
+		inflowLoad := inflowLoads[i]
+		lateralLoad := lateralLoads[i]
 		totalLoadIn := (inflowLoad + lateralLoad + pointInput) * deltaT
 
-		outflowR := outflows.Get(idx)
+		outflowR := outflows[i]
 		outflowV := outflowR * deltaT
-		storedV := storage.Get(idx)
+		storedV := storage[i]
 
 		workingMass := storedMass + totalLoadIn
 		workingVol := outflowV + storedV
 
 		if workingVol < MINIMUM_VOLUME {
 			storedMass = 0.0
-			outflowLoads.Set(idx, 0.0)
+			outflowLoads[i] = 0.0
 			if pointSourceLoad != nil {
-				pointSourceLoad.Set(idx, 0.0)
+				pointSourceLoad[i] = 0.0
 			}
 			continue
 		}
@@ -69,9 +64,9 @@ func LumpedConstituentTransport(inflowLoads, lateralLoads, outflows, storage dat
 		storedMass = concentration * storedV
 		outflowLoad := concentration * outflowR
 
-		outflowLoads.Set(idx, outflowLoad)
+		outflowLoads[i] = outflowLoad
 		if pointSourceLoad != nil {
-			pointSourceLoad.Set(idx, pointInput)
+			pointSourceLoad[i] = pointInput
 		}
 	}
 	return storedMass

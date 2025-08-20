@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/util/fn"
 )
 
@@ -32,17 +31,15 @@ RatingCurvePartition:
 		partition
 */
 
-func ratingPartition(input data.ND1[float64],
+func ratingPartition(input []float64,
 	nPts int,
-	inputAmount, proportion data.ND1[float64],
-	output1, output2 data.ND1[float64]) {
+	inputAmount, proportion []float64,
+	output1, output2 []float64) {
 
-	nDays := input.Len1()
-	idx := []int{0}
+	nDays := len(input)
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		incoming := input.Get(idx)
+		incoming := input[i]
 		frac, err := fn.Piecewise(incoming, inputAmount, proportion)
 		if err != nil {
 			panic(err)
@@ -57,7 +54,7 @@ func ratingPartition(input data.ND1[float64],
 			panic("nan")
 		}
 
-		output1.Set(idx, incoming*frac)
-		output2.Set(idx, incoming*(1-frac))
+		output1[i] = incoming * frac
+		output2[i] = incoming * (1 - frac)
 	}
 }

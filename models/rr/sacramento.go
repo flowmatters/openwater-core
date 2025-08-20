@@ -4,8 +4,6 @@ package rr
 
 import (
 	"math"
-
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -85,20 +83,20 @@ func makeUnitHydrograph(uh1, uh2, uh3, uh4, uh5 float64) []float64 {
 	return base
 }
 
-func sacramento(rainfall, pet data.ND1[float64],
+func sacramento(rainfall, pet []float64,
 	uprTensionWater, uprFreeWater, lwrTensionWater,
 	lwrPrimaryFreeWater, lwrSupplFreeWater, additionalImperviousStore float64,
 	lzpk, lzsk, uzk, uztwm, uzfwm, lztwm, lzfsm, lzfpm, pfree, rexp,
 	zperc, side, ssout, pctim, adimp, sarva, rserv,
 	uh1, uh2, uh3, uh4, uh5 float64,
-	actualET, runoff, imperviousRunoff, surfaceRunoff, baseflow data.ND1[float64]) (
+	actualET, runoff, imperviousRunoff, surfaceRunoff, baseflow []float64) (
 	float64, // final uprTensionWater,
 	float64, // final uprFreeWater,
 	float64, // final lwrTensionWater,
 	float64, // final lwrPrimaryFreeWater
 	float64, // final lwrSupplFreeWater
 	float64) { // final additionalImperviousStore
-	nDays := rainfall.Len1()
+	nDays := len(rainfall)
 
 	// percMax := pbase * (1 + zperc)
 	// lowerMax := (1+side)*(lzfpm+lzfsm) + lztwm
@@ -118,9 +116,7 @@ func sacramento(rainfall, pet data.ND1[float64],
 
 	alzfsc := lwrSupplFreeWater * (1. + side)
 	alzfpc := lwrPrimaryFreeWater * (1. + side)
-	idx := []int{0}
 	for timestep := 0; timestep < nDays; timestep++ {
-		idx[0] = timestep
 		// prevUprTensionWater := uprTensionWater
 		// prevUprFreeWater := uprFreeWater
 		// prevLwrTensionWater := lwrTensionWater
@@ -128,8 +124,8 @@ func sacramento(rainfall, pet data.ND1[float64],
 		// prevLwrSuppFreeWater := lwrSupplFreeWater
 		// prevAddImpStore := additionalImperviousStore
 		// prevHydrographStore := sumSlice(qq)
-		evapt := pet.Get(idx)
-		pliq := rainfall.Get(idx)
+		evapt := pet[timestep]
+		pliq := rainfall[timestep]
 
 		//     Determine evaporation from upper zone tension water store
 		e1 := 0.0
@@ -460,11 +456,11 @@ func sacramento(rainfall, pet data.ND1[float64],
 		// }
 
 		bf := baseflowFraction * qf
-		imperviousRunoff.Set(idx, roimp)
-		surfaceRunoff.Set(idx, qf-bf)
-		baseflow.Set(idx, bf)
-		runoff.Set(idx, qf)
-		actualET.Set(idx, e1+e2+e3+e4+e5)
+		imperviousRunoff[timestep] = roimp
+		surfaceRunoff[timestep] = qf - bf
+		baseflow[timestep] = bf
+		runoff[timestep] = qf
+		actualET[timestep] = e1 + e2 + e3 + e4 + e5
 		//hydrographStore := sumSlice(qq)
 
 		// deltaS := ((uprTensionWater-prevUprTensionWater)+
