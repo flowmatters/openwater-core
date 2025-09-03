@@ -180,20 +180,36 @@ func (m *ClimateVariables) Run(inputs data.ND3[float64], states data.ND2[float64
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      vaporpressure := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      vaporpressure := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      vaporpressureSliced := vaporpressure.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      dewpoint := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      dewpoint := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      dewpointSliced := dewpoint.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      wetbulb := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      wetbulb := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      wetbulbSliced := wetbulb.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      deltat := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      deltat := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      deltatSliced := deltat.Unroll()
       
       
 
-       climateVariables(drybulb,humidity,elevation,vaporpressure,dewpoint,wetbulb,deltat)
+       climateVariables(drybulb,humidity,elevation,vaporpressureSliced,dewpointSliced,wetbulbSliced,deltatSliced)
+
+      
+      
+      vaporpressure.Reroll()
+      
+      dewpoint.Reroll()
+      
+      wetbulb.Reroll()
+      
+      deltat.Reroll()
+      
+      
 
       
       

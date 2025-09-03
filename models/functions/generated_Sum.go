@@ -160,11 +160,18 @@ func (m *Sum) Run(inputs data.ND3[float64], states data.ND2[float64], outputs da
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      out := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      out := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outSliced := out.Unroll()
       
       
 
-       sum(i1,i2,out)
+       sum(i1,i2,outSliced)
+
+      
+      
+      out.Reroll()
+      
+      
 
       
       

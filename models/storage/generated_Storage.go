@@ -380,20 +380,36 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      volume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      volume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      volumeSliced := volume.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowSliced := outflow.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      rainfallvolume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      rainfallvolume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      rainfallvolumeSliced := rainfallvolume.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      evaporationvolume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      evaporationvolume := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      evaporationvolumeSliced := evaporationvolume.Unroll()
       
       
 
-      currentvolume,level,area= storageWaterBalance(rainfall,pet,inflow,demand,targetminimumvolume,targetminimumcapacity,currentvolume,level,area,deltat,nlva,levels,volumes,areas,minrelease,maxrelease,volume,outflow,rainfallvolume,evaporationvolume)
+      currentvolume,level,area= storageWaterBalance(rainfall,pet,inflow,demand,targetminimumvolume,targetminimumcapacity,currentvolume,level,area,deltat,nlva,levels,volumes,areas,minrelease,maxrelease,volumeSliced,outflowSliced,rainfallvolumeSliced,evaporationvolumeSliced)
+
+      
+      
+      volume.Reroll()
+      
+      outflow.Reroll()
+      
+      rainfallvolume.Reroll()
+      
+      evaporationvolume.Reroll()
+      
+      
 
       
       

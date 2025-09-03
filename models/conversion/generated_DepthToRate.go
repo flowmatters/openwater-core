@@ -192,11 +192,18 @@ func (m *DepthToRate) Run(inputs data.ND3[float64], states data.ND2[float64], ou
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowSliced := outflow.Unroll()
       
       
 
-       depthToRate(input,deltat,area,outflow)
+       depthToRate(input,deltat,area,outflowSliced)
+
+      
+      
+      outflow.Reroll()
+      
+      
 
       
       

@@ -250,14 +250,24 @@ func (m *RatingCurvePartition) Run(inputs data.ND3[float64], states data.ND2[flo
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      output1 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      output1 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      output1Sliced := output1.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      output2 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      output2 := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      output2Sliced := output2.Unroll()
       
       
 
-       ratingPartition(input,npts,inputamount,proportion,output1,output2)
+       ratingPartition(input,npts,inputamount,proportion,output1Sliced,output2Sliced)
+
+      
+      
+      output1.Reroll()
+      
+      output2.Reroll()
+      
+      
 
       
       

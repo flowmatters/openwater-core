@@ -207,20 +207,36 @@ func (m *DateGenerator) Run(inputs data.ND3[float64], states data.ND2[float64], 
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      date := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      date := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      dateSliced := date.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      month := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      month := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      monthSliced := month.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      year := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      year := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      yearSliced := year.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      dayofyear := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      dayofyear := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      dayofyearSliced := dayofyear.Unroll()
       
       
 
-       dateGenerator(tick,startdate,startmonth,startyear,date,month,year,dayofyear)
+       dateGenerator(tick,startdate,startmonth,startyear,dateSliced,monthSliced,yearSliced,dayofyearSliced)
+
+      
+      
+      date.Reroll()
+      
+      month.Reroll()
+      
+      year.Reroll()
+      
+      dayofyear.Reroll()
+      
+      
 
       
       

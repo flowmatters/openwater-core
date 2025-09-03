@@ -450,32 +450,60 @@ func (m *USLEFineSedimentGeneration) Run(inputs data.ND3[float64], states data.N
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      quickloadfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      quickloadfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      quickloadfineSliced := quickloadfine.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      slowloadfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      slowloadfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      slowloadfineSliced := slowloadfine.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      quickloadcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      quickloadcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      quickloadcoarseSliced := quickloadcoarse.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      slowloadcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      slowloadcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      slowloadcoarseSliced := slowloadcoarse.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 4
-      totalfineload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      totalfineload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      totalfineloadSliced := totalfineload.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 5
-      totalcoarseload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      totalcoarseload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      totalcoarseloadSliced := totalcoarseload.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 6
-      generatedloadfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      generatedloadfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      generatedloadfineSliced := generatedloadfine.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 7
-      generatedloadcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      generatedloadcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      generatedloadcoarseSliced := generatedloadcoarse.Unroll()
       
       
 
-       usleFine(quickflow,baseflow,rainfall,klsc,klsc_fine,covorcfact,dayofyear,s,p,rainthreshold,alpha,beta,eta,a1,a2,a3,dwc,avk,avls,avfines,area,maxconc,uslehsdrfine,uslehsdrcoarse,timestepinseconds,quickloadfine,slowloadfine,quickloadcoarse,slowloadcoarse,totalfineload,totalcoarseload,generatedloadfine,generatedloadcoarse)
+       usleFine(quickflow,baseflow,rainfall,klsc,klsc_fine,covorcfact,dayofyear,s,p,rainthreshold,alpha,beta,eta,a1,a2,a3,dwc,avk,avls,avfines,area,maxconc,uslehsdrfine,uslehsdrcoarse,timestepinseconds,quickloadfineSliced,slowloadfineSliced,quickloadcoarseSliced,slowloadcoarseSliced,totalfineloadSliced,totalcoarseloadSliced,generatedloadfineSliced,generatedloadcoarseSliced)
+
+      
+      
+      quickloadfine.Reroll()
+      
+      slowloadfine.Reroll()
+      
+      quickloadcoarse.Reroll()
+      
+      slowloadcoarse.Reroll()
+      
+      totalfineload.Reroll()
+      
+      totalcoarseload.Reroll()
+      
+      generatedloadfine.Reroll()
+      
+      generatedloadcoarse.Reroll()
+      
+      
 
       
       

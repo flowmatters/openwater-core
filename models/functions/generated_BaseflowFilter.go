@@ -157,14 +157,24 @@ func (m *BaseflowFilter) Run(inputs data.ND3[float64], states data.ND2[float64],
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      quickflowSliced := quickflow.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      baseflowSliced := baseflow.Unroll()
       
       
 
-       baseflowFilter(streamflow,quickflow,baseflow)
+       baseflowFilter(streamflow,quickflowSliced,baseflowSliced)
+
+      
+      
+      quickflow.Reroll()
+      
+      baseflow.Reroll()
+      
+      
 
       
       

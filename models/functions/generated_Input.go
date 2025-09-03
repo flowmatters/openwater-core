@@ -157,11 +157,18 @@ func (m *Input) Run(inputs data.ND3[float64], states data.ND2[float64], outputs 
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outputSliced := output.Unroll()
       
       
 
-       inputNode(input,output)
+       inputNode(input,outputSliced)
+
+      
+      
+      output.Reroll()
+      
+      
 
       
       

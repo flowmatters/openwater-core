@@ -224,11 +224,18 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowSliced := outflow.Unroll()
       
       
 
-      s,previnflow,prevoutflow= muskingum(inflow,lateral,s,previnflow,prevoutflow,k,x,deltat,outflow)
+      s,previnflow,prevoutflow= muskingum(inflow,lateral,s,previnflow,prevoutflow,k,x,deltat,outflowSliced)
+
+      
+      
+      outflow.Reroll()
+      
+      
 
       
       

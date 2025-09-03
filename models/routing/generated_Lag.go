@@ -185,11 +185,18 @@ func (m *Lag) Run(inputs data.ND3[float64], states data.ND2[float64], outputs da
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowSliced := outflow.Unroll()
       
       
 
-      lagged= lag(inflow,lagged,timelag,outflow)
+      lagged= lag(inflow,lagged,timelag,outflowSliced)
+
+      
+      
+      outflow.Reroll()
+      
+      
 
       
       // TODO Retrieve states

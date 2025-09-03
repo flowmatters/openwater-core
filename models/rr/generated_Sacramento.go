@@ -521,23 +521,42 @@ func (m *Sacramento) Run(inputs data.ND3[float64], states data.ND2[float64], out
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      actualet := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      actualet := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      actualetSliced := actualet.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      runoffSliced := runoff.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      imperviousrunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      imperviousrunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      imperviousrunoffSliced := imperviousrunoff.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      surfacerunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      surfacerunoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      surfacerunoffSliced := surfacerunoff.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 4
-      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      baseflowSliced := baseflow.Unroll()
       
       
 
-      uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore= sacramento(rainfall,pet,uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore,lzpk,lzsk,uzk,uztwm,uzfwm,lztwm,lzfsm,lzfpm,pfree,rexp,zperc,side,ssout,pctim,adimp,sarva,rserv,uh1,uh2,uh3,uh4,uh5,actualet,runoff,imperviousrunoff,surfacerunoff,baseflow)
+      uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore= sacramento(rainfall,pet,uprtensionwater,uprfreewater,lwrtensionwater,lwrprimaryfreewater,lwrsupplfreewater,additionalimperviousstore,lzpk,lzsk,uzk,uztwm,uzfwm,lztwm,lzfsm,lzfpm,pfree,rexp,zperc,side,ssout,pctim,adimp,sarva,rserv,uh1,uh2,uh3,uh4,uh5,actualetSliced,runoffSliced,imperviousrunoffSliced,surfacerunoffSliced,baseflowSliced)
+
+      
+      
+      actualet.Reroll()
+      
+      runoff.Reroll()
+      
+      imperviousrunoff.Reroll()
+      
+      surfacerunoff.Reroll()
+      
+      baseflow.Reroll()
+      
+      
 
       
       

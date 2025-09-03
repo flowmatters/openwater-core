@@ -225,14 +225,24 @@ func (m *ConstituentDecay) Run(inputs data.ND3[float64], states data.ND2[float64
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      decayedload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      decayedload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      decayedloadSliced := decayedload.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowloadSliced := outflowload.Unroll()
       
       
 
-      storedmass= constituentDecay(inflowload,lateralload,inflow,outflow,storage,storedmass,x,halflife,deltat,decayedload,outflowload)
+      storedmass= constituentDecay(inflowload,lateralload,inflow,outflow,storage,storedmass,x,halflife,deltat,decayedloadSliced,outflowloadSliced)
+
+      
+      
+      decayedload.Reroll()
+      
+      outflowload.Reroll()
+      
+      
 
       
       

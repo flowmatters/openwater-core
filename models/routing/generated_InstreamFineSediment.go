@@ -379,23 +379,42 @@ func (m *InstreamFineSediment) Run(inputs data.ND3[float64], states data.ND2[flo
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loaddownstreamSliced := loaddownstream.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loadtofloodplainSliced := loadtofloodplain.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      loadtochanneldeposition := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loadtochanneldeposition := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loadtochanneldepositionSliced := loadtochanneldeposition.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      floodplaindepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      floodplaindepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      floodplaindepositionfractionSliced := floodplaindepositionfraction.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 4
-      channeldepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      channeldepositionfraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      channeldepositionfractionSliced := channeldepositionfraction.Unroll()
       
       
 
-      channelstorefine,totalstoredmass= instreamFineSediment(upstreammass,lateralmass,reachlocalmass,reachvolume,outflow,channelstorefine,totalstoredmass,bankfullflow,finesedsettvelocityflood,floodplainarea,linkwidth,linklength,linkslope,bankheight,propbankheightforfinedep,sedbulkdensity,manningsn,finesedsettvelocity,finesedremobvelocity,durationinseconds,loaddownstream,loadtofloodplain,loadtochanneldeposition,floodplaindepositionfraction,channeldepositionfraction)
+      channelstorefine,totalstoredmass= instreamFineSediment(upstreammass,lateralmass,reachlocalmass,reachvolume,outflow,channelstorefine,totalstoredmass,bankfullflow,finesedsettvelocityflood,floodplainarea,linkwidth,linklength,linkslope,bankheight,propbankheightforfinedep,sedbulkdensity,manningsn,finesedsettvelocity,finesedremobvelocity,durationinseconds,loaddownstreamSliced,loadtofloodplainSliced,loadtochanneldepositionSliced,floodplaindepositionfractionSliced,channeldepositionfractionSliced)
+
+      
+      
+      loaddownstream.Reroll()
+      
+      loadtofloodplain.Reroll()
+      
+      loadtochanneldeposition.Reroll()
+      
+      floodplaindepositionfraction.Reroll()
+      
+      channeldepositionfraction.Reroll()
+      
+      
 
       
       

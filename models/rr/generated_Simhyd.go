@@ -314,20 +314,36 @@ func (m *Simhyd) Run(inputs data.ND3[float64], states data.ND2[float64], outputs
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      runoffSliced := runoff.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      quickflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      quickflowSliced := quickflow.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      baseflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      baseflowSliced := baseflow.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      store := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      store := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      storeSliced := store.Unroll()
       
       
 
-      soilmoisturestore,groundwater,totalstore= simhyd(rainfall,pet,soilmoisturestore,groundwater,totalstore,baseflowcoefficient,imperviousthreshold,infiltrationcoefficient,infiltrationshape,interflowcoefficient,perviousfraction,rainfallinterceptionstorecapacity,rechargecoefficient,soilmoisturestorecapacity,runoff,quickflow,baseflow,store)
+      soilmoisturestore,groundwater,totalstore= simhyd(rainfall,pet,soilmoisturestore,groundwater,totalstore,baseflowcoefficient,imperviousthreshold,infiltrationcoefficient,infiltrationshape,interflowcoefficient,perviousfraction,rainfallinterceptionstorecapacity,rechargecoefficient,soilmoisturestorecapacity,runoffSliced,quickflowSliced,baseflowSliced,storeSliced)
+
+      
+      
+      runoff.Reroll()
+      
+      quickflow.Reroll()
+      
+      baseflow.Reroll()
+      
+      store.Reroll()
+      
+      
 
       
       

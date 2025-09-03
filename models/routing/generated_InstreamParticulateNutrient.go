@@ -238,20 +238,36 @@ func (m *InstreamParticulateNutrient) Run(inputs data.ND3[float64], states data.
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      loaddeposited := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loaddeposited := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loaddepositedSliced := loaddeposited.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      loadfromstreambank := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loadfromstreambank := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loadfromstreambankSliced := loadfromstreambank.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loaddownstreamSliced := loaddownstream.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loadtofloodplainSliced := loadtofloodplain.Unroll()
       
       
 
-      instreamstoredmass,channelstoredmass= instreamParticulateNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,streambankerosion,lateralsediment,floodplaindepositionfraction,channeldepositionfraction,instreamstoredmass,channelstoredmass,particulatenutrientconcentration,soilpercentfine,durationinseconds,loaddeposited,loadfromstreambank,loaddownstream,loadtofloodplain)
+      instreamstoredmass,channelstoredmass= instreamParticulateNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,streambankerosion,lateralsediment,floodplaindepositionfraction,channeldepositionfraction,instreamstoredmass,channelstoredmass,particulatenutrientconcentration,soilpercentfine,durationinseconds,loaddepositedSliced,loadfromstreambankSliced,loaddownstreamSliced,loadtofloodplainSliced)
+
+      
+      
+      loaddeposited.Reroll()
+      
+      loadfromstreambank.Reroll()
+      
+      loaddownstream.Reroll()
+      
+      loadtofloodplain.Reroll()
+      
+      
 
       
       

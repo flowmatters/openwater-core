@@ -180,11 +180,18 @@ func (m *PassLoadIfFlow) Run(inputs data.ND3[float64], states data.ND2[float64],
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outputload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outputload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outputloadSliced := outputload.Unroll()
       
       
 
-       passLoadIfFlow(flow,inputload,scalingfactor,outputload)
+       passLoadIfFlow(flow,inputload,scalingfactor,outputloadSliced)
+
+      
+      
+      outputload.Reroll()
+      
+      
 
       
       

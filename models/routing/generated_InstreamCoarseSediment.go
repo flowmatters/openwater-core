@@ -193,11 +193,18 @@ func (m *InstreamCoarseSediment) Run(inputs data.ND3[float64], states data.ND2[f
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loaddownstreamSliced := loaddownstream.Unroll()
       
       
 
-      channelstore,totalstoredmass= instreamCoarseSediment(upstreammass,lateralmass,reachlocalmass,channelstore,totalstoredmass,durationinseconds,loaddownstream)
+      channelstore,totalstoredmass= instreamCoarseSediment(upstreammass,lateralmass,reachlocalmass,channelstore,totalstoredmass,durationinseconds,loaddownstreamSliced)
+
+      
+      
+      loaddownstream.Reroll()
+      
+      
 
       
       

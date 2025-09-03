@@ -160,14 +160,24 @@ func (m *PartitionDemand) Run(inputs data.ND3[float64], states data.ND2[float64]
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowSliced := outflow.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      extraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      extraction := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      extractionSliced := extraction.Unroll()
       
       
 
-       partitionDemand(input,demand,outflow,extraction)
+       partitionDemand(input,demand,outflowSliced,extractionSliced)
+
+      
+      
+      outflow.Reroll()
+      
+      extraction.Reroll()
+      
+      
 
       
       

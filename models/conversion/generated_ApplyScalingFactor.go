@@ -177,11 +177,18 @@ func (m *ApplyScalingFactor) Run(inputs data.ND3[float64], states data.ND2[float
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outputSliced := output.Unroll()
       
       
 
-       applyScaling(input,scale,output)
+       applyScaling(input,scale,outputSliced)
+
+      
+      
+      output.Reroll()
+      
+      
 
       
       

@@ -172,14 +172,24 @@ func (m *StorageTrapAll) Run(inputs data.ND3[float64], states data.ND2[float64],
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      trappedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      trappedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      trappedmassSliced := trappedmass.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      outflowmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflowmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowmassSliced := outflowmass.Unroll()
       
       
 
-      storedmass= storageTrapAll(inflowmass,inflow,outflow,storagevolume,storedmass,trappedmass,outflowmass)
+      storedmass= storageTrapAll(inflowmass,inflow,outflow,storagevolume,storedmass,trappedmassSliced,outflowmassSliced)
+
+      
+      
+      trappedmass.Reroll()
+      
+      outflowmass.Reroll()
+      
+      
 
       
       

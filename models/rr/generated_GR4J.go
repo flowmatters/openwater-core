@@ -245,11 +245,18 @@ func (m *GR4J) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      runoffSliced := runoff.Unroll()
       
       
 
-      s,r,n1,n2,q1,q9= gr4j(rainfall,pet,s,r,n1,n2,q1,q9,x1,x2,x3,x4,runoff)
+      s,r,n1,n2,q1,q9= gr4j(rainfall,pet,s,r,n1,n2,q1,q9,x1,x2,x3,x4,runoffSliced)
+
+      
+      
+      runoff.Reroll()
+      
+      
 
       
       // TODO Retrieve states

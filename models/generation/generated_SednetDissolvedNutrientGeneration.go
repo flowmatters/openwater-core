@@ -195,17 +195,30 @@ func (m *SednetDissolvedNutrientGeneration) Run(inputs data.ND3[float64], states
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      quickflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      quickflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      quickflowconstituentSliced := quickflowconstituent.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      slowflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      slowflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      slowflowconstituentSliced := slowflowconstituent.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      totalloadSliced := totalload.Unroll()
       
       
 
-       dissolvedNutrients(quickflow,slowflow,dissconst_emc,dissconst_dwc,quickflowconstituent,slowflowconstituent,totalload)
+       dissolvedNutrients(quickflow,slowflow,dissconst_emc,dissconst_dwc,quickflowconstituentSliced,slowflowconstituentSliced,totalloadSliced)
+
+      
+      
+      quickflowconstituent.Reroll()
+      
+      slowflowconstituent.Reroll()
+      
+      totalload.Reroll()
+      
+      
 
       
       

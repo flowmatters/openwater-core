@@ -177,11 +177,18 @@ func (m *DeliveryRatio) Run(inputs data.ND3[float64], states data.ND2[float64], 
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      output := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outputSliced := output.Unroll()
       
       
 
-       applyScaling(input,fraction,output)
+       applyScaling(input,fraction,outputSliced)
+
+      
+      
+      output.Reroll()
+      
+      
 
       
       

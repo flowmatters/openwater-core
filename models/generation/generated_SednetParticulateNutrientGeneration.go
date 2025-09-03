@@ -309,23 +309,42 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3[float64], stat
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      quickflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      quickflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      quickflowconstituentSliced := quickflowconstituent.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      slowflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      slowflowconstituent := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      slowflowconstituentSliced := slowflowconstituent.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      totalloadSliced := totalload.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      hillslopecontribution := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      hillslopecontribution := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      hillslopecontributionSliced := hillslopecontribution.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 4
-      gullycontribution := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      gullycontribution := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      gullycontributionSliced := gullycontribution.Unroll()
       
       
 
-       particulateNutrients(finesedmodelfinesheetgeneratedkg,finesedmodelcoarsesheetgeneratedkg,finesedmodelfinegullygeneratedkg,finesedmodelcoarsegullygeneratedkg,slowflow,area,nutsurfsoilconc,hilldeliveryratio,nutrient_enrichment_ratio,nutsubsoilconc,nutrient_enrichment_ratio_gully,gullydeliveryratio,nutrientdwc,do_p_creams_enrichment,quickflowconstituent,slowflowconstituent,totalload,hillslopecontribution,gullycontribution)
+       particulateNutrients(finesedmodelfinesheetgeneratedkg,finesedmodelcoarsesheetgeneratedkg,finesedmodelfinegullygeneratedkg,finesedmodelcoarsegullygeneratedkg,slowflow,area,nutsurfsoilconc,hilldeliveryratio,nutrient_enrichment_ratio,nutsubsoilconc,nutrient_enrichment_ratio_gully,gullydeliveryratio,nutrientdwc,do_p_creams_enrichment,quickflowconstituentSliced,slowflowconstituentSliced,totalloadSliced,hillslopecontributionSliced,gullycontributionSliced)
+
+      
+      
+      quickflowconstituent.Reroll()
+      
+      slowflowconstituent.Reroll()
+      
+      totalload.Reroll()
+      
+      hillslopecontribution.Reroll()
+      
+      gullycontribution.Reroll()
+      
+      
 
       
       

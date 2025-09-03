@@ -222,14 +222,24 @@ func (m *LumpedConstituentRouting) Run(inputs data.ND3[float64], states data.ND2
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowloadSliced := outflowload.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      pointsourceload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      pointsourceload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      pointsourceloadSliced := pointsourceload.Unroll()
       
       
 
-      storedmass= LumpedConstituentTransport(inflowload,lateralload,outflow,storage,storedmass,x,pointinput,deltat,outflowload,pointsourceload)
+      storedmass= LumpedConstituentTransport(inflowload,lateralload,outflow,storage,storedmass,x,pointinput,deltat,outflowloadSliced,pointsourceloadSliced)
+
+      
+      
+      outflowload.Reroll()
+      
+      pointsourceload.Reroll()
+      
+      
 
       
       

@@ -285,20 +285,36 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      decayedload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      decayedload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      decayedloadSliced := decayedload.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loaddownstream := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loaddownstreamSliced := loaddownstream.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loadtofloodplain := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loadtofloodplainSliced := loadtofloodplain.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      loadfrompointsource := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      loadfrompointsource := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loadfrompointsourceSliced := loadfrompointsource.Unroll()
       
       
 
-      totalstoredmass= instreamDissolvedNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,floodplaindepositionfraction,totalstoredmass,dodecay,pointsourceload,linkheight,linkwidth,linklength,uptakevelocity,durationinseconds,decayedload,loaddownstream,loadtofloodplain,loadfrompointsource)
+      totalstoredmass= instreamDissolvedNutrient(incomingmassupstream,incomingmasslateral,reachvolume,outflow,floodplaindepositionfraction,totalstoredmass,dodecay,pointsourceload,linkheight,linkwidth,linklength,uptakevelocity,durationinseconds,decayedloadSliced,loaddownstreamSliced,loadtofloodplainSliced,loadfrompointsourceSliced)
+
+      
+      
+      decayedload.Reroll()
+      
+      loaddownstream.Reroll()
+      
+      loadtofloodplain.Reroll()
+      
+      loadfrompointsource.Reroll()
+      
+      
 
       
       

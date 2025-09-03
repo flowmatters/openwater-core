@@ -252,14 +252,24 @@ func (m *StorageDissolvedDecay) Run(inputs data.ND3[float64], states data.ND2[fl
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      decayedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      decayedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      decayedmassSliced := decayedmass.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      outflowmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflowmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowmassSliced := outflowmass.Unroll()
       
       
 
-      storedmass= storageDissolvedDecay(inflowmass,inflow,outflow,storagevolume,storedmass,deltat,dostoragedecay,annualreturninterval,bankfullflow,medianfloodresidencetime,decayedmass,outflowmass)
+      storedmass= storageDissolvedDecay(inflowmass,inflow,outflow,storagevolume,storedmass,deltat,dostoragedecay,annualreturninterval,bankfullflow,medianfloodresidencetime,decayedmassSliced,outflowmassSliced)
+
+      
+      
+      decayedmass.Reroll()
+      
+      outflowmass.Reroll()
+      
+      
 
       
       

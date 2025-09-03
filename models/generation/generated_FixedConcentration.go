@@ -177,11 +177,18 @@ func (m *FixedConcentration) Run(inputs data.ND3[float64], states data.ND2[float
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      load := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      load := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      loadSliced := load.Unroll()
       
       
 
-       fixedConcentration(flow,concentration,load)
+       fixedConcentration(flow,concentration,loadSliced)
+
+      
+      
+      load.Reroll()
+      
+      
 
       
       

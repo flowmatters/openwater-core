@@ -375,14 +375,24 @@ func (m *BankErosion) Run(inputs data.ND3[float64], states data.ND2[float64], ou
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      bankerosionfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      bankerosionfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      bankerosionfineSliced := bankerosionfine.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      bankerosioncoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      bankerosioncoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      bankerosioncoarseSliced := bankerosioncoarse.Unroll()
       
       
 
-       bankErosion(downstreamflowvolume,totalvolume,riparianvegpercent,maxriparianvegeffectiveness,soilerodibility,bankerosioncoeff,linkslope,bankfullflow,bankmgtfactor,sedbulkdensity,bankheight,linklength,dailyflowpowerfactor,longtermavdailyflow,soilpercentfine,durationinseconds,bankerosionfine,bankerosioncoarse)
+       bankErosion(downstreamflowvolume,totalvolume,riparianvegpercent,maxriparianvegeffectiveness,soilerodibility,bankerosioncoeff,linkslope,bankfullflow,bankmgtfactor,sedbulkdensity,bankheight,linklength,dailyflowpowerfactor,longtermavdailyflow,soilpercentfine,durationinseconds,bankerosionfineSliced,bankerosioncoarseSliced)
+
+      
+      
+      bankerosionfine.Reroll()
+      
+      bankerosioncoarse.Reroll()
+      
+      
 
       
       

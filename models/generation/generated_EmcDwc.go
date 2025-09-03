@@ -195,17 +195,30 @@ func (m *EmcDwc) Run(inputs data.ND3[float64], states data.ND2[float64], outputs
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      quickload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      quickload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      quickloadSliced := quickload.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      slowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      slowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      slowloadSliced := slowload.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      totalload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      totalloadSliced := totalload.Unroll()
       
       
 
-       emcDWC(quickflow,baseflow,emc,dwc,quickload,slowload,totalload)
+       emcDWC(quickflow,baseflow,emc,dwc,quickloadSliced,slowloadSliced,totalloadSliced)
+
+      
+      
+      quickload.Reroll()
+      
+      slowload.Reroll()
+      
+      totalload.Reroll()
+      
+      
 
       
       

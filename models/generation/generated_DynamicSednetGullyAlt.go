@@ -351,20 +351,36 @@ func (m *DynamicSednetGullyAlt) Run(inputs data.ND3[float64], states data.ND2[fl
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      fineload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      fineload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      fineloadSliced := fineload.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      coarseload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      coarseload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      coarseloadSliced := coarseload.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 2
-      generatedfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      generatedfine := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      generatedfineSliced := generatedfine.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 3
-      generatedcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      generatedcoarse := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      generatedcoarseSliced := generatedcoarse.Unroll()
       
       
 
-       sednetGullyDerm(quickflow,year,annualrunoff,annualload,yeardisturbance,gullyendyear,area,averagegullyactivityfactor,gullyannualaveragesedimentsupply,gullypercentfine,managementpracticefactor,longtermrunofffactor,dailyrunoffpowerfactor,sdrfine,sdrcoarse,timestepinseconds,fineload,coarseload,generatedfine,generatedcoarse)
+       sednetGullyDerm(quickflow,year,annualrunoff,annualload,yeardisturbance,gullyendyear,area,averagegullyactivityfactor,gullyannualaveragesedimentsupply,gullypercentfine,managementpracticefactor,longtermrunofffactor,dailyrunoffpowerfactor,sdrfine,sdrcoarse,timestepinseconds,fineloadSliced,coarseloadSliced,generatedfineSliced,generatedcoarseSliced)
+
+      
+      
+      fineload.Reroll()
+      
+      coarseload.Reroll()
+      
+      generatedfine.Reroll()
+      
+      generatedcoarse.Reroll()
+      
+      
 
       
       

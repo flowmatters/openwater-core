@@ -160,11 +160,18 @@ func (m *Gate) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outgoing := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outgoing := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outgoingSliced := outgoing.Unroll()
       
       
 
-       gate(trigger,incoming,outgoing)
+       gate(trigger,incoming,outgoingSliced)
+
+      
+      
+      outgoing.Reroll()
+      
+      
 
       
       

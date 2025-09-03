@@ -282,14 +282,24 @@ func (m *StorageParticulateTrapping) Run(inputs data.ND3[float64], states data.N
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      trappedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      trappedmass := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      trappedmassSliced := trappedmass.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflowload := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowloadSliced := outflowload.Unroll()
       
       
 
-      storedmass= storageParticulateTrapping(inflowload,inflow,outflow,storage,storedmass,deltat,reservoircapacity,reservoirlength,subtractor,multiplier,lengthdischargefactor,lengthdischargepower,trappedmass,outflowload)
+      storedmass= storageParticulateTrapping(inflowload,inflow,outflow,storage,storedmass,deltat,reservoircapacity,reservoirlength,subtractor,multiplier,lengthdischargefactor,lengthdischargepower,trappedmassSliced,outflowloadSliced)
+
+      
+      
+      trappedmass.Reroll()
+      
+      outflowload.Reroll()
+      
+      
 
       
       

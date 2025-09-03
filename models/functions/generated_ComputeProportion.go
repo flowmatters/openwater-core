@@ -180,11 +180,18 @@ func (m *ComputeProportion) Run(inputs data.ND3[float64], states data.ND2[float6
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      proportion := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      proportion := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      proportionSliced := proportion.Unroll()
       
       
 
-       computeProportion(numerator,denominator,resultonzerodenominator,proportion)
+       computeProportion(numerator,denominator,resultonzerodenominator,proportionSliced)
+
+      
+      
+      proportion.Reroll()
+      
+      
 
       
       

@@ -275,14 +275,24 @@ func (m *StorageRouting) Run(inputs data.ND3[float64], states data.ND2[float64],
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      outflow := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      outflowSliced := outflow.Unroll()
       
       outputPosSlice[sim.DIMO_OUTPUT] = 1
-      storage := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      storage := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      storageSliced := storage.Unroll()
       
       
 
-      s,previnflow,prevoutflow= storageRouting(inflow,lateral,rainfall,evap,s,previnflow,prevoutflow,inflowbias,routingconstant,routingpower,area,deadstorage,deltat,outflow,storage)
+      s,previnflow,prevoutflow= storageRouting(inflow,lateral,rainfall,evap,s,previnflow,prevoutflow,inflowbias,routingconstant,routingpower,area,deadstorage,deltat,outflowSliced,storageSliced)
+
+      
+      
+      outflow.Reroll()
+      
+      storage.Reroll()
+      
+      
 
       
       

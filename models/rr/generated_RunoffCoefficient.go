@@ -177,11 +177,18 @@ func (m *RunoffCoefficient) Run(inputs data.ND3[float64], states data.ND2[float6
       
       
       outputPosSlice[sim.DIMO_OUTPUT] = 0
-      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      runoff := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      runoffSliced := runoff.Unroll()
       
       
 
-       runoffCoefficient(rainfall,coeff,runoff)
+       runoffCoefficient(rainfall,coeff,runoffSliced)
+
+      
+      
+      runoff.Reroll()
+      
+      
 
       
       
