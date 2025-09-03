@@ -273,7 +273,8 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       {{if $oAsP}}
       {{range $i, $v := .Outputs}}
       outputPosSlice[sim.DIMO_OUTPUT] = {{$i}}
-      {{lower $v.Key}} := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen}).Unroll()
+      {{lower $v.Key}} := outputs.Slice(outputPosSlice,outputSizeSlice,outputStepSlice).MustReshape([]int{inputLen})
+      {{lower $v.Key}}Sliced := {{lower $v.Key}}.Unroll()
       {{end}}
       {{end}}
 
@@ -285,8 +286,14 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
         {{- range .States}}{{lower .Key}},{{end -}}
         {{- range .ParameterSpecs}}{{lower .Name}},{{end -}}
         {{- if $oAsP}}
-        {{- range $i, $v := .Outputs}}{{if $i}},{{end}}{{lower $v.Key}}{{end}}
+        {{- range $i, $v := .Outputs}}{{if $i}},{{end}}{{lower $v.Key}}Sliced{{end}}
         {{- end}})
+
+      {{if $oAsP}}
+      {{range $i, $v := .Outputs}}
+      {{lower $v.Key}}.Reroll()
+      {{end}}
+      {{end}}
 
       {{if .Flags.GenerateExtractStates}}
       {{range $i, $v := .States}}

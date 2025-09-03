@@ -45,7 +45,7 @@ func RunSingleModel(
 		sArray = cdata.NewCArray[float64](unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2[float64])
 	}
 
-	// fmt.Printf("Running model: %s!\n", gName)
+	// fmt.Errorf("Running model: %s!\n", gName)
 	model.Run(iArray, sArray, oArray)
 	// for i := 0; i < iArray.Len3(); i += 10 {
 	// 	fmt.Println(i, iArray.Get3(0, 0, i))

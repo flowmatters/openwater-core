@@ -32,19 +32,13 @@ type ND[T Number] interface {
 	CopyFrom(other ND[T])
 	Contiguous() bool
 	Unroll() []T
+	Reroll()
 	Reshape(newShape []int) (ND[T], error)
 	MustReshape(newShape []int) ND[T]
 	ReshapeFast(newShape []int) (ND[T], error)
 	Maximum() T
 	Minimum() T
 }
-
-// type Pos[V Number] struct {
-// 	Loc []int
-// }
-// func (p *Pos[V]) Value() V
-
-// func (p *Pos[V]) Set(v V)
 
 type ND1[T Number] interface {
 	ND[T]
@@ -158,4 +152,9 @@ func (nd *NdCommon[T]) SliceInto(dest *NdCommon[T], loc []int, dims []int, step 
 		dest.Step = Multiply(nd.Step, step)
 	}
 	dest.OffsetStep = Multiply(dest.Step, dest.Offset)
+}
+
+// For interface purposes. Does nothing.
+func (nd *NdCommon[T]) Reroll() {
+
 }

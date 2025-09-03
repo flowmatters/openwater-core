@@ -2,6 +2,7 @@ package cdata
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"unsafe"
 
@@ -17,6 +18,7 @@ type ndC[T data.Number] struct {
 	//	Impl *C.double
 	Impl *[1 << 30]CArray[T]
 	//p2 := (*[1<<30]C.int)(unsafe.Pointer(p))
+	UnrolledTo *[]T
 }
 
 // func ArrayFromC(impl *C.double, shape []int) ND[float64] {
@@ -104,6 +106,7 @@ func (nd *ndC[T]) Unroll() []T {
 		//		fmt.Println(loc,i)
 		res[i] = nd.Get(loc)
 	}
+	nd.UnrolledTo = &res
 	return res
 }
 
@@ -261,4 +264,13 @@ func makeCArrayForTest[T data.Number](shape []int) *ndC[T] {
 	addr := (*[1 << 30]CArray[T])(unsafe.Pointer(slice.Data))
 
 	return newCArray[T](addr, shape)
+}
+
+// Replaces contents with contents of go slice previously unrolled to
+func (nd *ndC[T]) Reroll() {
+	if nd.UnrolledTo == nil {
+		fmt.Errorf("Cannot reroll from nil ptr")
+	}
+	vals := *nd.UnrolledTo
+	nd.Apply([]int{0}, 0, 1, vals)
 }
