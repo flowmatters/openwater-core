@@ -7,7 +7,6 @@ package storage
  * Don't edit this file. Edit models/storage/storage.go instead!
  */
 import (
-//  "fmt"
   "github.com/flowmatters/openwater-core/sim"
   "github.com/flowmatters/openwater-core/data"
 )
@@ -221,23 +220,6 @@ func (m *Storage) FindDimensions(parameters data.ND2[float64]) []int {
 func (m *Storage) InitialiseStates(n int) data.ND2[float64] {
   // Zero states
 	var result = data.NewArray2D[float64](n,3)
-
-	// for i := 0; i < n; i++ {
-  //   stateSet := make(sim.StateSet,3)
-  //   
-	// 	stateSet[0] = 0 // currentVolume
-  //   
-	// 	stateSet[1] = 0 // level
-  //   
-	// 	stateSet[2] = 0 // area
-  //   
-
-  //   if result==nil {
-  //     result = data.NewArray2D[float64](stateSet.Len(0),n)
-  //   }
-  //   result.Apply([]int{0,i},[]int{1,1},stateSet)
-	// }
- 
 	return result
 }
 
@@ -251,9 +233,6 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
   numStates := states.Len(sim.DIMS_STATE)
   numInputSequences := inputs.Len(sim.DIMI_CELL)
 
-  //  fmt.Println("num cells",lenStates,"num states",numStates)
-  // fmt.Println("states shape",states.Shape())
-  // fmt.Println("states",states) 
   inputLen := inputDims[sim.DIMI_TIMESTEP]
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
@@ -277,7 +256,6 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
-  // fmt.Println("Running Storage for ",numCells,"cells")
 //  for i := 0; i < numCells; i++ {
   for j := 0; j < numCells; j++ {
     go func(i int){
@@ -334,9 +312,6 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
       
       
 
-      // fmt.Println("i",i)
-      // fmt.Println("States",states.Shape())
-      // fmt.Println("Tmp2",tmp2.Shape())
       
       initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
@@ -351,27 +326,19 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
       
       
 
-  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{rainfall mm}",tmpTS.Shape())
       rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{pet mm}",tmpTS.Shape())
       pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
       inflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{demand m^3.s^-1}",tmpTS.Shape())
       demand := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{targetMinimumVolume m^3}",tmpTS.Shape())
       targetminimumvolume := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{targetMinimumCapacity m^3}",tmpTS.Shape())
       targetminimumcapacity := cellInputs.Slice([]int{ 5,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
@@ -421,7 +388,6 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
       
 
       doneChan <- i
@@ -431,5 +397,4 @@ func (m *Storage) Run(inputs data.ND3[float64], states data.ND2[float64], output
   for j := 0; j < numCells; j++ {
     <- doneChan
   }
-//	return result
 }

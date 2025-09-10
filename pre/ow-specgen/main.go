@@ -184,9 +184,7 @@ func processFile(fn string) {
 
 	specs := re.FindAllSubmatch(contents, -1)
 	for _, specContents := range specs {
-		// specContents := re.FindSubmatch(contents)
 		if specContents == nil {
-			//		fmt.Printf("No OW-SPEC in %s\n",fn)
 			return
 		}
 
@@ -198,10 +196,6 @@ func processFile(fn string) {
 		err = yaml.Unmarshal(spec, &desc)
 		if err != nil {
 			fmt.Println(err)
-			// for i := range specContents {
-			// 	fmt.Println(i)
-			// 	fmt.Println(string(specContents[i]))
-			// }
 			return
 		}
 
@@ -217,8 +211,6 @@ func processFile(fn string) {
 			description = transform(description)
 
 			description.Filename = fn
-			// fmt.Println(name)
-			// fmt.Println(description)
 			generateWrapper(description)
 		}
 	}
@@ -236,7 +228,6 @@ func generateWrapper(desc ModelSpec) {
 		fmt.Println("Could not parse templates. Exiting")
 		os.Exit(1)
 	}
-	//	fmt.Println(tmpl.DefinedTemplates())
 	tmpl = tmpl.Funcs(template.FuncMap{
 		"inc": func(n int) int {
 			return n + 1
@@ -300,33 +291,6 @@ func generateWrapper(desc ModelSpec) {
 		fmt.Println(err)
 		return
 	}
-	// var implementationField = desc.Implementation
-	// var generateStruct = implementationField != nil
-
-	// if generateStruct {
-	// 	implementation, _ := implementationField.(map[interface{}]interface{})
-
-	// 		if implementation==nil {
-	// 			fmt.Println("invalid type")
-	// 			return
-	// 		}
-
-	// 		function, _ := implementation["function"].(string)
-	// 		funcType, _ := implementation["type"].(string)
-	// 		lang, _ := implementation["lang"].(string)
-	// 		fmt.Println(function,funcType,lang)
-	// } else {
-	// 	fmt.Println("no implementation specified. assuming type already exists")
-	// }
-
-	// Extract out yaml (convert tabs to spaces if necessary)
-	// Unmarshal object
-	// If implementation is C function - generate Go wrapper
-	// If implementation is single function - generate vectorised wrapper
-	// If implementation is function - generate type
-	// Generate description
-
-	// Write out
 }
 
 func main() {

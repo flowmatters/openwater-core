@@ -143,7 +143,6 @@ func run_simulation(args []string) {
 				writingDone <- g
 			}(i)
 		}
-		// fmt.Printf("Results written in %f seconds\n", genWriteElapsed.Seconds())
 		// === /WRITE GENERATION OUTPUTS ===
 
 		// === PROCESS LINKS ===
@@ -230,6 +229,4 @@ func run_simulation(args []string) {
 	fmt.Printf("Total Simulation Time: %f\n", totalTimeSimulation)
 	fmt.Printf("Total Link Time: %f\n", totalTimeLinks)
 	fmt.Printf("Total Final Write Time: %f\n", totalTimeFinalWrite)
-
-	//	fmt.Println("Add stats")
 }

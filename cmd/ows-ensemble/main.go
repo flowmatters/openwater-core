@@ -64,7 +64,5 @@ func main() {
 	}
 
 	// err = outputPath.Write(outputs.States)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
+
 }

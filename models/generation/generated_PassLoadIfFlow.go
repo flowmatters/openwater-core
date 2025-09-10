@@ -7,7 +7,6 @@ package generation
  * Don't edit this file. Edit models/generation/pass_load_if_flow.go instead!
  */
 import (
-//  "fmt"
   "github.com/flowmatters/openwater-core/sim"
   "github.com/flowmatters/openwater-core/data"
 )
@@ -89,17 +88,6 @@ func (m *PassLoadIfFlow) FindDimensions(parameters data.ND2[float64]) []int {
 func (m *PassLoadIfFlow) InitialiseStates(n int) data.ND2[float64] {
   // Zero states
 	var result = data.NewArray2D[float64](n,0)
-
-	// for i := 0; i < n; i++ {
-  //   stateSet := make(sim.StateSet,0)
-  //   
-
-  //   if result==nil {
-  //     result = data.NewArray2D[float64](stateSet.Len(0),n)
-  //   }
-  //   result.Apply([]int{0,i},[]int{1,1},stateSet)
-	// }
- 
 	return result
 }
 
@@ -113,9 +101,6 @@ func (m *PassLoadIfFlow) Run(inputs data.ND3[float64], states data.ND2[float64],
   numStates := states.Len(sim.DIMS_STATE)
   numInputSequences := inputs.Len(sim.DIMI_CELL)
 
-  //  fmt.Println("num cells",lenStates,"num states",numStates)
-  // fmt.Println("states shape",states.Shape())
-  // fmt.Println("states",states) 
   inputLen := inputDims[sim.DIMI_TIMESTEP]
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
@@ -139,7 +124,6 @@ func (m *PassLoadIfFlow) Run(inputs data.ND3[float64], states data.ND2[float64],
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
-  // fmt.Println("Running PassLoadIfFlow for ",numCells,"cells")
 //  for i := 0; i < numCells; i++ {
   for j := 0; j < numCells; j++ {
     go func(i int){
@@ -154,24 +138,17 @@ func (m *PassLoadIfFlow) Run(inputs data.ND3[float64], states data.ND2[float64],
       scalingfactor := m.scalingFactor[i%len(m.scalingFactor)]
       
 
-      // fmt.Println("i",i)
-      // fmt.Println("States",states.Shape())
-      // fmt.Println("Tmp2",tmp2.Shape())
       
 
       
       
       
 
-  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{flow m^3.s^-1}",tmpTS.Shape())
       flow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{inputLoad <nil>}",tmpTS.Shape())
       inputload := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
@@ -197,7 +174,6 @@ func (m *PassLoadIfFlow) Run(inputs data.ND3[float64], states data.ND2[float64],
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 1)
       
 
       doneChan <- i
@@ -207,5 +183,4 @@ func (m *PassLoadIfFlow) Run(inputs data.ND3[float64], states data.ND2[float64],
   for j := 0; j < numCells; j++ {
     <- doneChan
   }
-//	return result
 }

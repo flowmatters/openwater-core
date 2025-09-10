@@ -139,14 +139,12 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 	minQI := bias * (inflow + lateral)
 	delta, outflow, storage := evaluateRouting(minQI)
 	// if bias > 0.999 && timestep < 10 {
-	// 	fmt.Printf("calcOutflow-1, minQI=%f,delta=%f,massBalanceLimit=%f\n", minQI, delta, massBalanceLimit)
 	// }
 	if delta >= massBalanceLimit {
 
 		// Qindexmin is not small enough with zero outflow, so lets call it zero outflow
 		qi = minQI
 		outflow = 0.0
-		// fmt.Printf("calcOutflow-2, outflow=0, storage=%f\n", storage)
 		return
 	}
 
@@ -158,7 +156,6 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 
 		delta, outflow, storage = evaluateRouting(qi)
 		// if bias < 0.999 {
-		// 	fmt.Printf("calcOutflow-3, qi=%f,delta=%f,outflow=%f,storage=%f\n", qi, delta, outflow, storage)
 		// }
 		return
 	}
@@ -180,7 +177,6 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 		qi = minQI
 		outflow = 0.0
 		delta = 0.0
-		// fmt.Printf("calcOutflow-4, qi=%f,delta=%f,outflow=%f,storage=%f\n", qi, delta, outflow, storage)
 		return
 	}
 
@@ -193,7 +189,6 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 		delta = 0.0
 		storage = math.Max((prevStorage + (inflow+lateral-netEvaporationFlux-outflow)*duration), 0.0)
 
-		// fmt.Printf("calcOutflow-5, qi=%f,delta=%f,outflow=%f,storage=%f\n", qi, delta, outflow, storage)
 		return
 	}
 
@@ -210,7 +205,6 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 	delta, outflow, storage = evaluateRouting(qi)
 
 	if math.Abs(delta) < massBalanceLimit {
-		// fmt.Printf("calcOutflow-6, qi=%f,delta=%f,outflow=%f,storage=%f\n", qi, delta, outflow, storage)
 		return
 	}
 
@@ -228,7 +222,6 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 	}
 	delta, outflow, storage = evaluateRouting(qi)
 	if math.Abs(delta) > massBalanceLimit {
-		// fmt.Printf("Timestep = %d, delta=%f, outflow=%f, storage=%f\n", timestep, delta, outflow, storage)
 	}
 	if math.IsNaN(outflow) {
 		fmt.Printf("outflow=%f\n", outflow)
@@ -246,7 +239,6 @@ func runRouting(qIndex, inflow, lateral, initialFluxMax, storage, area, netEvapR
 	} else if (routingPower <= 1.0 && qIndex < Qlimit) || (routingPower > 1.0 && qIndex > Qlimit) {
 		// eqn = 1
 		SIndex = Klimit*qIndex + deadStorage
-		// fmt.Printf("SIndex = %f = Klimit * qIndex + deadStorage = %f * %f + %f\n", SIndex, Klimit, qIndex, deadStorage)
 	} else {
 		// eqn = 2
 		SIndex = routingConstant*math.Pow(qIndex, routingPower) - Koffset + deadStorage
@@ -260,7 +252,6 @@ func runRouting(qIndex, inflow, lateral, initialFluxMax, storage, area, netEvapR
 	newStorage := math.Max((storage + (inflow+lateral-netEvaporationFlux)*duration), 0.0)
 	// corrected := false
 	// if newStorage < SIndex {
-	// 	// fmt.Printf("Correcting SIndex. Used eqn %d. newStorage=%f, SIndex=%f, inflow=%f, bias=%f,x=%f\n",
 	// 	// 	eqn, newStorage, SIndex, inflow, bias, routingPower)
 	// 	// corrected = true
 	// 	SIndex = newStorage
@@ -281,10 +272,6 @@ func runRouting(qIndex, inflow, lateral, initialFluxMax, storage, area, netEvapR
 		panic("outflow is nan")
 	}
 	//SIndex = SIndex - outflow
-
-	// if corrected {
-	// 	fmt.Printf("massBalance after correction = %f, SIndex=%f, outflow=%f\n", massBalance, SIndex, outflow)
-	// }
 
 	return
 }

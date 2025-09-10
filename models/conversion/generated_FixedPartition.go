@@ -7,7 +7,6 @@ package conversion
  * Don't edit this file. Edit models/conversion/fixed_partition.go instead!
  */
 import (
-//  "fmt"
   "github.com/flowmatters/openwater-core/sim"
   "github.com/flowmatters/openwater-core/data"
 )
@@ -89,17 +88,6 @@ func (m *FixedPartition) FindDimensions(parameters data.ND2[float64]) []int {
 func (m *FixedPartition) InitialiseStates(n int) data.ND2[float64] {
   // Zero states
 	var result = data.NewArray2D[float64](n,0)
-
-	// for i := 0; i < n; i++ {
-  //   stateSet := make(sim.StateSet,0)
-  //   
-
-  //   if result==nil {
-  //     result = data.NewArray2D[float64](stateSet.Len(0),n)
-  //   }
-  //   result.Apply([]int{0,i},[]int{1,1},stateSet)
-	// }
- 
 	return result
 }
 
@@ -113,9 +101,6 @@ func (m *FixedPartition) Run(inputs data.ND3[float64], states data.ND2[float64],
   numStates := states.Len(sim.DIMS_STATE)
   numInputSequences := inputs.Len(sim.DIMI_CELL)
 
-  //  fmt.Println("num cells",lenStates,"num states",numStates)
-  // fmt.Println("states shape",states.Shape())
-  // fmt.Println("states",states) 
   inputLen := inputDims[sim.DIMI_TIMESTEP]
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
@@ -139,7 +124,6 @@ func (m *FixedPartition) Run(inputs data.ND3[float64], states data.ND2[float64],
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
-  // fmt.Println("Running FixedPartition for ",numCells,"cells")
 //  for i := 0; i < numCells; i++ {
   for j := 0; j < numCells; j++ {
     go func(i int){
@@ -154,21 +138,15 @@ func (m *FixedPartition) Run(inputs data.ND3[float64], states data.ND2[float64],
       fraction := m.fraction[i%len(m.fraction)]
       
 
-      // fmt.Println("i",i)
-      // fmt.Println("States",states.Shape())
-      // fmt.Println("Tmp2",tmp2.Shape())
       
 
       
       
       
 
-  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{input <nil>}",tmpTS.Shape())
       input := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
@@ -200,7 +178,6 @@ func (m *FixedPartition) Run(inputs data.ND3[float64], states data.ND2[float64],
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 2)
       
 
       doneChan <- i
@@ -210,5 +187,4 @@ func (m *FixedPartition) Run(inputs data.ND3[float64], states data.ND2[float64],
   for j := 0; j < numCells; j++ {
     <- doneChan
   }
-//	return result
 }

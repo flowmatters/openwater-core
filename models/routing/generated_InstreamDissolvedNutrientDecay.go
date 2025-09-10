@@ -7,7 +7,6 @@ package routing
  * Don't edit this file. Edit models/routing/instream_dissolved_nutrient.go instead!
  */
 import (
-//  "fmt"
   "github.com/flowmatters/openwater-core/sim"
   "github.com/flowmatters/openwater-core/data"
 )
@@ -173,19 +172,6 @@ func (m *InstreamDissolvedNutrientDecay) FindDimensions(parameters data.ND2[floa
 func (m *InstreamDissolvedNutrientDecay) InitialiseStates(n int) data.ND2[float64] {
   // Zero states
 	var result = data.NewArray2D[float64](n,1)
-
-	// for i := 0; i < n; i++ {
-  //   stateSet := make(sim.StateSet,1)
-  //   
-	// 	stateSet[0] = 0 // totalStoredMass
-  //   
-
-  //   if result==nil {
-  //     result = data.NewArray2D[float64](stateSet.Len(0),n)
-  //   }
-  //   result.Apply([]int{0,i},[]int{1,1},stateSet)
-	// }
- 
 	return result
 }
 
@@ -199,9 +185,6 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
   numStates := states.Len(sim.DIMS_STATE)
   numInputSequences := inputs.Len(sim.DIMI_CELL)
 
-  //  fmt.Println("num cells",lenStates,"num states",numStates)
-  // fmt.Println("states shape",states.Shape())
-  // fmt.Println("states",states) 
   inputLen := inputDims[sim.DIMI_TIMESTEP]
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
@@ -225,7 +208,6 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
-  // fmt.Println("Running InstreamDissolvedNutrientDecay for ",numCells,"cells")
 //  for i := 0; i < numCells; i++ {
   for j := 0; j < numCells; j++ {
     go func(i int){
@@ -246,9 +228,6 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
       durationinseconds := m.durationInSeconds[i%len(m.durationInSeconds)]
       
 
-      // fmt.Println("i",i)
-      // fmt.Println("States",states.Shape())
-      // fmt.Println("Tmp2",tmp2.Shape())
       
       initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
@@ -259,24 +238,17 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
       
       
 
-  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{incomingMassUpstream <nil>}",tmpTS.Shape())
       incomingmassupstream := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{incomingMassLateral <nil>}",tmpTS.Shape())
       incomingmasslateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{reachVolume <nil>}",tmpTS.Shape())
       reachvolume := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{outflow <nil>}",tmpTS.Shape())
       outflow := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{floodplainDepositionFraction <nil>}",tmpTS.Shape())
       floodplaindepositionfraction := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
@@ -322,7 +294,6 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 4)
       
 
       doneChan <- i
@@ -332,5 +303,4 @@ func (m *InstreamDissolvedNutrientDecay) Run(inputs data.ND3[float64], states da
   for j := 0; j < numCells; j++ {
     <- doneChan
   }
-//	return result
 }

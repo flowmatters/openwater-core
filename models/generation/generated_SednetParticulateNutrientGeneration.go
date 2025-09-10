@@ -7,7 +7,6 @@ package generation
  * Don't edit this file. Edit models/generation/particulate_nutrients.go instead!
  */
 import (
-//  "fmt"
   "github.com/flowmatters/openwater-core/sim"
   "github.com/flowmatters/openwater-core/data"
 )
@@ -201,17 +200,6 @@ func (m *SednetParticulateNutrientGeneration) FindDimensions(parameters data.ND2
 func (m *SednetParticulateNutrientGeneration) InitialiseStates(n int) data.ND2[float64] {
   // Zero states
 	var result = data.NewArray2D[float64](n,0)
-
-	// for i := 0; i < n; i++ {
-  //   stateSet := make(sim.StateSet,0)
-  //   
-
-  //   if result==nil {
-  //     result = data.NewArray2D[float64](stateSet.Len(0),n)
-  //   }
-  //   result.Apply([]int{0,i},[]int{1,1},stateSet)
-	// }
- 
 	return result
 }
 
@@ -225,9 +213,6 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3[float64], stat
   numStates := states.Len(sim.DIMS_STATE)
   numInputSequences := inputs.Len(sim.DIMI_CELL)
 
-  //  fmt.Println("num cells",lenStates,"num states",numStates)
-  // fmt.Println("states shape",states.Shape())
-  // fmt.Println("states",states) 
   inputLen := inputDims[sim.DIMI_TIMESTEP]
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
@@ -251,7 +236,6 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3[float64], stat
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
-  // fmt.Println("Running SednetParticulateNutrientGeneration for ",numCells,"cells")
 //  for i := 0; i < numCells; i++ {
   for j := 0; j < numCells; j++ {
     go func(i int){
@@ -274,33 +258,23 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3[float64], stat
       do_p_creams_enrichment := m.Do_P_CREAMS_Enrichment[i%len(m.Do_P_CREAMS_Enrichment)]
       
 
-      // fmt.Println("i",i)
-      // fmt.Println("States",states.Shape())
-      // fmt.Println("Tmp2",tmp2.Shape())
       
 
       
       
       
 
-  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{fineSedModelFineSheetGeneratedKg <nil>}",tmpTS.Shape())
       finesedmodelfinesheetgeneratedkg := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{fineSedModelCoarseSheetGeneratedKg <nil>}",tmpTS.Shape())
       finesedmodelcoarsesheetgeneratedkg := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{fineSedModelFineGullyGeneratedKg <nil>}",tmpTS.Shape())
       finesedmodelfinegullygeneratedkg := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{fineSedModelCoarseGullyGeneratedKg <nil>}",tmpTS.Shape())
       finesedmodelcoarsegullygeneratedkg := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{slowflow m^3.s^-1}",tmpTS.Shape())
       slowflow := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
@@ -350,7 +324,6 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3[float64], stat
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 5)
       
 
       doneChan <- i
@@ -360,5 +333,4 @@ func (m *SednetParticulateNutrientGeneration) Run(inputs data.ND3[float64], stat
   for j := 0; j < numCells; j++ {
     <- doneChan
   }
-//	return result
 }

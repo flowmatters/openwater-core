@@ -36,9 +36,7 @@ func RunSingleModel(
 	// coeffSlice := pArray.Slice([]int{0, 0}, []int{1, int(nParameterSets)}, nil).(data.ND1[float64])
 	// i := 0
 	// coeff := coeffSlice.Get1(i % coeffSlice.Len1())
-	// fmt.Println("Runoff coefficient is", coeff)
 	var sArray data.ND2[float64]
-	// fmt.Println("initStates", initStates)
 	if initStates {
 		sArray = model.InitialiseStates(int(nCells))
 	} else {
@@ -48,11 +46,7 @@ func RunSingleModel(
 	// fmt.Errorf("Running model: %s!\n", gName)
 	model.Run(iArray, sArray, oArray)
 	// for i := 0; i < iArray.Len3(); i += 10 {
-	// 	fmt.Println(i, iArray.Get3(0, 0, i))
 	// }
-
-	// fmt.Println("Params")
-	// fmt.Println(pArray.Get2(0, 0))
 
 	// if initStates Copy data back into provided states array...
 	if initStates && (states != nil) {

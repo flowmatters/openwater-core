@@ -122,17 +122,12 @@ func (nd *nd[T]) Unroll() []T {
 		return nd.Impl[s : e+1]
 	}
 
-	//	fmt.Println(nd)
-
 	length := Product(nd.Shape())
 	res := make([]T, length)
 
 	dimOffsets := Offsets(nd.Dims)
-	//fmt.Println(dimOffsets)
 	for i := 0; i < length; i++ {
 		loc := IDivMod(i, dimOffsets, nd.Dims)
-		//		fmt.Println(i, loc, nd.Index(loc))
-		//		fmt.Println(loc,i)
 		res[i] = nd.Get(loc)
 	}
 	return res
@@ -202,7 +197,6 @@ func (nd *nd[T]) Get1(loc int) T {
 				break
 			}
 		}
-		//		fmt.Println("nDims>1",idx,nd.Dims,loc)
 	}
 	return nd.Get(idx)
 }

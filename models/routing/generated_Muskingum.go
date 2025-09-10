@@ -7,7 +7,6 @@ package routing
  * Don't edit this file. Edit models/routing/muskingum.go instead!
  */
 import (
-//  "fmt"
   "github.com/flowmatters/openwater-core/sim"
   "github.com/flowmatters/openwater-core/data"
 )
@@ -117,23 +116,6 @@ func (m *Muskingum) FindDimensions(parameters data.ND2[float64]) []int {
 func (m *Muskingum) InitialiseStates(n int) data.ND2[float64] {
   // Zero states
 	var result = data.NewArray2D[float64](n,3)
-
-	// for i := 0; i < n; i++ {
-  //   stateSet := make(sim.StateSet,3)
-  //   
-	// 	stateSet[0] = 0 // S
-  //   
-	// 	stateSet[1] = 0 // prevInflow
-  //   
-	// 	stateSet[2] = 0 // prevOutflow
-  //   
-
-  //   if result==nil {
-  //     result = data.NewArray2D[float64](stateSet.Len(0),n)
-  //   }
-  //   result.Apply([]int{0,i},[]int{1,1},stateSet)
-	// }
- 
 	return result
 }
 
@@ -147,9 +129,6 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
   numStates := states.Len(sim.DIMS_STATE)
   numInputSequences := inputs.Len(sim.DIMI_CELL)
 
-  //  fmt.Println("num cells",lenStates,"num states",numStates)
-  // fmt.Println("states shape",states.Shape())
-  // fmt.Println("states",states) 
   inputLen := inputDims[sim.DIMI_TIMESTEP]
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
@@ -173,7 +152,6 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
-  // fmt.Println("Running Muskingum for ",numCells,"cells")
 //  for i := 0; i < numCells; i++ {
   for j := 0; j < numCells; j++ {
     go func(i int){
@@ -190,9 +168,6 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       deltat := m.DeltaT[i%len(m.DeltaT)]
       
 
-      // fmt.Println("i",i)
-      // fmt.Println("States",states.Shape())
-      // fmt.Println("Tmp2",tmp2.Shape())
       
       initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
@@ -207,15 +182,11 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       
       
 
-  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
       inflow := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{lateral m^3.s^-1}",tmpTS.Shape())
       lateral := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
@@ -247,7 +218,6 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 1)
       
 
       doneChan <- i
@@ -257,5 +227,4 @@ func (m *Muskingum) Run(inputs data.ND3[float64], states data.ND2[float64], outp
   for j := 0; j < numCells; j++ {
     <- doneChan
   }
-//	return result
 }

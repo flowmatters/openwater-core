@@ -7,7 +7,6 @@ package routing
  * Don't edit this file. Edit models/routing/decay.go instead!
  */
 import (
-//  "fmt"
   "github.com/flowmatters/openwater-core/sim"
   "github.com/flowmatters/openwater-core/data"
 )
@@ -117,19 +116,6 @@ func (m *ConstituentDecay) FindDimensions(parameters data.ND2[float64]) []int {
 func (m *ConstituentDecay) InitialiseStates(n int) data.ND2[float64] {
   // Zero states
 	var result = data.NewArray2D[float64](n,1)
-
-	// for i := 0; i < n; i++ {
-  //   stateSet := make(sim.StateSet,1)
-  //   
-	// 	stateSet[0] = 0 // storedMass
-  //   
-
-  //   if result==nil {
-  //     result = data.NewArray2D[float64](stateSet.Len(0),n)
-  //   }
-  //   result.Apply([]int{0,i},[]int{1,1},stateSet)
-	// }
- 
 	return result
 }
 
@@ -143,9 +129,6 @@ func (m *ConstituentDecay) Run(inputs data.ND3[float64], states data.ND2[float64
   numStates := states.Len(sim.DIMS_STATE)
   numInputSequences := inputs.Len(sim.DIMI_CELL)
 
-  //  fmt.Println("num cells",lenStates,"num states",numStates)
-  // fmt.Println("states shape",states.Shape())
-  // fmt.Println("states",states) 
   inputLen := inputDims[sim.DIMI_TIMESTEP]
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
@@ -169,7 +152,6 @@ func (m *ConstituentDecay) Run(inputs data.ND3[float64], states data.ND2[float64
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
-  // fmt.Println("Running ConstituentDecay for ",numCells,"cells")
 //  for i := 0; i < numCells; i++ {
   for j := 0; j < numCells; j++ {
     go func(i int){
@@ -186,9 +168,6 @@ func (m *ConstituentDecay) Run(inputs data.ND3[float64], states data.ND2[float64
       deltat := m.DeltaT[i%len(m.DeltaT)]
       
 
-      // fmt.Println("i",i)
-      // fmt.Println("States",states.Shape())
-      // fmt.Println("Tmp2",tmp2.Shape())
       
       initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
@@ -199,24 +178,17 @@ func (m *ConstituentDecay) Run(inputs data.ND3[float64], states data.ND2[float64
       
       
 
-  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{inflowLoad kg.s^-1}",tmpTS.Shape())
       inflowload := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{lateralLoad kg.s^-1}",tmpTS.Shape())
       lateralload := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{inflow m^3.s^-1}",tmpTS.Shape())
       inflow := cellInputs.Slice([]int{ 2,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{outflow m^3.s^-1}",tmpTS.Shape())
       outflow := cellInputs.Slice([]int{ 3,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{storage m^3}",tmpTS.Shape())
       storage := cellInputs.Slice([]int{ 4,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
@@ -250,7 +222,6 @@ func (m *ConstituentDecay) Run(inputs data.ND3[float64], states data.ND2[float64
       
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 2)
       
 
       doneChan <- i
@@ -260,5 +231,4 @@ func (m *ConstituentDecay) Run(inputs data.ND3[float64], states data.ND2[float64
   for j := 0; j < numCells; j++ {
     <- doneChan
   }
-//	return result
 }

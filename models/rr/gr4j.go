@@ -57,10 +57,7 @@ func initGR4J(x1 float64, x2 float64, x3 float64, x4 float64) data.ND2[float64] 
 	q1 := make([]float64, n2)
 	q9 := make([]float64, n1)
 
-	//	fmt.Println(n1,x4)
-
 	result := packGR4JStates(0.0, 0.0, n1, n2, q1, q9)
-	//	fmt.Println(result)
 	return result
 }
 
@@ -91,8 +88,6 @@ func gr4j(rainfall []float64, pet []float64, s0 float64, r0 float64,
 	n1 int, n2 int, q1State []float64, q9State []float64,
 	x1 float64, x2 float64, x3 float64, x4 float64, runoff []float64) (float64, float64, int, int, []float64, []float64) {
 	nDays := len(rainfall)
-	// fmt.Println("ndays",nDays)
-	// fmt.Println("ndays",rainfall.Shape())
 	//var runoff []float64 = data.NewArray1D(nDays)
 	//var q9This []float64;
 	//var q9Last []float64;
@@ -169,7 +164,6 @@ func gr4j(rainfall []float64, pet []float64, s0 float64, r0 float64,
 		var todaysPET float64 = pet[i]
 		//----------------Production-------------------------
 		var ws float64 = 0
-		//		fmt.Println("rainfall",todaysRainfall,"pet",todaysPET)
 		if todaysRainfall > todaysPET {
 			netRainfall = todaysRainfall - todaysPET
 			ws = netRainfall / x1
@@ -184,12 +178,10 @@ func gr4j(rainfall []float64, pet []float64, s0 float64, r0 float64,
 		} else {
 			netET = todaysPET - todaysRainfall
 			//float64
-			//			fmt.Println(netET,x1)
 			ws = netET / x1
 			if ws > 13.0 {
 				ws = 13.0
 			}
-			//			fmt.Println("S,x1,ws",S,x1,ws)
 			tws := math.Tanh(ws)
 			Es = (S * (2 - S/x1) * tws) /
 				(1 + (1-S/x1)*tws)
@@ -198,9 +190,7 @@ func gr4j(rainfall []float64, pet []float64, s0 float64, r0 float64,
 			//                  (1 + (1 - S / x1) * Tanh(ws));
 			Pr = 0.0
 		}
-		//		fmt.Println(S,Es,Ps)
 		S = S - Es + Ps
-		//		fmt.Println(S,x1)
 		Perc = S * (1 - math.Pow((1+
 			math.Pow((4.0/9.0)*(S/x1), 4.0)), -0.25))
 		S = S - Perc
@@ -249,10 +239,8 @@ func gr4j(rainfall []float64, pet []float64, s0 float64, r0 float64,
 		}
 
 		qtot := Qr + Qd
-		//		fmt.Println(todaysRainfall,todaysPET,qtot,Qr,Qd,S)
 		runoff[day] = qtot
 
-		//          printf("\t%f,\t%f,\t%f\n",Qr,Qd,runoff[day]);
 	}
 
 	return S, R, n1, n2, q1State, q9State

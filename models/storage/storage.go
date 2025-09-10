@@ -231,7 +231,6 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 					if subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE {
 						// report()
 						panic("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS")
-						// fmt.Println("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE")
 						// return
 					}
 					subtimestep = math.Max(subtimestep*0.5, MIN_TIMESTEP_SECONDS_NEGATIVE)
@@ -256,7 +255,6 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 						}
 					} else if subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE {
 						panic("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE")
-						// fmt.Println("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE")
 						// return
 					}
 				}

@@ -7,7 +7,6 @@ package rr
  * Don't edit this file. Edit models/rr/gr4j.go instead!
  */
 import (
-//  "fmt"
   "github.com/flowmatters/openwater-core/sim"
   "github.com/flowmatters/openwater-core/data"
 )
@@ -173,9 +172,6 @@ func (m *GR4J) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
   numStates := states.Len(sim.DIMS_STATE)
   numInputSequences := inputs.Len(sim.DIMI_CELL)
 
-  //  fmt.Println("num cells",lenStates,"num states",numStates)
-  // fmt.Println("states shape",states.Shape())
-  // fmt.Println("states",states) 
   inputLen := inputDims[sim.DIMI_TIMESTEP]
   cellInputsShape := inputDims[1:]
   inputNewShape := []int{inputLen}
@@ -199,7 +195,6 @@ func (m *GR4J) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
 //	result.States = states  //clone? make([]sim.StateSet, len(states))
 
   doneChan := make(chan int)
-  // fmt.Println("Running GR4J for ",numCells,"cells")
 //  for i := 0; i < numCells; i++ {
   for j := 0; j < numCells; j++ {
     go func(i int){
@@ -217,9 +212,6 @@ func (m *GR4J) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
       x4 := m.X4[i%len(m.X4)]
       
 
-      // fmt.Println("i",i)
-      // fmt.Println("States",states.Shape())
-      // fmt.Println("Tmp2",tmp2.Shape())
       
       initialStates := states.Slice(statesPosSlice,statesSizeSlice,nil).MustReshape([]int{numStates}).Unroll()
       
@@ -228,15 +220,11 @@ func (m *GR4J) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
       s,r,n1,n2,q1,q9 := extractGR4JStates(initialStates)
       
 
-  //    fmt.Println("is",inputDims,"tmpShape",tmpCI.Shape(),"cis",cellInputsShape)
 
       cellInputs := inputs.Slice(inputsPosSlice,inputsSizeSlice,nil).MustReshape(cellInputsShape)
-  //    fmt.Println("cellInputs Shape",cellInputs.Shape())
       
-  //    fmt.Println("{rainfall mm}",tmpTS.Shape())
       rainfall := cellInputs.Slice([]int{ 0,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
-  //    fmt.Println("{pet mm}",tmpTS.Shape())
       pet := cellInputs.Slice([]int{ 1,0}, []int{ 1,inputLen}, nil).MustReshape(inputNewShape).Unroll()
       
 
@@ -263,7 +251,6 @@ func (m *GR4J) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
       states.ApplySlice([]int{i,0},[]int{0,1},packGR4JStates(s,r,n1,n2,q1,q9))
       
 
-  //		result.Outputs.ApplySpice([]int{i,0,0},[]int = make([]sim.Series, 1)
       
 
       doneChan <- i
@@ -273,5 +260,4 @@ func (m *GR4J) Run(inputs data.ND3[float64], states data.ND2[float64], outputs d
   for j := 0; j < numCells; j++ {
     <- doneChan
   }
-//	return result
 }
