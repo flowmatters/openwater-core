@@ -3,11 +3,9 @@ package io
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
-	"fmt"
-
-	"github.com/joelrahman/genny/generic"
 
 	"github.com/flowmatters/openwater-core/conv"
 	"github.com/flowmatters/openwater-core/data"
@@ -15,17 +13,15 @@ import (
 	"gonum.org/v1/hdf5"
 )
 
-//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64,int,uint"
+//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "[T]=float64,float32,int32,uint32,int64,uint64,int,uint"
 
-type ArrayType generic.Type
-
-type H5RefArrayType struct {
+type H5Ref[T data.Number] struct {
 	Filename string
 	Dataset  string
 	Slice    [][]int
 }
 
-func (h H5RefArrayType) Load() (data.NDArrayType, error) {
+func (h H5Ref[T]) Load() (data.ND[T], error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
 	// mu.RLock()
@@ -60,13 +56,13 @@ func (h H5RefArrayType) Load() (data.NDArrayType, error) {
 	}
 
 	shape := conv.UintsToInts(dims)
-	result := data.NewArrayArrayType(shape)
+	result := data.NewArray[T](shape)
 	impl := result.Unroll()
 	ds.Read(&impl)
 	return result, nil
 }
 
-func (h H5RefArrayType) loadSubset(ds *hdf5.Dataset) (data.NDArrayType, error) {
+func (h H5Ref[T]) loadSubset(ds *hdf5.Dataset) (data.ND[T], error) {
 	space := ds.Space()
 	defer space.Close()
 
@@ -96,13 +92,13 @@ func (h H5RefArrayType) loadSubset(ds *hdf5.Dataset) (data.NDArrayType, error) {
 	}
 	defer memSpace.Close()
 
-	result := data.NewArrayArrayType(shape)
+	result := data.NewArray[T](shape)
 	impl := result.Unroll()
 	err = ds.ReadSubset(&impl, memSpace, filespace)
 	return result, err
 }
 
-func (h H5RefArrayType) Write(data data.NDArrayType) error {
+func (h H5Ref[T]) Write(data data.ND[T]) error {
 	lockHDF5(h.Filename)
 	defer unlockHDF5(h.Filename)
 	// mu.Lock()
@@ -128,7 +124,7 @@ func (h H5RefArrayType) Write(data data.NDArrayType) error {
 	return nil
 }
 
-func (h H5RefArrayType) Create(shape []int, fillValue ArrayType, compress bool) error {
+func (h H5Ref[T]) Create(shape []int, fillValue T, compress bool) error {
 	lockHDF5(h.Filename)
 	defer unlockHDF5(h.Filename)
 
@@ -145,7 +141,7 @@ func (h H5RefArrayType) Create(shape []int, fillValue ArrayType, compress bool) 
 	return err
 }
 
-func (h H5RefArrayType) WriteSlice(data data.NDArrayType, loc []int) error {
+func (h H5Ref[T]) WriteSlice(data data.ND[T], loc []int) error {
 	lockHDF5(h.Filename)
 	defer unlockHDF5(h.Filename)
 
@@ -183,7 +179,7 @@ func (h H5RefArrayType) WriteSlice(data data.NDArrayType, loc []int) error {
 	return nil
 }
 
-func (h H5RefArrayType) LoadText() ([]string, error) {
+func (h H5Ref[T]) LoadText() ([]string, error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
 
@@ -233,7 +229,7 @@ func (h H5RefArrayType) LoadText() ([]string, error) {
 	return result, nil
 }
 
-func (h H5RefArrayType) GetDatasets() ([]string, error) {
+func (h H5Ref[T]) GetDatasets() ([]string, error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
 
@@ -269,7 +265,7 @@ func (h H5RefArrayType) GetDatasets() ([]string, error) {
 	return result, nil
 }
 
-func (h H5RefArrayType) GetGroups() ([]string, error) {
+func (h H5Ref[T]) GetGroups() ([]string, error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
 
@@ -305,29 +301,29 @@ func (h H5RefArrayType) GetGroups() ([]string, error) {
 	return result, nil
 }
 
-func ParseH5RefArrayType(path string) H5RefArrayType {
+func ParseH5Ref[T data.Number](path string) H5Ref[T] {
 	components := strings.Split(path, ":")
-	return H5RefArrayType{components[0], components[1], nil}
+	return H5Ref[T]{components[0], components[1], nil}
 }
 
-func (h H5RefArrayType) Exists() bool {
-	components := strings.Split(h.Dataset,"/")
+func (h H5Ref[T]) Exists() bool {
+	components := strings.Split(h.Dataset, "/")
 
 	path := "/"
-	for ix, comp := range(components) {
-		if len(comp)==0{
+	for ix, comp := range components {
+		if len(comp) == 0 {
 			continue
 		}
 
-		ref := H5RefArrayType{Filename:h.Filename,Dataset: path}
+		ref := H5Ref[T]{Filename: h.Filename, Dataset: path}
 
-		if ix == (len(components)-1) {
+		if ix == (len(components) - 1) {
 			datasets, err := ref.GetDatasets()
 
 			if err != nil {
 				return false
 			}
-			if findInSlice(datasets,comp) >= 0 {
+			if findInSlice(datasets, comp) >= 0 {
 				return true
 			}
 		}
@@ -337,17 +333,17 @@ func (h H5RefArrayType) Exists() bool {
 		if err != nil {
 			return false
 		}
-		if findInSlice(groups,comp) < 0 {
+		if findInSlice(groups, comp) < 0 {
 			return false
 		}
 
-		path = fmt.Sprintf("%s/%s",path,comp)
+		path = fmt.Sprintf("%s/%s", path, comp)
 	}
 
 	return true
 }
 
-func (h H5RefArrayType) Shape() ([]int,error) {
+func (h H5Ref[T]) Shape() ([]int, error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
 
@@ -372,5 +368,5 @@ func (h H5RefArrayType) Shape() ([]int,error) {
 	}
 
 	shape := conv.UintsToInts(dims)
-	return shape,nil
+	return shape, nil
 }

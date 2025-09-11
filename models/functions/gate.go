@@ -1,9 +1,5 @@
 package functions
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 /*OW-SPEC
 Gate:
 	inputs:
@@ -24,21 +20,19 @@ Gate:
 		function
 */
 
-func gate(trigger, incoming data.ND1Float64,
-	outgoing data.ND1Float64) {
+func gate(trigger, incoming []float64,
+	outgoing []float64) {
 
-	n := trigger.Len1()
-	idx := []int{0}
+	n := len(trigger)
 
 	for day := 0; day < n; day++ {
-		idx[0] = day
-		t := trigger.Get(idx)
-		i := incoming.Get(idx)
+		t := trigger[day]
+		i := incoming[day]
 
 		if t > 0 {
-			outgoing.Set(idx, i)
+			outgoing[day] = i
 		} else {
-			outgoing.Set(idx, 0.0)
+			outgoing[day] = 0.0
 		}
 	}
 }

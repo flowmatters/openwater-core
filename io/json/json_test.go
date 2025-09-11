@@ -11,7 +11,7 @@ import (
 // import "fmt"
 
 func Test1D(t *testing.T) {
-	arr := data.NewArray1DFloat64(10)
+	arr := data.NewArray1D[float64](10)
 	arr.Set1(0, 1.0)
 	arr.Set1(1, math.NaN())
 	arr.Set1(2, math.Inf(0))
@@ -34,7 +34,7 @@ func Test1D(t *testing.T) {
 }
 
 func Test2D(t *testing.T) {
-	arr := data.NewArray2DFloat64(10, 5)
+	arr := data.NewArray2D[float64](10, 5)
 	arr.Set2(0, 0, 1.0)
 	arr.Set2(0, 1, math.NaN())
 	arr.Set2(1, 0, math.Inf(0))

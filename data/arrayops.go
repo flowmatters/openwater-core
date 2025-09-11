@@ -1,8 +1,6 @@
 package data
 
-//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64"
-
-func ApplyFunc1ArrayType(dest, source NDArrayType, fn func(val ArrayType) ArrayType) {
+func ApplyFunc1[T Number](dest, source ND[T], fn func(val T) T) {
 	if dest.Contiguous() && source.Contiguous() {
 		destSlice := dest.Unroll()
 		sourceSlice := source.Unroll()
@@ -23,11 +21,11 @@ func ApplyFunc1ArrayType(dest, source NDArrayType, fn func(val ArrayType) ArrayT
 
 }
 
-func ScaleArrayTypeArray(dest, source NDArrayType, scale ArrayType) {
-	ApplyFunc1ArrayType(dest, source, func(v ArrayType) ArrayType { return v * scale })
+func ScaleArray[T Number](dest, source ND[T], scale T) {
+	ApplyFunc1[T](dest, source, func(v T) T { return v * scale })
 }
 
-func AddToArrayTypeArray(dest, source NDArrayType) {
+func AddToArray[T Number](dest, source ND[T]) {
 	if dest.Contiguous() && source.Contiguous() {
 
 		destSlice := dest.Unroll()

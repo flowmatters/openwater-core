@@ -2,8 +2,6 @@ package routing
 
 import (
 	"math"
-
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -35,45 +33,43 @@ ConstituentDecay:
 		constituent transport
 */
 
-func constituentDecay(inflowLoads, lateralLoads, inflows, outflows, storage data.ND1Float64,
+func constituentDecay(inflowLoads, lateralLoads, inflows, outflows, storage []float64,
 	storedMass float64,
 	x, halflife, deltaT float64,
-	decayedLoad, outflowLoads data.ND1Float64) float64 {
-	const MINIMUM_VOLUME=0.01
-	n := inflowLoads.Len1()
-	idx := []int{0}
+	decayedLoad, outflowLoads []float64) float64 {
+	const MINIMUM_VOLUME = 0.01
+	n := len(inflowLoads)
 
 	for day := 0; day < n; day++ {
-		idx[0] = day
 
 		decayedAmount := 0.0
 		if halflife > 0 {
 			fraction := math.Pow(2.0, -deltaT/halflife)
-			decayedAmount = (1-fraction)*storedMass
-			decayedLoad.Set(idx,decayedAmount/deltaT)
+			decayedAmount = (1 - fraction) * storedMass
+			decayedLoad[day] = decayedAmount / deltaT
 			storedMass *= fraction
 		}
 
-		inflowLoad := inflowLoads.Get(idx) * deltaT
-		lateralLoad := lateralLoads.Get(idx) * deltaT
+		inflowLoad := inflowLoads[day] * deltaT
+		lateralLoad := lateralLoads[day] * deltaT
 		workingMass := storedMass + inflowLoad + lateralLoad
 
-		outflowR := outflows.Get(idx)
+		outflowR := outflows[day]
 		outflowV := outflowR * deltaT
-		storedV := storage.Get(idx)
+		storedV := storage[day]
 
 		workingVol := outflowV + storedV
 		if workingVol < MINIMUM_VOLUME {
 			storedMass = 0.0
-			outflowLoads.Set(idx, 0.0)
+			outflowLoads[day] = 0.0
 			continue
 		}
 
 		concentration := workingMass / workingVol
 		outflowLoad := concentration * outflowR
-		storedMass = workingMass - outflowLoad * deltaT
+		storedMass = workingMass - outflowLoad*deltaT
 
-		outflowLoads.Set(idx, outflowLoad)
+		outflowLoads[day] = outflowLoad
 	}
 	return storedMass
 }

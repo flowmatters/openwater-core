@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	_ "path/filepath"
@@ -12,6 +11,9 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/flowmatters/openwater-core/util/logger"
+
+	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 )
 
@@ -63,7 +65,7 @@ type ModelSpec struct {
 func processPath(path string) {
 	fi, err := os.Stat(path)
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Msg("")
 		return
 	}
 
@@ -95,7 +97,7 @@ func transform(spec ModelSpec) ModelSpec {
 			for _, d := range dimensions {
 				dims[d] = struct{}{}
 			}
-			fmt.Println(paramName, dimensions)
+			log.Info().Any(paramName, dimensions).Msg("")
 		}
 
 		txt := fmt.Sprint(v.Value)
@@ -144,7 +146,7 @@ func transform(spec ModelSpec) ModelSpec {
 		for _, d := range v.Dimensions {
 			for i, p := range spec.ParameterSpecs {
 				if strings.Compare(p.Name, d) == 0 {
-					fmt.Printf("%s is a dimension of %s\n", p.Name, v.Name)
+					log.Info().Str("Dimension", p.Name).Str("Variable", v.Name).Msg("Variable dimension")
 					spec.ParameterSpecs[i].IsDimension = true
 				}
 			}
@@ -157,7 +159,7 @@ func transform(spec ModelSpec) ModelSpec {
 
 	for _, v := range spec.ParameterSpecs {
 		if v.IsDimension {
-			fmt.Printf("%s is a dimension\n", v.Name)
+			log.Info().Str("Dimension", v.Name).Msg("Is a dimension")
 		}
 	}
 	return spec
@@ -166,16 +168,16 @@ func transform(spec ModelSpec) ModelSpec {
 func processFile(fn string) {
 	//	directory := filepath.Dir(fn)
 
-	contents, err := ioutil.ReadFile(fn)
+	contents, err := os.ReadFile(fn)
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Msg("")
 		return
 	}
 
 	packageRe := regexp.MustCompile("^\\s*package\\s+(\\w+)")
 	packageMatch := packageRe.FindSubmatch(contents)
 	if packageMatch == nil {
-		fmt.Printf("No package declaration in %s\n", fn)
+		log.Info().Str("Filename", fn).Msg("No package declaration found")
 		return
 	}
 	packageName := packageMatch[1]
@@ -184,9 +186,7 @@ func processFile(fn string) {
 
 	specs := re.FindAllSubmatch(contents, -1)
 	for _, specContents := range specs {
-		// specContents := re.FindSubmatch(contents)
 		if specContents == nil {
-			//		fmt.Printf("No OW-SPEC in %s\n",fn)
 			return
 		}
 
@@ -197,11 +197,7 @@ func processFile(fn string) {
 		desc := make(ModelSpecs) // := make(map[interface{}]interface{})
 		err = yaml.Unmarshal(spec, &desc)
 		if err != nil {
-			fmt.Println(err)
-			// for i := range specContents {
-			// 	fmt.Println(i)
-			// 	fmt.Println(string(specContents[i]))
-			// }
+			log.Error().Stack().Err(err).Msg("")
 			return
 		}
 
@@ -217,8 +213,6 @@ func processFile(fn string) {
 			description = transform(description)
 
 			description.Filename = fn
-			// fmt.Println(name)
-			// fmt.Println(description)
 			generateWrapper(description)
 		}
 	}
@@ -232,11 +226,8 @@ func generateWrapper(desc ModelSpec) {
 		"lower": strings.ToLower}).ParseGlob(templatePath)
 
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println("Could not parse templates. Exiting")
-		os.Exit(1)
+		log.Fatal().Stack().Err(err).Msg("Could not parse templates. Exiting")
 	}
-	//	fmt.Println(tmpl.DefinedTemplates())
 	tmpl = tmpl.Funcs(template.FuncMap{
 		"inc": func(n int) int {
 			return n + 1
@@ -244,10 +235,10 @@ func generateWrapper(desc ModelSpec) {
 
 	dir := filepath.Dir(desc.Filename)
 	destFn := filepath.Join(dir, fmt.Sprintf("generated_%s.go", desc.Name))
-	fmt.Printf("Writing to %s\n", destFn)
+	log.Info().Str("Destination Filename", destFn).Msg("Writing generated wrapper")
 	dest, err := os.Create(destFn)
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Msg("")
 		return
 	}
 	defer dest.Close()
@@ -297,40 +288,14 @@ func generateWrapper(desc ModelSpec) {
 
 	err = tmpl.ExecuteTemplate(dest, "generated_struct.got", desc)
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Msg("")
 		return
 	}
-	// var implementationField = desc.Implementation
-	// var generateStruct = implementationField != nil
-
-	// if generateStruct {
-	// 	implementation, _ := implementationField.(map[interface{}]interface{})
-
-	// 		if implementation==nil {
-	// 			fmt.Println("invalid type")
-	// 			return
-	// 		}
-
-	// 		function, _ := implementation["function"].(string)
-	// 		funcType, _ := implementation["type"].(string)
-	// 		lang, _ := implementation["lang"].(string)
-	// 		fmt.Println(function,funcType,lang)
-	// } else {
-	// 	fmt.Println("no implementation specified. assuming type already exists")
-	// }
-
-	// Extract out yaml (convert tabs to spaces if necessary)
-	// Unmarshal object
-	// If implementation is C function - generate Go wrapper
-	// If implementation is single function - generate vectorised wrapper
-	// If implementation is function - generate type
-	// Generate description
-
-	// Write out
 }
 
 func main() {
 	flag.Parse()
+	logger.SetupLogger(false, true)
 	paths := flag.Args()
 
 	for _, path := range paths {

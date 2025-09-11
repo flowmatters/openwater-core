@@ -1,12 +1,14 @@
 package m
 
-import "github.com/joelrahman/genny/generic"
-
 //go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "NumT=NUMBERS"
 
-type NumT generic.Number
+// type NumT generic.Number
 
-func MinNumT(a, b NumT) NumT {
+type Number interface {
+	float32 | float64 | int32 | uint32 | int64 | uint64 | int | uint | uint8 | int8 | int16 | uint16
+}
+
+func Min[T Number](a, b T) T {
 	if a > b {
 		return b
 	}
@@ -14,7 +16,7 @@ func MinNumT(a, b NumT) NumT {
 	return a
 }
 
-func MaxNumT(a, b NumT) NumT {
+func Max[T Number](a, b T) T {
 	if a > b {
 		return a
 	}

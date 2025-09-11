@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/flowmatters/openwater-core/data"
 	owjs "github.com/flowmatters/openwater-core/io/json"
 )
@@ -60,7 +62,7 @@ func (vals modelValues) Find(name string, defaultValue float64) (float64, string
 	return defaultValue, fmt.Sprintf("%s not found, using default=%f", name, defaultValue)
 }
 
-func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3Float64, data.ND2Float64, []string) {
+func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3[float64], data.ND2[float64], []string) {
 	warnings := make([]string, 1)
 
 	if m.Name == "" {
@@ -68,7 +70,7 @@ func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3Float64, da
 	}
 	factory := Catalog[m.Name]
 	if factory == nil {
-		return errors.New(fmt.Sprintf("Unknown model: %s", m.Name)), nil, nil, nil, warnings
+		return fmt.Errorf("Unknown model: %s", m.Name), nil, nil, nil, warnings
 	}
 	model := factory()
 	desc := model.Description()
@@ -83,14 +85,14 @@ func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3Float64, da
 	}
 
 	model.ApplyParameters(uniformParameters(params, 1))
-	var states data.ND2Float64
+	var states data.ND2[float64]
 	if len(m.States) == len(desc.States) {
 		//TODO: log("TODO. Use supplied states")
 		states = model.InitialiseStates(1)
 	} else {
 		states = model.InitialiseStates(1)
 	}
-	var inputs data.ND3Float64 = nil
+	var inputs data.ND3[float64] = nil
 	for i, p := range desc.Inputs {
 		thisInput := m.Inputs.Find(p)
 		if thisInput == nil {
@@ -99,7 +101,7 @@ func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3Float64, da
 		}
 
 		if inputs == nil {
-			inputs = data.NewArray3DFloat64(1, len(desc.Inputs), len(thisInput))
+			inputs = data.NewArray3D[float64](1, len(desc.Inputs), len(thisInput))
 		}
 
 		inputs.Apply([]int{0, i, 0}, 2, 1, thisInput)
@@ -108,8 +110,8 @@ func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3Float64, da
 	return nil, model, inputs, states, warnings
 }
 
-func uniformParameters(params []float64, n int) data.ND2Float64 {
-	res := data.NewArray2DFloat64(len(params), n)
+func uniformParameters(params []float64, n int) data.ND2[float64] {
+	res := data.NewArray2D[float64](len(params), n)
 	for i := 0; i < len(params); i++ {
 		for j := 0; j < n; j++ {
 			res.Set2(i, j, params[i])
@@ -202,7 +204,6 @@ func encodeResults(w io.Writer, runLogs []string, results RunResults,
 
 	err := encoder.Encode(overall)
 	if err != nil {
-		fmt.Println(overall.Log)
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Any("Overall Log", overall.Log).Msg("")
 	}
 }

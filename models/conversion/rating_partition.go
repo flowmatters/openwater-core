@@ -1,9 +1,10 @@
 package conversion
 
 import (
-	"fmt"
 	"math"
-	"github.com/flowmatters/openwater-core/data"
+
+	"github.com/rs/zerolog/log"
+
 	"github.com/flowmatters/openwater-core/util/fn"
 )
 
@@ -31,32 +32,31 @@ RatingCurvePartition:
 		partition
 */
 
-func ratingPartition(input data.ND1Float64,
+func ratingPartition(input []float64,
 	nPts int,
-	inputAmount, proportion data.ND1Float64,
-	output1, output2 data.ND1Float64) {
+	inputAmount, proportion []float64,
+	output1, output2 []float64) {
 
-	nDays := input.Len1()
-	idx := []int{0}
+	nDays := len(input)
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		incoming := input.Get(idx)
-		frac,err := fn.Piecewise(incoming,inputAmount,proportion)
+		incoming := input[i]
+		frac, err := fn.Piecewise(incoming, inputAmount, proportion)
 		if err != nil {
-			panic(err)
+			log.Panic().Stack().Err(err).Msg("")
 		}
 
-		if math.IsNaN(frac) || math.IsNaN(incoming){
-			fmt.Printf("timestep=%d/%d\n",i,nDays)
-			fmt.Printf("frac=%f\n",frac)
-			fmt.Printf("incoming=%f\n",incoming)
-			fmt.Printf("inputAmount=%v\n",inputAmount)
-			fmt.Printf("proportion=%v\n",proportion)
-			panic("nan")
+		if math.IsNaN(frac) || math.IsNaN(incoming) {
+			log.Panic().Int("timestep", i).
+				Int("nDays", nDays).
+				Float64("frac", frac).
+				Float64("incoming", incoming).
+				Any("inputAmount", inputAmount).
+				Any("proportion", proportion).
+				Err(err).Msg("NAN")
 		}
 
-		output1.Set(idx, incoming*frac)
-		output2.Set(idx, incoming*(1-frac))
+		output1[i] = incoming * frac
+		output2[i] = incoming * (1 - frac)
 	}
 }

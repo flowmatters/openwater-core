@@ -2,8 +2,6 @@ package climate
 
 import (
 	"math"
-
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -30,18 +28,15 @@ ClimateVariables:
 		climate variable estimation
 */
 
-func climateVariables(dryBulb, humidity data.ND1Float64,
+func climateVariables(dryBulb, humidity []float64,
 	elevation float64,
-	vaporPressure, dewPoint, wetBulb, deltaT data.ND1Float64) {
-	nDays := dryBulb.Len1()
-	idx := []int{0}
-
+	vaporPressure, dewPoint, wetBulb, deltaT []float64) {
+	nDays := len(dryBulb)
 	pa := barometricPressure(elevation)
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		dryBulbTemp := dryBulb.Get(idx)
-		relativeHumidity := humidity.Get(idx)
+		dryBulbTemp := dryBulb[i]
+		relativeHumidity := humidity[i]
 
 		vp := calcVaporPressure(dryBulbTemp)
 		tdew := calcDewPoint(dryBulbTemp, relativeHumidity)
@@ -50,10 +45,10 @@ func climateVariables(dryBulb, humidity data.ND1Float64,
 			calcHumidityRatioActual(dryBulbTemp, relativeHumidity, pa))
 
 		twetBulbTemp := calcWetBulb(dryBulbTemp, tdew, e, pa)
-		vaporPressure.Set(idx, vp)
-		dewPoint.Set(idx, tdew)
-		wetBulb.Set(idx, twetBulbTemp)
-		deltaT.Set(idx, dryBulbTemp-twetBulbTemp)
+		vaporPressure[i] = vp
+		dewPoint[i] = tdew
+		wetBulb[i] = twetBulbTemp
+		deltaT[i] = dryBulbTemp - twetBulbTemp
 	}
 }
 
@@ -62,7 +57,7 @@ func climateVariables(dryBulb, humidity data.ND1Float64,
 // where  Temperature = °C
 // Result = kPa
 //
-//VaporPressure_GoffGratch
+// VaporPressure_GoffGratch
 func calcVaporPressure(temperature float64) float64 {
 	const a1 = -7.90298
 	const a2 = 5.02808
@@ -130,7 +125,6 @@ func barometricPressure(elevation float64) float64 {
 //
 // where  VaporPressure and AtmPressure are the same units
 // HumidityRatio is unitless (e.g. grams/gram, lb/lb)
-//
 func calcHumidityRatio(vaporPressure, atmPressure float64) float64 {
 	return 0.62198 * vaporPressure / (atmPressure - vaporPressure)
 }
@@ -143,7 +137,6 @@ func calcHumidityRatio(vaporPressure, atmPressure float64) float64 {
 // HumidityPC = % relative humidity (0 < HumidityPC <= 100)
 // AtmPressure = kPA (e.g. 100)
 // HumidityRatio = ratio (grams/gram, lb/lb, etc.)
-//
 func calcHumidityRatioActual(tDryBulb, humidityPC, atmPressure float64) float64 {
 	var vp_sat float64
 	vp_sat = calcVaporPressure(tDryBulb)             // saturated vapor pressure
@@ -158,7 +151,6 @@ func calcHumidityRatioActual(tDryBulb, humidityPC, atmPressure float64) float64 
 // where  TDryBulb = °C
 // HumidityRatio = grams/gram (lb/lb, etc.)
 // Result = Joules/gram
-//
 func calcEnthalpy(tDryBulb, humidityRatio float64) float64 {
 	return 1.006*tDryBulb + (1.84*tDryBulb+2501)*humidityRatio
 }
@@ -172,7 +164,6 @@ func calcEnthalpy(tDryBulb, humidityRatio float64) float64 {
 // TDewPoint = °C
 // Enthalpy = Joules/gram
 // AtmPress = kPa (around 100)
-//
 func calcWetBulb(tDryBulb, tDewPoint, hEnthalpy, pAtmosphere float64) float64 {
 	var rtb, dx, xmid, psat, wstar, fmid float64
 	// -----------------------------------------------------------------------------

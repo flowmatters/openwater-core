@@ -2,7 +2,6 @@ package generation
 
 import (
 	u "github.com/flowmatters/openwater-core/conv/units"
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -43,28 +42,26 @@ SednetParticulateNutrientGeneration:
 
 func particulateNutrients(fineSedModelFineSheetGeneratedKg, fineSedModelCoarseSheetGeneratedKg,
 	fineSedModelFineGullyGeneratedKg, fineSedModelCoarseGullyGeneratedKg,
-	slowflow data.ND1Float64,
+	slowflow []float64,
 	area,
 	nutSurfSoilConc, hillDeliveryRatio, Nutrient_Enrichment_Ratio,
 	nutSubSoilConc, Nutrient_Enrichment_Ratio_Gully, gullyDeliveryRatio,
 	nutrientDWC, Do_P_CREAMS_Enrichment float64,
 	quickflowConstituent, slowflowConstituent, totalLoad,
-	hillslopeContribution, gullyContribution data.ND1Float64) {
+	hillslopeContribution, gullyContribution []float64) {
 	const CREAMS_CONSTANT = 1.2
 	//All calcs done in units / day then converted back to units per sec for E2 consumption
-	n := fineSedModelCoarseSheetGeneratedKg.Len1()
+	n := len(fineSedModelCoarseSheetGeneratedKg)
 	// areaHa := area * units.SQUARE_METRES_TO_HECTARES
 
-	idx := []int{0}
 	for day := 0; day < n; day++ {
-		idx[0] = day
 
 		Gully_Particulate_load_kg := 0.0
 		Hillslope_Particulate_load_kg := 0.0
 		Total_Particulate_load_kg := 0.0
 
-		Hillslope_ErosionLoad_kg := fineSedModelFineSheetGeneratedKg.Get(idx) + fineSedModelCoarseSheetGeneratedKg.Get(idx)
-		Gully_ErosionLoad_kg := fineSedModelFineGullyGeneratedKg.Get(idx) + fineSedModelCoarseGullyGeneratedKg.Get(idx)
+		Hillslope_ErosionLoad_kg := fineSedModelFineSheetGeneratedKg[day] + fineSedModelCoarseSheetGeneratedKg[day]
+		Gully_ErosionLoad_kg := fineSedModelFineGullyGeneratedKg[day] + fineSedModelCoarseGullyGeneratedKg[day]
 
 		//This is only ever set to true during APSIM parameterisation
 		if Do_P_CREAMS_Enrichment > 0.5 {
@@ -100,13 +97,13 @@ func particulateNutrients(fineSedModelFineSheetGeneratedKg, fineSedModelCoarseSh
 		Total_Particulate_load_kg = Hillslope_Particulate_load_kg + Gully_Particulate_load_kg // * ConversionConst.Grams_to_Kilograms;
 
 		quickLoad := Total_Particulate_load_kg
-		quickflowConstituent.Set(idx, quickLoad)
-		slowLoad := slowflow.Get(idx) * nutrientDWC * u.MG_PER_LITRE_TO_KG_PER_M3
-		slowflowConstituent.Set(idx, slowLoad)
-		totalLoad.Set(idx, quickLoad+slowLoad)
+		quickflowConstituent[day] = quickLoad
+		slowLoad := slowflow[day] * nutrientDWC * u.MG_PER_LITRE_TO_KG_PER_M3
+		slowflowConstituent[day] = slowLoad
+		totalLoad[day] = quickLoad + slowLoad
 
-		hillslopeContribution.Set(idx,Hillslope_Particulate_load_kg)
-		gullyContribution.Set(idx,Gully_Particulate_load_kg)
+		hillslopeContribution[day] = Hillslope_Particulate_load_kg
+		gullyContribution[day] = Gully_Particulate_load_kg
 
 		// Total_Total_Particulate_Constituent_kg += Daily_Total_Particulate_load_kg
 		// Total_Hillslope_Particulate_Constituent_kg += Daily_Hillslope_Particulate_load_kg

@@ -1,9 +1,5 @@
 package conversion
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 /*OW-SPEC
 VariablePartition:
   inputs:
@@ -26,17 +22,15 @@ VariablePartition:
 		partition
 */
 
-func variablePartition(input, fraction data.ND1Float64,
-	output1, output2 data.ND1Float64) {
+func variablePartition(input, fraction []float64,
+	output1, output2 []float64) {
 
-	nDays := input.Len1()
-	idx := []int{0}
+	nDays := len(input)
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		incoming := input.Get(idx)
-		frac := fraction.Get(idx)
-		output1.Set(idx, incoming*frac)
-		output2.Set(idx, incoming*(1-frac))
+		incoming := input[i]
+		frac := fraction[i]
+		output1[i] = incoming * frac
+		output2[i] = incoming * (1 - frac)
 	}
 }

@@ -4,6 +4,10 @@ import (
 	"C"
 	"unsafe"
 
+	"log"
+	"os"
+	"runtime/pprof"
+
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/data/cdata"
 	_ "github.com/flowmatters/openwater-core/models"
@@ -19,44 +23,48 @@ func RunSingleModel(
 	params *C.double, nParameters, nParameterSets C.int,
 	states *C.double, nCells, nStates C.int,
 	outputs *C.double, nOutputCells, nOutputs, nOutputTimesteps C.int,
-	initStates bool) {
+	initStates bool, cpuprofile *C.char) {
+
+	if cpuprofile != nil && C.GoString(cpuprofile) != "" {
+		f, err := os.Create(C.GoString(cpuprofile))
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
+
 	gName := C.GoString(modelName)
 	model := sim.Catalog[gName]()
 
-	iArray := cdata.NewFloat64CArray(unsafe.Pointer(inputs), []int{int(nInputSets), int(nInputs), int(nTimesteps)}).(data.ND3Float64)
-	pArray := cdata.NewFloat64CArray(unsafe.Pointer(params), []int{int(nParameters), int(nParameterSets)}).(data.ND2Float64)
-	oArray := cdata.NewFloat64CArray(unsafe.Pointer(outputs), []int{int(nOutputCells), int(nOutputs), int(nOutputTimesteps)}).(data.ND3Float64)
+	iArray := cdata.NewCArray[float64](unsafe.Pointer(inputs), []int{int(nInputSets), int(nInputs), int(nTimesteps)}).(data.ND3[float64])
+	pArray := cdata.NewCArray[float64](unsafe.Pointer(params), []int{int(nParameters), int(nParameterSets)}).(data.ND2[float64])
+	oArray := cdata.NewCArray[float64](unsafe.Pointer(outputs), []int{int(nOutputCells), int(nOutputs), int(nOutputTimesteps)}).(data.ND3[float64])
 
-	dimSizes := model.FindDimensions(pArray.(data.ND2Float64))
+	dimSizes := model.FindDimensions(pArray.(data.ND2[float64]))
 	if len(dimSizes) > 0 {
 		model.InitialiseDimensions(dimSizes)
 	}
 
 	model.ApplyParameters(pArray)
-	// coeffSlice := pArray.Slice([]int{0, 0}, []int{1, int(nParameterSets)}, nil).(data.ND1Float64)
+	// coeffSlice := pArray.Slice([]int{0, 0}, []int{1, int(nParameterSets)}, nil).(data.ND1[float64])
 	// i := 0
 	// coeff := coeffSlice.Get1(i % coeffSlice.Len1())
-	// fmt.Println("Runoff coefficient is", coeff)
-	var sArray data.ND2Float64
-	// fmt.Println("initStates", initStates)
+	var sArray data.ND2[float64]
 	if initStates {
 		sArray = model.InitialiseStates(int(nCells))
 	} else {
-		sArray = cdata.NewFloat64CArray(unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2Float64)
+		sArray = cdata.NewCArray[float64](unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2[float64])
 	}
 
-	// fmt.Printf("Running model: %s!\n", gName)
+	// fmt.Errorf("Running model: %s!", gName)
 	model.Run(iArray, sArray, oArray)
 	// for i := 0; i < iArray.Len3(); i += 10 {
-	// 	fmt.Println(i, iArray.Get3(0, 0, i))
 	// }
-
-	// fmt.Println("Params")
-	// fmt.Println(pArray.Get2(0, 0))
 
 	// if initStates Copy data back into provided states array...
 	if initStates && (states != nil) {
-		sOrig := cdata.NewFloat64CArray(unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2Float64)
+		sOrig := cdata.NewCArray[float64](unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2[float64])
 		sOrig.CopyFrom(sArray)
 	}
 }

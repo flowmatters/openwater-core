@@ -2,8 +2,8 @@ package routing
 
 import (
 	"math"
+
 	"github.com/flowmatters/openwater-core/conv/units"
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -49,25 +49,24 @@ InstreamFineSediment:
 		sediment transport
 */
 
-func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume, outflow data.ND1Float64,
+func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume, outflow []float64,
 	channelStoreFine, totalStoredMass float64,
 	bankFullFlow, fineSedSettVelocityFlood, floodPlainArea,
 	linkWidth, linkLength, linkSlope, bankHeight,
 	propBankHeightForFineDep, sedBulkDensity, manningsN,
 	fineSedSettVelocity, fineSedReMobVelocity, durationInSeconds float64,
-	loadDownstream, loadToFloodplain, loadToChannelDeposition, floodplainDepositionFraction, channelDepositionFraction data.ND1Float64) (float64, float64) {
+	loadDownstream, loadToFloodplain, loadToChannelDeposition, floodplainDepositionFraction, channelDepositionFraction []float64) (float64, float64) {
 
 	if bankFullFlow <= 1e-8 {
 		totalStoredMass = LumpedConstituentTransport(
 			upstreamMass, lateralMass, outflow, reachVolume,
 			totalStoredMass,
 			0, 0.0, durationInSeconds,
-			loadDownstream,nil)
+			loadDownstream, nil)
 		return channelStoreFine, totalStoredMass
 	}
 
-	n := reachVolume.Len1()
-	idx := []int{0}
+	n := len(reachVolume)
 
 	linkArea := linkWidth * linkLength
 	maxStorage := propBankHeightForFineDep * bankHeight * linkArea * sedBulkDensity * units.TONNES_TO_KG
@@ -78,7 +77,6 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 	}
 
 	for i := 0; i < n; i++ {
-		idx[0] = i
 		//note - Flow Storage is in cubic metres per day
 		//note - ConstituentStorage is in kg per day
 
@@ -100,12 +98,12 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 		// STC_Dep_t = 0
 		// STC_Mob_t = 0
 
-		//		model.step(incomingMass.Get(idx), volumeAtEndTimestep.Get(idx), outflow.Get(idx))
+		//		model.step(incomingMass[i], volumeAtEndTimestep[i], outflow[i])
 		//NOT USED: ChannelStoreAtStartOfTimeStep_Fine_kg := ism.channelStoreFine
-		incomingMassNow := (upstreamMass.Get(idx)+lateralMass.Get(idx)+reachLocalMass.Get(idx)) * durationInSeconds
-		outflowRate := outflow.Get(idx)
+		incomingMassNow := (upstreamMass[i] + lateralMass[i] + reachLocalMass[i]) * durationInSeconds
+		outflowRate := outflow[i]
 		outflowNow := outflowRate * durationInSeconds
-		reachVolumeNow := reachVolume.Get(idx)
+		reachVolumeNow := reachVolume[i]
 
 		totalDailyConstsituentMass := totalStoredMass + incomingMassNow
 		totalVolume := reachVolumeNow + outflowNow
@@ -134,7 +132,7 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 		if combinedConstituentStorageBeforeDeposition > 0 {
 			proportionDepositedChannel = netStreamDepositionFineSed / combinedConstituentStorageBeforeDeposition
 		}
-	
+
 		channelStoreFine += netStreamDepositionFineSed
 		totalDailyConstsituentMass -= netStreamDepositionFineSed
 
@@ -155,11 +153,11 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 		}
 
 		//this gets apportioned to outflow & storage by concentration in StorageRoutingConstituentProvider.ProcessLumped
-		loadDownstream.Set(idx, outflowLoad)
-		loadToFloodplain.Set(idx, floodPlainDepositionFine_Kg_per_Day/durationInSeconds)
-		floodplainDepositionFraction.Set(idx, proportionDepositedFloodplain)
-		channelDepositionFraction.Set(idx,proportionDepositedChannel)
-		loadToChannelDeposition.Set(idx,netStreamDepositionFineSed)
+		loadDownstream[i] = outflowLoad
+		loadToFloodplain[i] = floodPlainDepositionFine_Kg_per_Day / durationInSeconds
+		floodplainDepositionFraction[i] = proportionDepositedFloodplain
+		channelDepositionFraction[i] = proportionDepositedChannel
+		loadToChannelDeposition[i] = netStreamDepositionFineSed
 	}
 
 	return channelStoreFine, totalStoredMass
@@ -168,7 +166,7 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 func floodPlainDepositionEmperical(outflow, totalDailyConstsituentMass,
 	bankFullFlow, fineSedSettVelocityFlood, floodPlainArea float64) float64 {
 
-	if (outflow < bankFullFlow) || (bankFullFlow==0.0) {
+	if (outflow < bankFullFlow) || (bankFullFlow == 0.0) {
 		return 0.0
 	}
 
@@ -210,9 +208,9 @@ func floodPlainDepositionEmperical(outflow, totalDailyConstsituentMass,
 
 // }
 
-///<summary>
-///This is the long term channel storage component. Not to be confused with the much more transient Flow Routing Storage
-///<//summary>
+// /<summary>
+// /This is the long term channel storage component. Not to be confused with the much more transient Flow Routing Storage
+// /<//summary>
 func inChannelStorage(outflow, totalVolume, totalDailyConstsituentMass, initialChannelStore,
 	linkWidth, linkSlope, manningsN,
 	fineSedSettVelocity, fineSedReMobVelocity, maxStorage float64) float64 {

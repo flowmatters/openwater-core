@@ -39,32 +39,28 @@ Simhyd:
 
 import (
 	"math"
-
-	"github.com/flowmatters/openwater-core/data"
 )
 
 const SOIL_ET_CONST = 10.0
 
-func simhyd(rainfall data.ND1Float64, pet data.ND1Float64,
+func simhyd(rainfall []float64, pet []float64,
 	initialStore float64, initialGW float64, initialTotalStore float64,
 	baseflowCoefficient float64, imperviousThreshold float64, infiltrationCoefficient float64,
 	infiltrationShape float64, interflowCoefficient float64, perviousFraction float64,
 	risc float64, rechargeCoefficient float64, smsc float64,
-	runoff, quickflow, baseflow, store data.ND1Float64) (
+	runoff, quickflow, baseflow, store []float64) (
 	float64, // final store
 	float64, // final GW
 	float64) { // final total store
-	nDays := rainfall.Len1()
+	nDays := len(rainfall)
 
 	soilMoistureStore := initialStore
 	gw := initialGW
 	totalStore := initialTotalStore
-	idx := []int{0}
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		rainToday := rainfall.Get(idx)
-		petToday := pet.Get(idx)
+		rainToday := rainfall[i]
+		petToday := pet[i]
 
 		perviousIncident := rainToday
 		imperviousIncident := rainToday
@@ -115,10 +111,10 @@ func simhyd(rainfall data.ND1Float64, pet data.ND1Float64,
 		totalRunoff := eventRunoff + perviousFraction*baseflowRunoff
 
 		//effectiveRainfall := rainToday - totalEt;
-		store.Set(idx, soilMoistureStore)
-		baseflow.Set(idx, baseflowRunoff*perviousFraction)
-		runoff.Set(idx, totalRunoff)
-		quickflow.Set(idx, eventRunoff)
+		store[i] = soilMoistureStore
+		baseflow[i] = baseflowRunoff * perviousFraction
+		runoff[i] = totalRunoff
+		quickflow[i] = eventRunoff
 	}
 	return soilMoistureStore, gw, totalStore
 }

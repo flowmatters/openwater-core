@@ -5,6 +5,7 @@ import (
 )
 
 var verbose bool
+var quiet bool
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 var overwrite = flag.Bool("overwrite", false, "overwrite existing output files")
@@ -25,4 +26,7 @@ func init() {
 	const usage = "show progress of simulation generations"
 	flag.BoolVar(&verbose, "verbose", false, usage)
 	flag.BoolVar(&verbose, "v", false, usage+" (shorthand)")
+	const usageQuiet = "Only log errors and warnings"
+	flag.BoolVar(&quiet, "quiet", false, usageQuiet)
+	flag.BoolVar(&quiet, "q", false, usageQuiet+" (shorthand)")
 }

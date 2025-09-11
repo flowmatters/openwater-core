@@ -1,9 +1,5 @@
 package conversion
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 /*OW-SPEC
 ApplyScalingFactor:
   inputs:
@@ -25,21 +21,18 @@ ApplyScalingFactor:
 		partition
 */
 
-func applyScaling(input data.ND1Float64,
+func applyScaling(input []float64,
 	scale float64,
-	output data.ND1Float64) {
+	output []float64) {
 
 	if scale == 0.0 {
 		return
 	}
-	
-	
-	nDays := input.Len1()
-	idx := []int{0}
+
+	nDays := len(input)
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		incoming := input.Get(idx)
-		output.Set(idx, incoming*scale)
+		incoming := input[i]
+		output[i] = incoming * scale
 	}
 }

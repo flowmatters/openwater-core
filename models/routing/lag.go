@@ -33,60 +33,54 @@ Lag:
 		lag
 */
 
-func initLag(timeLag float64) data.ND2Float64 {
+func initLag(timeLag float64) data.ND2[float64] {
 	lags := make([]float64, int(timeLag))
 
 	result := packLagStates(lags)
 	return result
 }
 
-func extractLagStates(states data.ND1Float64) []float64 {
-	return states.Unroll()
+func extractLagStates(states []float64) []float64 {
+	return states
 }
 
-func packLagStates(lagged []float64) data.ND2Float64 {
-	result := data.NewArray2DFloat64(1, len(lagged))
+func packLagStates(lagged []float64) data.ND2[float64] {
+	result := data.NewArray2D[float64](1, len(lagged))
 	return result
 }
 
-func lag(inflow data.ND1Float64,
+func lag(inflow []float64,
 	lagged []float64,
 	timeLag float64,
-	outflow data.ND1Float64) []float64 {
+	outflow []float64) []float64 {
 
 	lagSteps := int(timeLag)
 
 	if lagSteps == 0 {
-		outflow.CopyFrom(inflow)
+		copy(outflow, inflow)
 		return lagged
 	}
 
-	idx := []int{0}
-	for i := 0; i < m.MinInt(lagSteps, outflow.Len1()); i++ {
-		idx[0] = i
-		outflow.Set(idx, lagged[i])
+	n := len(outflow)
+	for i := 0; i < m.Min[int](lagSteps, n); i++ {
+		outflow[i] = lagged[i]
 	}
 
-	idxInflow := []int{0}
-	for i := lagSteps; i < outflow.Len1(); i++ {
-		idx[0] = i
-		idxInflow[0] = i - lagSteps
-		outflow.Set(idx, inflow.Get(idxInflow))
+	for i := lagSteps; i < n; i++ {
+		outflow[i] = inflow[i-lagSteps]
 	}
-
-	if lagSteps > inflow.Len1() {
-		for i := inflow.Len1(); i < lagSteps; i++ {
-			lagged[i-inflow.Len1()] = lagged[i]
+	m := len(inflow)
+	if lagSteps > m {
+		for i := m; i < lagSteps; i++ {
+			lagged[i-m] = lagged[i]
 		}
 
-		for i := 0; i < inflow.Len1(); i++ {
-			idxInflow[0] = i
-			lagged[i+inflow.Len1()] = inflow.Get(idxInflow)
+		for i := 0; i < m; i++ {
+			lagged[i+m] = inflow[i]
 		}
 	} else {
 		for i := 0; i < lagSteps; i++ {
-			idxInflow[0] = inflow.Len1() - lagSteps + i
-			lagged[i] = inflow.Get(idxInflow)
+			lagged[i] = inflow[m-lagSteps+i]
 		}
 	}
 

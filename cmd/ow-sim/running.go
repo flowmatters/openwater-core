@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 func runGeneration(i int, models map[string]*modelReference, modelNames []string) (elapsedTime float64, nodesRun int) {
@@ -15,13 +15,12 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 	for _, modelName := range modelNames {
 		gen, err := models[modelName].GetGeneration(i)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal().Stack().Err(err).Msg("")
 		}
 		if gen.Count == 0 {
 			continue
 		}
-		verbosePrintf("* %d x %s\n", gen.Count, modelName)
+		log.Debug().Int("Count", gen.Count).Str("Model Name", modelName).Msg("Running model generation")
 		modelCount++
 
 		nodesRun += gen.Count
@@ -30,7 +29,7 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 				g.Run()
 				outputs := g.Outputs
 				if outputs == nil {
-					fmt.Printf("No outputs from %s in generation %d\n", name, i)
+					log.Info().Str("Model Name", name).Int("Generation", i).Msg("No outputs from model in generation")
 				}
 				simulationDone <- name
 			} else {
@@ -42,28 +41,27 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 	for i := 0; i < modelCount; i++ {
 		mn := <-simulationDone
 		if mn != "" {
-			verbosePrintf("%d: %s finished\n", i, mn)
+			log.Debug().Int("Index", i).Str("Model Name", mn).Msg("Model finished")
 		}
 	}
 
 	genSimulationEnd := time.Now()
 	elapsedTime = genSimulationEnd.Sub(genStart).Seconds()
-	verbosePrintf("= %d runs in %f seconds\n", nodesRun, elapsedTime)
+	log.Debug().Int("Runs", nodesRun).Float64("Elapsed Seconds", elapsedTime).Msg("Generation runs completed")
 	return
 }
 
 func writeGeneration(g int, models map[string]*modelReference, modelNames []string) {
 	genWriteStart := time.Now()
-	verbosePrintf("Writing results for generation %d...\n", g)
+	log.Debug().Int("Generation", g).Msg("Writing results for generation")
 	for _, modelName := range modelNames {
 		modelRef := models[modelName]
 		err := modelRef.WriteData(g)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal().Stack().Err(err).Msg("")
 		}
 	}
 	genWriteEnd := time.Now()
 	genWriteElapsed := genWriteEnd.Sub(genWriteStart)
-	verbosePrintf("Results for generation %d written in %f seconds\n", g, genWriteElapsed.Seconds())
+	log.Debug().Int("Generation", g).Float64("Elapsed Seconds", genWriteElapsed.Seconds()).Msg("Results written for generation")
 }

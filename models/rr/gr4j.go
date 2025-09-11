@@ -43,7 +43,7 @@ GR4J:
 		rainfall runoff
 */
 
-func initGR4J(x1 float64, x2 float64, x3 float64, x4 float64) data.ND2Float64 {
+func initGR4J(x1 float64, x2 float64, x3 float64, x4 float64) data.ND2[float64] {
 	// Initialise states
 	// * S
 	// * nUH1
@@ -57,28 +57,22 @@ func initGR4J(x1 float64, x2 float64, x3 float64, x4 float64) data.ND2Float64 {
 	q1 := make([]float64, n2)
 	q9 := make([]float64, n1)
 
-	//	fmt.Println(n1,x4)
-
 	result := packGR4JStates(0.0, 0.0, n1, n2, q1, q9)
-	//	fmt.Println(result)
 	return result
 }
 
-func extractGR4JStates(states data.ND1Float64) (float64, float64, int, int, []float64, []float64) {
-	// fmt.Println("states passed in to extract",states)
-	// fmt.Println("states passed in to extract",states.Shape())
-	s := states.Get1(0)
-	r := states.Get1(1)
-	n1 := int(states.Get1(2))
-	n2 := int(states.Get1(3))
-	q1 := states.Slice([]int{4}, []int{n2}, nil).Unroll()
-	q9 := states.Slice([]int{4 + n2}, []int{n1}, nil).Unroll()
-	//	fmt.Println("extract states",s,n1,n2,q1,q9)
+func extractGR4JStates(states []float64) (float64, float64, int, int, []float64, []float64) {
+	s := states[0]
+	r := states[1]
+	n1 := int(states[2])
+	n2 := int(states[3])
+	q1 := states[4:]
+	q9 := states[4+n2:]
 	return s, r, n1, n2, q1, q9
 }
 
-func packGR4JStates(s, r float64, n1, n2 int, q1, q9 []float64) data.ND2Float64 {
-	result := data.NewArray2DFloat64(1, 4+n1+n2)
+func packGR4JStates(s, r float64, n1, n2 int, q1, q9 []float64) data.ND2[float64] {
+	result := data.NewArray2D[float64](1, 4+n1+n2)
 	//result := make(sim.StateSet, 3+n1+n2)
 	result.Set2(0, 0, s)
 	result.Set2(0, 1, s)
@@ -90,13 +84,11 @@ func packGR4JStates(s, r float64, n1, n2 int, q1, q9 []float64) data.ND2Float64 
 	return result
 }
 
-func gr4j(rainfall data.ND1Float64, pet data.ND1Float64, s0 float64, r0 float64,
+func gr4j(rainfall []float64, pet []float64, s0 float64, r0 float64,
 	n1 int, n2 int, q1State []float64, q9State []float64,
-	x1 float64, x2 float64, x3 float64, x4 float64, runoff data.ND1Float64) (float64, float64, int, int, []float64, []float64) {
-	nDays := rainfall.Len1()
-	// fmt.Println("ndays",nDays)
-	// fmt.Println("ndays",rainfall.Shape())
-	//var runoff data.ND1Float64 = data.NewArray1D(nDays)
+	x1 float64, x2 float64, x3 float64, x4 float64, runoff []float64) (float64, float64, int, int, []float64, []float64) {
+	nDays := len(rainfall)
+	//var runoff []float64 = data.NewArray1D(nDays)
 	//var q9This []float64;
 	//var q9Last []float64;
 	//var q1This []float64;
@@ -150,15 +142,12 @@ func gr4j(rainfall data.ND1Float64, pet data.ND1Float64, s0 float64, r0 float64,
 	//
 	//q1This = make([]float64, n2);
 	//q1Last = make([]float64, n2);
-	idx := []int{0}
 
 	for day := 0; day < nDays; day++ {
 		//    Sprev = S;
 		//    Rprev = R;
 		//    ech1 = 0.0;
 		//    ech2 = 0.0;
-		idx[0] = day
-
 		Ps = 0.0
 		Es = 0.0
 		Pr = 0.0
@@ -171,11 +160,10 @@ func gr4j(rainfall data.ND1Float64, pet data.ND1Float64, s0 float64, r0 float64,
 		var Qd float64 = 0.0
 		var Qr float64 = 0.0
 		var ech float64 = 0.0
-		var todaysRainfall float64 = rainfall.Get(idx)
-		var todaysPET float64 = pet.Get(idx)
+		var todaysRainfall float64 = rainfall[i]
+		var todaysPET float64 = pet[i]
 		//----------------Production-------------------------
 		var ws float64 = 0
-		//		fmt.Println("rainfall",todaysRainfall,"pet",todaysPET)
 		if todaysRainfall > todaysPET {
 			netRainfall = todaysRainfall - todaysPET
 			ws = netRainfall / x1
@@ -190,12 +178,10 @@ func gr4j(rainfall data.ND1Float64, pet data.ND1Float64, s0 float64, r0 float64,
 		} else {
 			netET = todaysPET - todaysRainfall
 			//float64
-			//			fmt.Println(netET,x1)
 			ws = netET / x1
 			if ws > 13.0 {
 				ws = 13.0
 			}
-			//			fmt.Println("S,x1,ws",S,x1,ws)
 			tws := math.Tanh(ws)
 			Es = (S * (2 - S/x1) * tws) /
 				(1 + (1-S/x1)*tws)
@@ -204,9 +190,7 @@ func gr4j(rainfall data.ND1Float64, pet data.ND1Float64, s0 float64, r0 float64,
 			//                  (1 + (1 - S / x1) * Tanh(ws));
 			Pr = 0.0
 		}
-		//		fmt.Println(S,Es,Ps)
 		S = S - Es + Ps
-		//		fmt.Println(S,x1)
 		Perc = S * (1 - math.Pow((1+
 			math.Pow((4.0/9.0)*(S/x1), 4.0)), -0.25))
 		S = S - Perc
@@ -255,10 +239,8 @@ func gr4j(rainfall data.ND1Float64, pet data.ND1Float64, s0 float64, r0 float64,
 		}
 
 		qtot := Qr + Qd
-		//		fmt.Println(todaysRainfall,todaysPET,qtot,Qr,Qd,S)
-		runoff.Set(idx, qtot)
+		runoff[day] = qtot
 
-		//          printf("\t%f,\t%f,\t%f\n",Qr,Qd,runoff[day]);
 	}
 
 	return S, R, n1, n2, q1State, q9State

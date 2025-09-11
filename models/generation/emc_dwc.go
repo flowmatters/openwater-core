@@ -2,7 +2,6 @@ package generation
 
 import (
 	"github.com/flowmatters/openwater-core/conv/units"
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -29,25 +28,23 @@ EmcDwc:
 		constituent generation
 */
 
-func emcDWC(quickflow, slowflow data.ND1Float64, emc, dwc float64, quickLoad, slowLoad, totalLoad data.ND1Float64) {
-	nDays := quickflow.Len1()
-	idx := []int{0}
+func emcDWC(quickflow, slowflow []float64, emc, dwc float64, quickLoad, slowLoad, totalLoad []float64) {
+	nDays := len(quickflow)
 
-	if (emc==0.0) && (dwc==0.0) {
+	if (emc == 0.0) && (dwc == 0.0) {
 		return
 	}
 
 	for i := 0; i < nDays; i++ {
-		idx[0] = i
-		qf := quickflow.Get(idx)
-		sf := slowflow.Get(idx)
+		qf := quickflow[i]
+		sf := slowflow[i]
 
 		ql := qf * emc * units.MG_PER_LITRE_TO_KG_PER_M3
 		sl := sf * dwc * units.MG_PER_LITRE_TO_KG_PER_M3
 		total := ql + sl
 
-		quickLoad.Set(idx, ql)
-		slowLoad.Set(idx, sl)
-		totalLoad.Set(idx, total)
+		quickLoad[i] = ql
+		slowLoad[i] = sl
+		totalLoad[i] = total
 	}
 }

@@ -2,7 +2,6 @@ package generation
 
 import (
 	"github.com/flowmatters/openwater-core/conv/units"
-	"github.com/flowmatters/openwater-core/data"
 )
 
 /*OW-SPEC
@@ -44,12 +43,12 @@ DynamicSednetGullyAlt:
 		gully
 */
 
-func sednetGullyDerm(quickflow, year, annualRunoff, annualLoad data.ND1Float64,
+func sednetGullyDerm(quickflow, year, annualRunoff, annualLoad []float64,
 	yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 	annualAverageSedimentSupply, percentFine,
 	managementPracticeFactor, longtermRunoffFactor, dailyRunoffPowerFactor,
 	sdrFine, sdrCoarse, timeStepInSeconds float64,
-	fineLoad, coarseLoad, generatedFine, generatedCoarse data.ND1Float64) {
+	fineLoad, coarseLoad, generatedFine, generatedCoarse []float64) {
 	sednetGully(quickflow, year, annualRunoff, annualLoad,
 		yearDisturbance, gullyEndYear, area, averageGullyActivityFactor,
 		annualAverageSedimentSupply, percentFine,

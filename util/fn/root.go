@@ -2,17 +2,19 @@ package fn
 
 import (
 	"math"
+
+	"github.com/rs/zerolog/log"
 )
 
 func FindRoot(fn func(x float64) float64,
-fn_dx func(x float64) float64,
-initialX, minX, maxX, tolerance, convergenceLimit float64, maxIterations int) (x, delta float64) {
+	fn_dx func(x float64) float64,
+	initialX, minX, maxX, tolerance, convergenceLimit float64, maxIterations int) (x, delta float64) {
 	delta = fn(initialX)
 	x = initialX
 	maxDelta := fn(maxX)
 	minDelta := fn(minX)
 	if minDelta > 0 || maxDelta < 0 {
-		panic("Invalid range")
+		log.Panic().Msg("Invalid range")
 	}
 	for iteration := 0; iteration < maxIterations; iteration++ {
 		var trialXs []float64
@@ -121,4 +123,3 @@ initialX, minX, maxX, tolerance, convergenceLimit float64, maxIterations int) (x
 
 	return
 }
-

@@ -1,9 +1,5 @@
 package functions
 
-import (
-	"github.com/flowmatters/openwater-core/data"
-)
-
 /*OW-SPEC
 ComputeProportion:
 	inputs:
@@ -25,21 +21,19 @@ ComputeProportion:
 		dates function
 */
 
-func computeProportion(numerator, denominator data.ND1Float64,
+func computeProportion(numerator, denominator []float64,
 	resultOnZeroDenominator float64,
-	proportion data.ND1Float64) {
-	n := numerator.Len1()
-	idx := []int{0}
+	proportion []float64) {
+	n := len(numerator)
 
 	for i := 0; i < n; i++ {
-		idx[0] = i
-		n := numerator.Get(idx)
-		d := denominator.Get(idx)
+		n := numerator[i]
+		d := denominator[i]
 
 		if d == 0.0 {
-			proportion.Set(idx,resultOnZeroDenominator)
+			proportion[i] = resultOnZeroDenominator
 		} else {
-			proportion.Set(idx,n/d)
+			proportion[i] = n / d
 		}
 	}
 }

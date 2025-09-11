@@ -7,7 +7,7 @@ import (
 	"github.com/flowmatters/openwater-core/data"
 )
 
-func JsonSafeArray(vals data.NDFloat64, shiftDim int) []interface{} {
+func JsonSafeArray(vals data.ND[float64], shiftDim int) []interface{} {
 	shape := vals.Shape()
 	length := vals.Len(shiftDim)
 	ndims := vals.NDims()

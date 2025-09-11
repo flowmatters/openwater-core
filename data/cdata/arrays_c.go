@@ -1,28 +1,29 @@
 package cdata
 
-//go:generate genny -in=$GOFILE -strip data. -out=gen-$GOFILE gen "ArrayType=float64,float32,int32,uint32,int64,uint64,int,uint"
-
 import (
 	"errors"
 	"reflect"
 	"unsafe"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/util/slice"
 	"github.com/joelrahman/genny/generic/cgeneric"
 )
 
-type CArrayType cgeneric.CNumber
+type CArray[T data.Number] cgeneric.CNumber
 
-type ndArrayTypeC struct {
-	data.NdArrayTypeCommon
+type ndC[T data.Number] struct {
+	data.NdCommon[T]
 	//	Impl *C.double
-	Impl *[1 << 30]CArrayType
+	Impl *[1 << 30]CArray[T]
 	//p2 := (*[1<<30]C.int)(unsafe.Pointer(p))
+	UnrolledTo *[]T
 }
 
-// func ArrayFromC(impl *C.double, shape []int) NDFloat64 {
-// 	res := ndArrayTypeC{}
+// func ArrayFromC(impl *C.double, shape []int) ND[float64] {
+// 	res := ndC[T]{}
 // 	res.Dims = shape
 // 	res.OriginalDims = shape
 // 	res.Start = 0
@@ -32,22 +33,22 @@ type ndArrayTypeC struct {
 // 	return &res
 // }
 
-func (nd *ndArrayTypeC) Get(loc []int) data.ArrayType {
-	return data.ArrayType(nd.Impl[nd.Index(loc)])
+func (nd *ndC[T]) Get(loc []int) T {
+	return T(nd.Impl[nd.Index(loc)])
 }
 
-func (nd *ndArrayTypeC) Set(loc []int, val data.ArrayType) {
-	nd.Impl[nd.Index(loc)] = CArrayType(val)
+func (nd *ndC[T]) Set(loc []int, val T) {
+	nd.Impl[nd.Index(loc)] = CArray[T](val)
 }
 
-func (nd *ndArrayTypeC) Slice(loc []int, dims []int, step []int) data.NDArrayType {
-	result := ndArrayTypeC{}
-	nd.SliceInto(&result.NdArrayTypeCommon, loc, dims, step)
+func (nd *ndC[T]) Slice(loc []int, dims []int, step []int) data.ND[T] {
+	result := ndC[T]{}
+	nd.SliceInto(&result.NdCommon, loc, dims, step)
 	result.Impl = nd.Impl
 	return &result
 }
 
-func (nd *ndArrayTypeC) Apply(loc []int, dim int, step int, vals []data.ArrayType) {
+func (nd *ndC[T]) Apply(loc []int, dim int, step int, vals []T) {
 	sliceDim := nd.NewIndex(1)
 	sliceDim[dim] = len(vals)
 	sliceStep := nd.NewIndex(1)
@@ -55,7 +56,7 @@ func (nd *ndArrayTypeC) Apply(loc []int, dim int, step int, vals []data.ArrayTyp
 	//	slice := nd.Slice(loc, sliceDim, sliceStep)
 
 	// if slice.Contiguous() {
-	// 	concrete := slice.(*ndArrayTypeC)
+	// 	concrete := slice.(*ndC[T])
 	// 	implSlice := concrete.Impl
 	// 	subset := implSlice[concrete.Start : concrete.Start+len(vals)]
 	// 	copy(subset, vals)
@@ -69,7 +70,7 @@ func (nd *ndArrayTypeC) Apply(loc []int, dim int, step int, vals []data.ArrayTyp
 	// }
 }
 
-func (nd *ndArrayTypeC) ApplySlice(loc []int, step []int, vals data.NDArrayType) {
+func (nd *ndC[T]) ApplySlice(loc []int, step []int, vals data.ND[T]) {
 	shape := vals.Shape()
 	slice := nd.Slice(loc, shape, step)
 
@@ -82,34 +83,30 @@ func (nd *ndArrayTypeC) ApplySlice(loc []int, step []int, vals data.NDArrayType)
 	// How to speed up
 }
 
-func (nd *ndArrayTypeC) CopyFrom(other data.NDArrayType) {
+func (nd *ndC[T]) CopyFrom(other data.ND[T]) {
 	nd.ApplySlice(nd.NewIndex(0), nil, other)
 }
 
-func (nd *ndArrayTypeC) Unroll() []data.ArrayType {
+func (nd *ndC[T]) Unroll() []T {
 	// if nd.Contiguous() {
 	// 	s := nd.Start
 	// 	e := nd.Index(decrement(nd.Dims))
 	// 	return nd.Impl[s : e+1]
 	// }
 
-	//	fmt.Println(nd)
-
 	length := data.Product(nd.Shape())
-	res := make([]data.ArrayType, length)
+	res := make([]T, length)
 
 	dimOffsets := data.Offsets(nd.Dims)
-	//fmt.Println(dimOffsets)
 	for i := 0; i < length; i++ {
 		loc := data.IDivMod(i, dimOffsets, nd.Dims)
-		//		fmt.Println(i, loc, nd.Index(loc))
-		//		fmt.Println(loc,i)
 		res[i] = nd.Get(loc)
 	}
+	nd.UnrolledTo = &res
 	return res
 }
 
-func (nd *ndArrayTypeC) ReshapeFast(newShape []int) (data.NDArrayType, error) {
+func (nd *ndC[T]) ReshapeFast(newShape []int) (data.ND[T], error) {
 	if !nd.Contiguous() {
 		return nil, errors.New("Array not contiguous")
 	}
@@ -117,8 +114,8 @@ func (nd *ndArrayTypeC) ReshapeFast(newShape []int) (data.NDArrayType, error) {
 	return nd.Reshape(newShape)
 }
 
-func (nd *ndArrayTypeC) Reshape(newShape []int) (data.NDArrayType, error) {
-	result := ndArrayTypeC{}
+func (nd *ndC[T]) Reshape(newShape []int) (data.ND[T], error) {
+	result := ndC[T]{}
 	size := data.Product(newShape)
 	currentSize := data.Product(nd.Shape())
 
@@ -153,15 +150,15 @@ func (nd *ndArrayTypeC) Reshape(newShape []int) (data.NDArrayType, error) {
 	return &result, nil
 }
 
-func (nd *ndArrayTypeC) MustReshape(newShape []int) data.NDArrayType {
+func (nd *ndC[T]) MustReshape(newShape []int) data.ND[T] {
 	result, e := nd.Reshape(newShape)
 	if e != nil {
-		panic(e.Error())
+		log.Panic().Stack().Err(e).Msg("")
 	}
 	return result
 }
 
-func (nd *ndArrayTypeC) Get1(loc int) data.ArrayType {
+func (nd *ndC[T]) Get1(loc int) T {
 	var idx []int
 
 	if len(nd.Dims) == 1 {
@@ -174,38 +171,37 @@ func (nd *ndArrayTypeC) Get1(loc int) data.ArrayType {
 				break
 			}
 		}
-		//		fmt.Println("nDims>1",idx,nd.Dims,loc)
 	}
 	return nd.Get(idx)
 }
 
-func (nd *ndArrayTypeC) Set1(loc int, val data.ArrayType) {
+func (nd *ndC[T]) Set1(loc int, val T) {
 	nd.Set([]int{loc}, val)
 }
 
-func (nd *ndArrayTypeC) Apply1(loc int, step int, vals []data.ArrayType) {
+func (nd *ndC[T]) Apply1(loc int, step int, vals []T) {
 	for i := 0; i < len(vals); i++ {
 		nd.Set1(loc+i*step, vals[i])
 	}
 }
 
-func (nd *ndArrayTypeC) Get2(loc1 int, loc2 int) data.ArrayType {
+func (nd *ndC[T]) Get2(loc1 int, loc2 int) T {
 	return nd.Get([]int{loc1, loc2})
 }
 
-func (nd *ndArrayTypeC) Set2(loc1 int, loc2 int, val data.ArrayType) {
+func (nd *ndC[T]) Set2(loc1 int, loc2 int, val T) {
 	nd.Set([]int{loc1, loc2}, val)
 }
 
-func (nd *ndArrayTypeC) Get3(loc1 int, loc2 int, loc3 int) data.ArrayType {
+func (nd *ndC[T]) Get3(loc1 int, loc2 int, loc3 int) T {
 	return nd.Get([]int{loc1, loc2, loc3})
 }
 
-func (nd *ndArrayTypeC) Set3(loc1 int, loc2 int, loc3 int, val data.ArrayType) {
+func (nd *ndC[T]) Set3(loc1 int, loc2 int, loc3 int, val T) {
 	nd.Set([]int{loc1, loc2, loc3}, val)
 }
 
-func (nd *ndArrayTypeC) Maximum() data.ArrayType {
+func (nd *ndC[T]) Maximum() T {
 	idx := nd.NewIndex(0)
 	res := nd.Get(idx)
 
@@ -221,7 +217,7 @@ func (nd *ndArrayTypeC) Maximum() data.ArrayType {
 	return res
 }
 
-func (nd *ndArrayTypeC) Minimum() data.ArrayType {
+func (nd *ndC[T]) Minimum() T {
 	idx := nd.NewIndex(0)
 	res := nd.Get(idx)
 
@@ -237,12 +233,12 @@ func (nd *ndArrayTypeC) Minimum() data.ArrayType {
 	return res
 }
 
-func NewArrayTypeCArray(impl unsafe.Pointer, dims []int) data.NDArrayType {
-	return newArrayTypeCArray((*[1 << 30]CArrayType)(impl), dims)
+func NewCArray[T data.Number](impl unsafe.Pointer, dims []int) data.ND[T] {
+	return newCArray[T]((*[1 << 30]CArray[T])(impl), dims)
 }
 
-func newArrayTypeCArray(impl *[1 << 30]CArrayType, dims []int) *ndArrayTypeC {
-	result := ndArrayTypeC{}
+func newCArray[T data.Number](impl *[1 << 30]CArray[T], dims []int) *ndC[T] {
+	result := ndC[T]{}
 	//	size := product(dims)
 	result.Start = 0
 	result.Impl = impl
@@ -254,13 +250,22 @@ func newArrayTypeCArray(impl *[1 << 30]CArrayType, dims []int) *ndArrayTypeC {
 	return &result
 }
 
-func makeArrayTypeCArrayForTest(shape []int) *ndArrayTypeC {
-	goArray := data.ARangeArrayType(data.Product(shape)).MustReshape(shape)
+func makeCArrayForTest[T data.Number](shape []int) *ndC[T] {
+	goArray := data.ARange[T](data.Product(shape)).MustReshape(shape)
 	impl := goArray.Unroll()
 
 	v := reflect.Indirect(reflect.ValueOf(&impl))
 	slice := (*reflect.SliceHeader)(unsafe.Pointer(v.UnsafeAddr()))
-	addr := (*[1 << 30]CArrayType)(unsafe.Pointer(slice.Data))
+	addr := (*[1 << 30]CArray[T])(unsafe.Pointer(slice.Data))
 
-	return newArrayTypeCArray(addr, shape)
+	return newCArray[T](addr, shape)
+}
+
+// Replaces contents with contents of go slice previously unrolled to
+func (nd *ndC[T]) Reroll() {
+	if nd.UnrolledTo == nil {
+		log.Error().Msg("Cannot reroll from nil ptr")
+	}
+	vals := *nd.UnrolledTo
+	nd.Apply([]int{0}, 0, 1, vals)
 }

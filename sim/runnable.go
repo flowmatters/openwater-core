@@ -42,10 +42,10 @@ type TimeSteppingModel interface {
 	Description() ModelDescription
 
 	InitialiseDimensions(dims []int)
-	FindDimensions(params data.ND2Float64) []int
-	ApplyParameters(params data.ND2Float64)
-	InitialiseStates(n int) data.ND2Float64
-	Run(inputs data.ND3Float64, states data.ND2Float64, outputs data.ND3Float64)
+	FindDimensions(params data.ND2[float64]) []int
+	ApplyParameters(params data.ND2[float64])
+	InitialiseStates(n int) data.ND2[float64]
+	Run(inputs data.ND3[float64], states data.ND2[float64], outputs data.ND3[float64])
 }
 
 type Hotstartable interface {
@@ -53,15 +53,15 @@ type Hotstartable interface {
 	SetStates(states []float64)
 }
 
-type Series data.ND1Float64
+type Series []float64
 
-//type InputSet data.ND2Float64
-//type OutputSet data.ND3Float64
-//type StateSet data.ND2Float64
+//type InputSet data.ND2[float64]
+//type OutputSet data.ND3[float64]
+//type StateSet data.ND2[float64]
 
 type RunResults struct {
-	Outputs data.ND3Float64
-	States  data.ND2Float64
+	Outputs data.ND3[float64]
+	States  data.ND2[float64]
 }
 
 func DescribeParameters(names []string) []ParameterDescription {
@@ -87,11 +87,11 @@ func DescribeParameter(name string, defaultValue float64, description string,
 
 func NewParameter(name string) ParameterDescription {
 	dummyRange := make([]float64, 2)
-	return DescribeParameter(name, 0, "", dummyRange, "",[]string{})
+	return DescribeParameter(name, 0, "", dummyRange, "", []string{})
 }
 
-func InitialiseOutputs(model TimeSteppingModel, nTimeSteps int, nCells int) data.ND3Float64 {
-	return data.NewArray3DFloat64(nCells, len(model.Description().Outputs), nTimeSteps)
+func InitialiseOutputs(model TimeSteppingModel, nTimeSteps int, nCells int) data.ND3[float64] {
+	return data.NewArray3D[float64](nCells, len(model.Description().Outputs), nTimeSteps)
 }
 
 /*
