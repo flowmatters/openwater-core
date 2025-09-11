@@ -13,6 +13,7 @@ import (
 func setupLogger() {
 	log.Logger = log.With().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.ANSIC})
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
+	zerolog.FloatingPointPrecision = 2
 	if verbose {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		hdf5.DisplayErrors(true)

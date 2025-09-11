@@ -104,7 +104,7 @@ func run_simulation(args []string) {
 
 	for i := 0; i < genCount; i++ {
 		pcComplete := 100.0 * float64(nodesCompleted) / float64(nodeCount)
-		log.Info().Msgf("==== %.1f%% - Generation %d / %d ====", pcComplete, i+1, genCount)
+		log.Info().Float64("Percent Complete", pcComplete).Int("Generation", i+1).Int("Total Generations", genCount).Msg("Generation progress")
 
 		// === RUN GENERATION ===
 		genSimulationTime, nodesInGeneration := runGeneration(i, models, modelNames) // synchronous
@@ -129,7 +129,7 @@ func run_simulation(args []string) {
 						if prevG == (g - 1) {
 							break
 						}
-						log.Debug().Msgf("Waiting for generation %d, got generation %d, sleeping", g, prevG)
+						log.Debug().Int("Expected Generation", g).Int("Current Generation", prevG).Msg("Waiting for generation to finish (sleeping)")
 						writingDone <- prevG
 						time.Sleep(time.Duration(1000 * 1000 * 500)) // Half a second
 					}
@@ -192,11 +192,11 @@ func run_simulation(args []string) {
 		genLinkEnd := time.Now()
 		genLinkElapsed := genLinkEnd.Sub(genLinkStart).Seconds()
 		totalTimeLinks += genLinkElapsed
-		log.Debug().Msgf("%d links (%d to %d), processed in %f seconds", nextLink-currentLink, currentLink, nextLink, genLinkElapsed)
+		log.Debug().Int("Links Processed", nextLink-currentLink).Int("Start Link", currentLink).Int("End Link", nextLink).Float64("Elapsed Time (seconds)", genLinkElapsed).Msg("Processed links")
 		// === /PROCESS LINKS ===
 
 		genElapsed := genLinkElapsed + genSimulationTime
-		log.Debug().Msgf("Generation completed in %f seconds", genElapsed)
+		log.Debug().Float64("Elapsed Seconds", genElapsed).Msg("Generation completed")
 	}
 
 	log.Debug().Msg("Simulation finished. Waiting for results to be written")
@@ -206,10 +206,10 @@ func run_simulation(args []string) {
 		for {
 			genFinished := <-writingDone
 			if genFinished == (genCount - 1) {
-				log.Debug().Int("Time", genFinished).Msg("Generation Finished Writing")
+				log.Debug().Int("Generation", genFinished).Msg("Generation Finished Writing")
 				break
 			}
-			log.Debug().Msgf("Waiting for final generation (%d), got generation %d, sleeping", genCount-1, genFinished)
+			log.Debug().Int("Expected Final Generation", genCount-1).Int("Received Generation", genFinished).Msg("Waiting for final generation to finish (sleeping)")
 			writingDone <- genFinished
 			time.Sleep(time.Duration(500 * 1000 * 1000))
 		}
@@ -220,7 +220,7 @@ func run_simulation(args []string) {
 	totalTimeFinalWrite = finalWriteElapsed.Seconds()
 	simElapsed := simEnd.Sub(simStart)
 	log.Info().
-		Float64("Total Run time", simElapsed.Seconds()).
+		Float64("Total Run Time", simElapsed.Seconds()).
 		Float64("Total Simulation Time", totalTimeSimulation).
 		Float64("Total Link Time", totalTimeLinks).
 		Float64("Total Final Write Time", totalTimeFinalWrite).

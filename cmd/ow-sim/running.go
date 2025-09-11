@@ -20,7 +20,7 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 		if gen.Count == 0 {
 			continue
 		}
-		log.Debug().Msgf("* %d x %s", gen.Count, modelName)
+		log.Debug().Int("Count", gen.Count).Str("Model Name", modelName).Msg("Running model generation")
 		modelCount++
 
 		nodesRun += gen.Count
@@ -29,7 +29,7 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 				g.Run()
 				outputs := g.Outputs
 				if outputs == nil {
-					log.Info().Msgf("No outputs from %s in generation %d", name, i)
+					log.Info().Str("Model Name", name).Int("Generation", i).Msg("No outputs from model in generation")
 				}
 				simulationDone <- name
 			} else {
@@ -41,19 +41,19 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 	for i := 0; i < modelCount; i++ {
 		mn := <-simulationDone
 		if mn != "" {
-			log.Debug().Msgf("%d: %s finished", i, mn)
+			log.Debug().Int("Index", i).Str("Model Name", mn).Msg("Model finished")
 		}
 	}
 
 	genSimulationEnd := time.Now()
 	elapsedTime = genSimulationEnd.Sub(genStart).Seconds()
-	log.Debug().Msgf("= %d runs in %f seconds", nodesRun, elapsedTime)
+	log.Debug().Int("Runs", nodesRun).Float64("Elapsed Seconds", elapsedTime).Msg("Generation runs completed")
 	return
 }
 
 func writeGeneration(g int, models map[string]*modelReference, modelNames []string) {
 	genWriteStart := time.Now()
-	log.Debug().Msgf("Writing results for generation %d...", g)
+	log.Debug().Int("Generation", g).Msg("Writing results for generation")
 	for _, modelName := range modelNames {
 		modelRef := models[modelName]
 		err := modelRef.WriteData(g)
@@ -63,5 +63,5 @@ func writeGeneration(g int, models map[string]*modelReference, modelNames []stri
 	}
 	genWriteEnd := time.Now()
 	genWriteElapsed := genWriteEnd.Sub(genWriteStart)
-	log.Debug().Msgf("Results for generation %d written in %f seconds", g, genWriteElapsed.Seconds())
+	log.Debug().Int("Generation", g).Float64("Elapsed Seconds", genWriteElapsed.Seconds()).Msg("Results written for generation")
 }

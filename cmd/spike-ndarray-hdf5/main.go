@@ -20,11 +20,11 @@ const (
 func main() {
 	arr := data.ARange[float64](80).MustReshape([]int{8, 10}).(data.ND2[float64])
 
-	log.Info().Msgf(":: data: %v", arr)
+	log.Info().Any("data", arr).Msg("Array data")
 
 	// create data space
 	dims := conv.IntsToUints(arr.Shape())
-	log.Info().Msgf(":: data shape: %v", dims)
+	log.Info().Any("Shape", dims).Msg("Array shape")
 	space, err := hdf5.CreateSimpleDataspace(dims, nil)
 	if err != nil {
 		log.Panic().Stack().Err(err).Msg("")
@@ -50,13 +50,13 @@ func main() {
 	}
 
 	// write data to the dataset
-	log.Info().Msgf(":: dset.Write...")
+	log.Info().Msg("Writing to dataset")
 	arrAsSlice := arr.Unroll()
 	err = dset.Write(&arrAsSlice)
 	if err != nil {
 		log.Panic().Stack().Err(err).Msg("")
 	}
-	log.Info().Msgf(":: dset.Write... [ok]")
+	log.Info().Msg("Dataset write successful")
 
 	// release resources
 	dset.Close()
@@ -74,7 +74,7 @@ func main() {
 
 	space = dset.Space()
 	dims, _, err = space.SimpleExtentDims()
-	log.Info().Msgf(":: data shape (R): %v", dims)
+	log.Info().Any("Dimensions", dims).Msg("Read array shape")
 
 	// // read it back into a new slice
 	// s2 := make([]s1Type, length)
@@ -86,7 +86,7 @@ func main() {
 	}
 
 	// display the fields
-	log.Info().Msgf(":: data: %v", dest)
+	log.Info().Any("Fields", dest).Msg("Fields")
 
 	// release resources
 	space.Close()

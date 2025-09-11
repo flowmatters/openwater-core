@@ -38,7 +38,7 @@ func writeData(
 
 func run_writer(args []string) {
 	fn := args[0]
-	log.Info().Msgf("Writing results from stdin to %s", fn)
+	log.Info().Str("Target File", fn).Msg("Writing results from stdin")
 	input := os.Stdin
 
 	for {
@@ -64,7 +64,7 @@ func run_writer(args []string) {
 			continue
 		}
 
-		log.Info().Msgf("Writing data from %s to %s (%d cells)", data.Model, fn, data.Cells)
+		log.Info().Str("Model", data.Model).Str("Filename", fn).Int("Cells", int(data.Cells)).Msg("Writing data from model to file")
 
 		if data.InputColumns > 0 {
 			if data.StartingLocation == 0 {

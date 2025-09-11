@@ -145,7 +145,7 @@ func transform(spec ModelSpec) ModelSpec {
 		for _, d := range v.Dimensions {
 			for i, p := range spec.ParameterSpecs {
 				if strings.Compare(p.Name, d) == 0 {
-					log.Info().Msgf("%s is a dimension of %s", p.Name, v.Name)
+					log.Info().Str("Dimension", p.Name).Str("Variable", v.Name).Msg("Variable dimension")
 					spec.ParameterSpecs[i].IsDimension = true
 				}
 			}
@@ -158,7 +158,7 @@ func transform(spec ModelSpec) ModelSpec {
 
 	for _, v := range spec.ParameterSpecs {
 		if v.IsDimension {
-			log.Info().Msgf("%s is a dimension", v.Name)
+			log.Info().Str("Dimension", v.Name).Msg("Is a dimension")
 		}
 	}
 	return spec
@@ -176,7 +176,7 @@ func processFile(fn string) {
 	packageRe := regexp.MustCompile("^\\s*package\\s+(\\w+)")
 	packageMatch := packageRe.FindSubmatch(contents)
 	if packageMatch == nil {
-		log.Info().Msgf("No package declaration in %s", fn)
+		log.Info().Str("Filename", fn).Msg("No package declaration found")
 		return
 	}
 	packageName := packageMatch[1]
@@ -234,7 +234,7 @@ func generateWrapper(desc ModelSpec) {
 
 	dir := filepath.Dir(desc.Filename)
 	destFn := filepath.Join(dir, fmt.Sprintf("generated_%s.go", desc.Name))
-	log.Info().Msgf("Writing to %s", destFn)
+	log.Info().Str("Destination Filename", destFn).Msg("Writing generated wrapper")
 	dest, err := os.Create(destFn)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("")

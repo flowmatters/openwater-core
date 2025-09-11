@@ -33,7 +33,7 @@ func main() {
 
 	factory := sim.Catalog[modelName]
 	if factory == nil {
-		log.Fatal().Msgf("Unknown model: %s", modelName)
+		log.Fatal().Str("Model Name", modelName).Msg("Unknown model")
 	}
 	model := factory()
 

@@ -62,7 +62,7 @@ func initModel(fn, model, paramFn string) (*modelReference, error) {
 	modelRef := io.H5Ref[int32]{Filename: fn, Dataset: "/MODELS/" + model + "/batches"}
 	batchesArray, err := modelRef.Load()
 	if err != nil {
-		log.Error().Msgf("Couldn't load batches for %s", model)
+		log.Error().Str("Model Name", model).Msg("Couldn't load batches")
 		return nil, err
 	}
 	batches := batchesArray.Unroll()
@@ -72,7 +72,7 @@ func initModel(fn, model, paramFn string) (*modelReference, error) {
 	result.InitialStatesFilename = fn
 	dimensions, err := result.initDimensions()
 	if err != nil {
-		log.Error().Msgf("Couldn't initialise dimensions for %s", model)
+		log.Error().Str("Model Name", model).Msg("Couldn't initialise dimensions")
 		return nil, err
 	}
 	result.Dimensions = dimensions
@@ -83,6 +83,7 @@ func initModel(fn, model, paramFn string) (*modelReference, error) {
 func (mr *modelReference) makeModel() (sim.TimeSteppingModel, error) {
 	modelRef := sim.Catalog[mr.ModelName]
 	if modelRef == nil {
+		log.Error().Str("Model Name", mr.ModelName).Msg("Unknown model")
 		errorMsg := fmt.Sprintf("Unknown model: %s", mr.ModelName)
 		return nil, &errorString{errorMsg}
 	}
@@ -92,7 +93,7 @@ func (mr *modelReference) makeModel() (sim.TimeSteppingModel, error) {
 func (mr *modelReference) initDimensions() ([]int, error) {
 	modelInstance, err := mr.makeModel()
 	if err != nil {
-		log.Error().Msgf("Couldn't make model")
+		log.Error().Str("Model Name", mr.ModelName).Msg("Couldn't make model")
 		return nil, err
 	}
 
@@ -107,15 +108,15 @@ func (mr *modelReference) initDimensions() ([]int, error) {
 
 	allParameters, err := h5Ref.Load()
 	if err != nil {
-		log.Error().Msgf("Couldn't load parameters for model %s from %s", mr.ModelName, mr.ParametersFilename)
+		log.Error().Str("Model Name", mr.ModelName).Str("Parameters Filename", mr.ParametersFilename).Msg("Couldn't load parameters for model")
 		return nil, err
 	}
 
 	dimSizes := modelInstance.FindDimensions(allParameters.(data.ND2[float64]))
 
-	log.Debug().Msgf("===== Simulation dimension sizes for %s =====", mr.ModelName)
+	log.Debug().Str("Model Name", mr.ModelName).Msg("Simulation dimension sizes")
 	for ix, dim := range dims {
-		log.Debug().Msgf("\t%s=%d", dim, dimSizes[ix])
+		log.Debug().Str("Dimension", dim).Int("Size", dimSizes[ix]).Msg("Dimension size")
 	}
 
 	return dimSizes, err
@@ -143,7 +144,7 @@ func (mr *modelReference) GetReference(genSlice []int, element string) io.H5Ref[
 
 func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 	if mr.Generations[i] == nil {
-		log.Debug().Msgf("Initialising Generation %d for %s", i, mr.ModelName)
+		log.Debug().Int("Generation", i).Str("Model Name", mr.ModelName).Msg("Initialising generation for model")
 		gen := modelGeneration{}
 		modelInstance, err := mr.makeModel()
 		if err != nil {
@@ -180,7 +181,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		}
 
 		if !inputsExist {
-			log.Debug().Msgf("No inputs saved for %s. Initialising", mr.ModelName)
+			log.Debug().Str("Model Name", mr.ModelName).Msg("No inputs saved. Initialising inputs array")
 			gen.Inputs = data.NewArray3D[float64](gen.Count, len(gen.Model.Description().Inputs), mr.SimLength)
 		}
 
@@ -202,7 +203,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 }
 
 func (mr *modelReference) PurgeGeneration(i int) {
-	log.Debug().Msgf("Purging Generation %d for %s", i, mr.ModelName)
+	log.Debug().Int("Generation", i).Str("Model Name", mr.ModelName).Msg("Purging generation for model")
 	mr.Generations[i] = nil
 }
 
@@ -309,7 +310,7 @@ func (mr *modelReference) writeProtobuf(generation int) error {
 
 	buf := make([]byte, 4)
 	binary.LittleEndian.PutUint32(buf, uint32(len(msg)))
-	log.Info().Msgf("Writing gen %d of %s", generation, mr.ModelName)
+	log.Info().Int("Generation", generation).Str("Model Name", mr.ModelName).Msg("Writing protobuf for generation")
 	if _, err := mr.OutputWriter.Write(buf); err != nil {
 		return err
 	}
@@ -317,13 +318,13 @@ func (mr *modelReference) writeProtobuf(generation int) error {
 	if _, err := mr.OutputWriter.Write(msg); err != nil {
 		return err
 	}
-	log.Info().Msgf("Sent gen %d of %s", generation, mr.ModelName)
+	log.Info().Int("Generation", generation).Str("Model Name", mr.ModelName).Msg("Sent protobuf for generation")
 
 	if generation == len(mr.Batches)-1 {
-		log.Info().Msgf("Waiting for output writer for %s to close", mr.ModelName)
+		log.Info().Str("Model Name", mr.ModelName).Msg("Waiting for output writer to close")
 		mr.OutputWriter.Close()
 		mr.OutputProcess.Wait()
-		log.Info().Msgf("Output writer for %s closed", mr.ModelName)
+		log.Info().Str("Model Name", mr.ModelName).Msg("Output writer closed")
 	}
 
 	return nil
@@ -452,14 +453,14 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 		ref, err := initModel(inputFn, modelName, paramFilename)
 
 		if err != nil {
-			log.Fatal().Stack().Err(err).Str("Model name", modelName).Msg("Couldn't initialise model")
+			log.Fatal().Stack().Err(err).Str("Model Name", modelName).Msg("Couldn't initialise model")
 		}
 
 		ref.TimeSeriesFilename = tsFilename
 		ref.InitialStatesFilename = initStatesFilename
 
 		if simLength == 0 {
-			log.Debug().Msg("Trying to establish simulation length...")
+			log.Debug().Str("Model Name", modelName).Msg("Trying to establish simulation length")
 			inputRef := io.H5Ref[float64]{}
 			inputRef.Filename = tsFilename
 			inputRef.Dataset = "/MODELS/" + modelName + "/inputs"
@@ -470,7 +471,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 				}
 				simLength = inputShp[sim.DIMI_TIMESTEP]
 			}
-			log.Debug().Msgf("Simulation has %d timesteps", simLength)
+			log.Debug().Str("Model Name", modelName).Int("Timesteps", simLength).Msg("Simulation length established")
 		}
 
 		destFn := outputPaths[modelName]
@@ -487,7 +488,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 
 			if destFn != defaultOutputFn {
 				exe_path, _ := osext.Executable()
-				log.Info().Msgf("Configuring external write process: %s", exe_path)
+				log.Info().Str("Executable Path", exe_path).Msg("Configuring external write process")
 				write_cmd := exec.Command(exe_path, "-writer", destFn)
 				reader, writer := gio.Pipe()
 				write_cmd.Stdin = reader
@@ -498,7 +499,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 			}
 		}
 
-		log.Debug().Str("Model Name", ref.ModelName).Any("Batches:", ref.Batches).Any("Generations", ref.Generations).Msg("")
+		log.Debug().Str("Model Name", ref.ModelName).Any("Batches", ref.Batches).Any("Generations", ref.Generations).Msg("Model reference initialised")
 		models[modelName] = ref
 		genCount = len(ref.Generations)
 		nodeCount += int(ref.Batches[len(ref.Batches)-1])
