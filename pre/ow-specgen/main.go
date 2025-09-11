@@ -11,8 +11,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/rs/zerolog/log"
+	"github.com/flowmatters/openwater-core/util/logger"
 
+	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 )
 
@@ -294,6 +295,7 @@ func generateWrapper(desc ModelSpec) {
 
 func main() {
 	flag.Parse()
+	logger.SetupLogger(false, true)
 	paths := flag.Args()
 
 	for _, path := range paths {
