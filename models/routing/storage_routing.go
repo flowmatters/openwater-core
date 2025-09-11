@@ -1,8 +1,9 @@
 package routing
 
 import (
-	"fmt"
 	"math"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/flowmatters/openwater-core/util/fn"
 )
@@ -84,10 +85,12 @@ func storageRouting(inflows, laterals, rainfall, evap []float64,
 		lateral := laterals[i]
 
 		if math.IsNaN(inflow) {
-			fmt.Printf("inflow=%f\n", inflow)
-			fmt.Printf("lateral=%f\n", lateral)
-			fmt.Printf("storage=%f\n", storage)
-			fmt.Printf("deltaT=%f\n", deltaT)
+			log.Info().
+				Float64("inflow", inflow).
+				Float64("lateral", lateral).
+				Float64("storage", storage).
+				Float64("deltaT", deltaT).
+				Msg("")
 		}
 		evapRate := (evap[i] - rainfall[i]) / deltaT
 
@@ -131,10 +134,11 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 	}
 
 	if math.IsNaN(bias) || math.IsNaN(inflow) || math.IsNaN(lateral) {
-		fmt.Printf("bias=%f\n", bias)
-		fmt.Printf("inflow=%f\n", inflow)
-		fmt.Printf("lateral=%f\n", lateral)
-		panic("NAN!")
+		log.Panic().
+			Float64("bias", bias).
+			Float64("inflow", inflow).
+			Float64("lateral", lateral).
+			Msg("NAN")
 	}
 	minQI := bias * (inflow + lateral)
 	delta, outflow, storage := evaluateRouting(minQI)
@@ -211,23 +215,24 @@ func calcOutflow(timestep int, inflow, lateral, bias, prevQi, prevOutflow, prevS
 	qi, delta = fn.FindRoot(evaluateRoutingMassBalance, slopeOfMassBalance, minQI, minQI, maxQI, massBalanceLimit, convergenceLimit, maxIterations)
 
 	if math.IsNaN(delta) {
-		fmt.Printf("delta is NaN.\n")
-		fmt.Printf("qi=%f\n", qi)
-		fmt.Printf("minQI=%f\n", minQI)
-		fmt.Printf("maxQI=%f\n", maxQI)
-		fmt.Printf("massBalanceLimit=%f\n", massBalanceLimit)
-		fmt.Printf("convergenceLimit=%f\n", convergenceLimit)
-		fmt.Printf("maxIterations=%d\n", maxIterations)
-		panic("delta is NaN")
+		log.Panic().
+			Float64("qi", qi).
+			Float64("minQI", minQI).
+			Float64("maxQI", maxQI).
+			Float64("massBalanceLimit", massBalanceLimit).
+			Float64("convergenceLimit", convergenceLimit).
+			Float64("maxIterations", maxIterations).
+			Msg("delta is NaN")
 	}
 	delta, outflow, storage = evaluateRouting(qi)
 	if math.Abs(delta) > massBalanceLimit {
 	}
 	if math.IsNaN(outflow) {
-		fmt.Printf("outflow=%f\n", outflow)
-		fmt.Printf("storage=%f\n", storage)
-		fmt.Printf("delta=%f\n", delta)
-		panic("outflow is nan")
+		log.Panic().
+			Float64("outflow", outflow).
+			Float64("storage", storage).
+			Float64("delta", delta).
+			Msg("outflow is NAN")
 	}
 	return
 }
@@ -265,11 +270,12 @@ func runRouting(qIndex, inflow, lateral, initialFluxMax, storage, area, netEvapR
 
 	outflow = math.Max(0, newStorage-SIndex) / duration
 	if math.IsNaN(outflow) {
-		fmt.Printf("outflow=%f\n", outflow)
-		fmt.Printf("newStorage=%f\n", newStorage)
-		fmt.Printf("SIndex=%f\n", SIndex)
-		fmt.Printf("duration=%f\n", duration)
-		panic("outflow is nan")
+		log.Panic().
+			Float64("outflow", outflow).
+			Float64("newStorage", newStorage).
+			Float64("SIndex", SIndex).
+			Float64("duration", duration).
+			Msg("outflow is NAN")
 	}
 	//SIndex = SIndex - outflow
 

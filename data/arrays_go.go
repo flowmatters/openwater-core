@@ -8,6 +8,7 @@ import (
 	"iter"
 
 	"github.com/flowmatters/openwater-core/util/slice"
+	"github.com/rs/zerolog/log"
 )
 
 type nd[T Number] struct {
@@ -179,7 +180,7 @@ func (ndArray *nd[T]) Reshape(newShape []int) (ND[T], error) {
 func (ndArray *nd[T]) MustReshape(newShape []int) ND[T] {
 	result, e := ndArray.Reshape(newShape)
 	if e != nil {
-		panic(e.Error())
+		log.Panic().Stack().Err(e).Msg("")
 	}
 	return result
 }

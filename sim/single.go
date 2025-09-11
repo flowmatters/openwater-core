@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/flowmatters/openwater-core/data"
 	owjs "github.com/flowmatters/openwater-core/io/json"
 )
@@ -68,7 +70,7 @@ func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3[float64], 
 	}
 	factory := Catalog[m.Name]
 	if factory == nil {
-		return errors.New(fmt.Sprintf("Unknown model: %s", m.Name)), nil, nil, nil, warnings
+		return fmt.Errorf("Unknown model: %s", m.Name), nil, nil, nil, warnings
 	}
 	model := factory()
 	desc := model.Description()
@@ -202,7 +204,6 @@ func encodeResults(w io.Writer, runLogs []string, results RunResults,
 
 	err := encoder.Encode(overall)
 	if err != nil {
-		fmt.Println(overall.Log)
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Any("Overall Log", overall.Log).Msg("")
 	}
 }

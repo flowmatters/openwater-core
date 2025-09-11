@@ -1,8 +1,9 @@
 package conversion
 
 import (
-	"fmt"
 	"math"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/flowmatters/openwater-core/util/fn"
 )
@@ -42,16 +43,17 @@ func ratingPartition(input []float64,
 		incoming := input[i]
 		frac, err := fn.Piecewise(incoming, inputAmount, proportion)
 		if err != nil {
-			panic(err)
+			log.Panic().Stack().Err(err).Msg("")
 		}
 
 		if math.IsNaN(frac) || math.IsNaN(incoming) {
-			fmt.Printf("timestep=%d/%d\n", i, nDays)
-			fmt.Printf("frac=%f\n", frac)
-			fmt.Printf("incoming=%f\n", incoming)
-			fmt.Printf("inputAmount=%v\n", inputAmount)
-			fmt.Printf("proportion=%v\n", proportion)
-			panic("nan")
+			log.Panic().Int("timestep", i).
+				Int("nDays", nDays).
+				Float64("frac", frac).
+				Float64("incoming", incoming).
+				Any("inputAmount", inputAmount).
+				Any("proportion", proportion).
+				Err(err).Msg("NAN")
 		}
 
 		output1[i] = incoming * frac

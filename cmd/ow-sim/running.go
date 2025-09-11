@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 func runGeneration(i int, models map[string]*modelReference, modelNames []string) (elapsedTime float64, nodesRun int) {
@@ -15,13 +15,12 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 	for _, modelName := range modelNames {
 		gen, err := models[modelName].GetGeneration(i)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal().Stack().Err(err).Msg("")
 		}
 		if gen.Count == 0 {
 			continue
 		}
-		verbosePrintf("* %d x %s\n", gen.Count, modelName)
+		log.Debug().Msgf("* %d x %s", gen.Count, modelName)
 		modelCount++
 
 		nodesRun += gen.Count
@@ -30,7 +29,7 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 				g.Run()
 				outputs := g.Outputs
 				if outputs == nil {
-					fmt.Printf("No outputs from %s in generation %d\n", name, i)
+					log.Info().Msgf("No outputs from %s in generation %d", name, i)
 				}
 				simulationDone <- name
 			} else {
@@ -42,28 +41,27 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 	for i := 0; i < modelCount; i++ {
 		mn := <-simulationDone
 		if mn != "" {
-			verbosePrintf("%d: %s finished\n", i, mn)
+			log.Debug().Msgf("%d: %s finished", i, mn)
 		}
 	}
 
 	genSimulationEnd := time.Now()
 	elapsedTime = genSimulationEnd.Sub(genStart).Seconds()
-	verbosePrintf("= %d runs in %f seconds\n", nodesRun, elapsedTime)
+	log.Debug().Msgf("= %d runs in %f seconds", nodesRun, elapsedTime)
 	return
 }
 
 func writeGeneration(g int, models map[string]*modelReference, modelNames []string) {
 	genWriteStart := time.Now()
-	verbosePrintf("Writing results for generation %d...\n", g)
+	log.Debug().Msgf("Writing results for generation %d...", g)
 	for _, modelName := range modelNames {
 		modelRef := models[modelName]
 		err := modelRef.WriteData(g)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal().Stack().Err(err).Msg("")
 		}
 	}
 	genWriteEnd := time.Now()
 	genWriteElapsed := genWriteEnd.Sub(genWriteStart)
-	verbosePrintf("Results for generation %d written in %f seconds\n", g, genWriteElapsed.Seconds())
+	log.Debug().Msgf("Results for generation %d written in %f seconds", g, genWriteElapsed.Seconds())
 }

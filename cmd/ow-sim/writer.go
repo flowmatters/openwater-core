@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/binary"
-	"fmt"
 	gio "io"
-	"log"
 	"math"
 	"os"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
@@ -38,7 +38,7 @@ func writeData(
 
 func run_writer(args []string) {
 	fn := args[0]
-	fmt.Printf("Writing results from stdin to %s\n", fn)
+	log.Info().Msgf("Writing results from stdin to %s", fn)
 	input := os.Stdin
 
 	for {
@@ -51,20 +51,20 @@ func run_writer(args []string) {
 
 		msg := make([]byte, size)
 		if _, err := gio.ReadFull(input, msg); err != nil {
-			fmt.Println(err)
+			log.Error().Stack().Err(err).Msg("")
 			return
 		}
 
 		data := &protobuf.ModelOutput{}
 		if err := proto.Unmarshal(msg, data); err != nil {
-			log.Fatalln("Failed to parse model data:", err)
+			log.Fatal().Stack().Err(err).Msg("Failed to parse model data")
 		}
 
 		if data.Cells == 0 {
 			continue
 		}
 
-		fmt.Printf("Writing data from %s to %s (%d cells)\n", data.Model, fn, data.Cells)
+		log.Info().Msgf("Writing data from %s to %s (%d cells)", data.Model, fn, data.Cells)
 
 		if data.InputColumns > 0 {
 			if data.StartingLocation == 0 {
@@ -75,7 +75,7 @@ func run_writer(args []string) {
 			err := writeData(fn, data.Model, "inputs", data.InputValues,
 				data.StartingLocation, data.Cells, data.InputColumns, data.Length)
 			if err != nil {
-				fmt.Println(err)
+				log.Error().Stack().Err(err).Msg("")
 				return
 			}
 		}
@@ -89,7 +89,7 @@ func run_writer(args []string) {
 			err := writeData(fn, data.Model, "outputs", data.OutputValues,
 				data.StartingLocation, data.Cells, data.OutputColumns, data.Length)
 			if err != nil {
-				fmt.Println(err)
+				log.Error().Stack().Err(err).Msg("")
 				return
 			}
 		}

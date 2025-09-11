@@ -2,9 +2,10 @@ package cdata
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"unsafe"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/util/slice"
@@ -152,7 +153,7 @@ func (nd *ndC[T]) Reshape(newShape []int) (data.ND[T], error) {
 func (nd *ndC[T]) MustReshape(newShape []int) data.ND[T] {
 	result, e := nd.Reshape(newShape)
 	if e != nil {
-		panic(e.Error())
+		log.Panic().Stack().Err(e).Msg("")
 	}
 	return result
 }
@@ -263,7 +264,7 @@ func makeCArrayForTest[T data.Number](shape []int) *ndC[T] {
 // Replaces contents with contents of go slice previously unrolled to
 func (nd *ndC[T]) Reroll() {
 	if nd.UnrolledTo == nil {
-		fmt.Errorf("Cannot reroll from nil ptr")
+		log.Error().Msg("Cannot reroll from nil ptr")
 	}
 	vals := *nd.UnrolledTo
 	nd.Apply([]int{0}, 0, 1, vals)

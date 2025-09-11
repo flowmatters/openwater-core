@@ -2,13 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"log"
 	"os"
 	"runtime/pprof"
 	"time"
 
-	"gonum.org/v1/hdf5"
+	"github.com/rs/zerolog/log"
 
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
@@ -31,12 +29,12 @@ const (
 
 func main() {
 	flag.Parse()
-	hdf5.DisplayErrors(false)
+	setupLogger()
 
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Stack().Err(err).Msg("")
 		}
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
@@ -52,7 +50,9 @@ func main() {
 }
 
 func run_simulation(args []string) {
-
+	if len(args) == 0 {
+		log.Fatal().Msg("Must specify an input file")
+	}
 	fn := args[0]
 	var outputFn string = ""
 	if len(args) > 1 {
@@ -62,8 +62,7 @@ func run_simulation(args []string) {
 			if *overwrite {
 				os.Remove(outputFn)
 			} else {
-				fmt.Printf("Output file (%s) exists and overwrite not set. Delete file or use -overwrite\n", outputFn)
-				os.Exit(1)
+				log.Fatal().Str("Output Filename", outputFn).Msg("Output file exists and overwrite not set. Delete file or use -overwrite")
 			}
 		}
 	}
@@ -74,17 +73,15 @@ func run_simulation(args []string) {
 
 	modelNames, err := modelsRef.LoadText()
 	if err != nil {
-		fmt.Println("Couldn't read model metadata")
-		os.Exit(1)
+		log.Fatal().Stack().Err(err).Msg("Couldn't read model metadata")
 	}
-	verbosePrintln("Models", modelNames)
+	log.Debug().Any("Models", modelNames).Msg("")
 
 	dims, err := dimsRef.GetDatasets()
 	if err != nil {
-		fmt.Println("Couldn't read model dimensions")
-		os.Exit(1)
+		log.Fatal().Stack().Err(err).Msg("Couldn't read model dimensions")
 	}
-	verbosePrintln("Dimensions", dims)
+	log.Debug().Any("Dimensions", dims).Msg("")
 
 	linksRef := io.H5Ref[uint32]{Filename: fn, Dataset: "/LINKS"}
 	linksND, err := linksRef.Load()
@@ -105,10 +102,9 @@ func run_simulation(args []string) {
 	models, genCount, nodeCount := makeModelRefs(modelNames, fn, outputFn)
 	nodesCompleted := 0
 
-	fmt.Println()
 	for i := 0; i < genCount; i++ {
 		pcComplete := 100.0 * float64(nodesCompleted) / float64(nodeCount)
-		fmt.Printf("==== %.1f%% - Generation %d / %d ====\n", pcComplete, i+1, genCount)
+		log.Info().Msgf("==== %.1f%% - Generation %d / %d ====", pcComplete, i+1, genCount)
 
 		// === RUN GENERATION ===
 		genSimulationTime, nodesInGeneration := runGeneration(i, models, modelNames) // synchronous
@@ -133,7 +129,7 @@ func run_simulation(args []string) {
 						if prevG == (g - 1) {
 							break
 						}
-						verbosePrintf("Waiting for generation %d, got generation %d, sleeping\n", g, prevG)
+						log.Debug().Msgf("Waiting for generation %d, got generation %d, sleeping", g, prevG)
 						writingDone <- prevG
 						time.Sleep(time.Duration(1000 * 1000 * 500)) // Half a second
 					}
@@ -172,8 +168,7 @@ func run_simulation(args []string) {
 			destModelName := modelNames[destModelNumber]
 			destModel, err := models[destModelName].GetGeneration(int(destGen))
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				log.Fatal().Stack().Err(err).Msg("")
 			}
 
 			nTimesteps := srcModel.Outputs.Len(sim.DIMO_TIMESTEP)
@@ -197,25 +192,24 @@ func run_simulation(args []string) {
 		genLinkEnd := time.Now()
 		genLinkElapsed := genLinkEnd.Sub(genLinkStart).Seconds()
 		totalTimeLinks += genLinkElapsed
-		verbosePrintf("%d links (%d to %d), processed in %f seconds\n", nextLink-currentLink, currentLink, nextLink, genLinkElapsed)
+		log.Debug().Msgf("%d links (%d to %d), processed in %f seconds", nextLink-currentLink, currentLink, nextLink, genLinkElapsed)
 		// === /PROCESS LINKS ===
 
 		genElapsed := genLinkElapsed + genSimulationTime
-		verbosePrintf("Generation completed in %f seconds\n", genElapsed)
-		verbosePrintln()
+		log.Debug().Msgf("Generation completed in %f seconds", genElapsed)
 	}
 
-	verbosePrintln("Simulation finished. Waiting for results to be written")
+	log.Debug().Msg("Simulation finished. Waiting for results to be written")
 	generationsEnd := time.Now()
 
 	if outputFn != "" {
 		for {
 			genFinished := <-writingDone
 			if genFinished == (genCount - 1) {
-				verbosePrintf("Generation %d finished writing\n", genFinished)
+				log.Debug().Int("Time", genFinished).Msg("Generation Finished Writing")
 				break
 			}
-			verbosePrintf("Waiting for final generation (%d), got generation %d, sleeping\n", genCount-1, genFinished)
+			log.Debug().Msgf("Waiting for final generation (%d), got generation %d, sleeping", genCount-1, genFinished)
 			writingDone <- genFinished
 			time.Sleep(time.Duration(500 * 1000 * 1000))
 		}
@@ -225,8 +219,10 @@ func run_simulation(args []string) {
 	finalWriteElapsed := simEnd.Sub(generationsEnd)
 	totalTimeFinalWrite = finalWriteElapsed.Seconds()
 	simElapsed := simEnd.Sub(simStart)
-	fmt.Printf("Simulation completed in %f seconds\n", simElapsed.Seconds())
-	fmt.Printf("Total Simulation Time: %f\n", totalTimeSimulation)
-	fmt.Printf("Total Link Time: %f\n", totalTimeLinks)
-	fmt.Printf("Total Final Write Time: %f\n", totalTimeFinalWrite)
+	log.Info().
+		Float64("Total Run time", simElapsed.Seconds()).
+		Float64("Total Simulation Time", totalTimeSimulation).
+		Float64("Total Link Time", totalTimeLinks).
+		Float64("Total Final Write Time", totalTimeFinalWrite).
+		Msg("Simulation complete")
 }

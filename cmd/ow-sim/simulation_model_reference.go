@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
 	"github.com/flowmatters/openwater-core/io/protobuf"
@@ -60,7 +62,7 @@ func initModel(fn, model, paramFn string) (*modelReference, error) {
 	modelRef := io.H5Ref[int32]{Filename: fn, Dataset: "/MODELS/" + model + "/batches"}
 	batchesArray, err := modelRef.Load()
 	if err != nil {
-		fmt.Printf("Couldn't load batches for %s\n", model)
+		log.Error().Msgf("Couldn't load batches for %s", model)
 		return nil, err
 	}
 	batches := batchesArray.Unroll()
@@ -70,7 +72,7 @@ func initModel(fn, model, paramFn string) (*modelReference, error) {
 	result.InitialStatesFilename = fn
 	dimensions, err := result.initDimensions()
 	if err != nil {
-		fmt.Printf("Couldn't initialise dimensions for %s\n", model)
+		log.Error().Msgf("Couldn't initialise dimensions for %s", model)
 		return nil, err
 	}
 	result.Dimensions = dimensions
@@ -90,7 +92,7 @@ func (mr *modelReference) makeModel() (sim.TimeSteppingModel, error) {
 func (mr *modelReference) initDimensions() ([]int, error) {
 	modelInstance, err := mr.makeModel()
 	if err != nil {
-		fmt.Printf("Couldn't make model\n")
+		log.Error().Msgf("Couldn't make model")
 		return nil, err
 	}
 
@@ -105,15 +107,15 @@ func (mr *modelReference) initDimensions() ([]int, error) {
 
 	allParameters, err := h5Ref.Load()
 	if err != nil {
-		fmt.Printf("Couldn't load parameters for model %s from %s\n", mr.ModelName, mr.ParametersFilename)
+		log.Error().Msgf("Couldn't load parameters for model %s from %s", mr.ModelName, mr.ParametersFilename)
 		return nil, err
 	}
 
 	dimSizes := modelInstance.FindDimensions(allParameters.(data.ND2[float64]))
 
-	verbosePrintf("===== Simulation dimension sizes for %s =====\n", mr.ModelName)
+	log.Debug().Msgf("===== Simulation dimension sizes for %s =====", mr.ModelName)
 	for ix, dim := range dims {
-		verbosePrintf("\t%s=%d\n", dim, dimSizes[ix])
+		log.Debug().Msgf("\t%s=%d", dim, dimSizes[ix])
 	}
 
 	return dimSizes, err
@@ -141,7 +143,7 @@ func (mr *modelReference) GetReference(genSlice []int, element string) io.H5Ref[
 
 func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 	if mr.Generations[i] == nil {
-		verbosePrintf("Initialising Generation %d for %s\n", i, mr.ModelName)
+		log.Debug().Msgf("Initialising Generation %d for %s", i, mr.ModelName)
 		gen := modelGeneration{}
 		modelInstance, err := mr.makeModel()
 		if err != nil {
@@ -178,7 +180,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		}
 
 		if !inputsExist {
-			verbosePrintf("No inputs saved for %s. Initialising\n", mr.ModelName)
+			log.Debug().Msgf("No inputs saved for %s. Initialising", mr.ModelName)
 			gen.Inputs = data.NewArray3D[float64](gen.Count, len(gen.Model.Description().Inputs), mr.SimLength)
 		}
 
@@ -200,7 +202,7 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 }
 
 func (mr *modelReference) PurgeGeneration(i int) {
-	verbosePrintf("Purging Generation %d for %s\n", i, mr.ModelName)
+	log.Debug().Msgf("Purging Generation %d for %s", i, mr.ModelName)
 	mr.Generations[i] = nil
 }
 
@@ -307,7 +309,7 @@ func (mr *modelReference) writeProtobuf(generation int) error {
 
 	buf := make([]byte, 4)
 	binary.LittleEndian.PutUint32(buf, uint32(len(msg)))
-	fmt.Printf("Writing gen %d of %s\n", generation, mr.ModelName)
+	log.Info().Msgf("Writing gen %d of %s", generation, mr.ModelName)
 	if _, err := mr.OutputWriter.Write(buf); err != nil {
 		return err
 	}
@@ -315,13 +317,13 @@ func (mr *modelReference) writeProtobuf(generation int) error {
 	if _, err := mr.OutputWriter.Write(msg); err != nil {
 		return err
 	}
-	fmt.Printf("Sent gen %d of %s\n", generation, mr.ModelName)
+	log.Info().Msgf("Sent gen %d of %s", generation, mr.ModelName)
 
 	if generation == len(mr.Batches)-1 {
-		fmt.Printf("Waiting for output writer for %s to close\n", mr.ModelName)
+		log.Info().Msgf("Waiting for output writer for %s to close", mr.ModelName)
 		mr.OutputWriter.Close()
 		mr.OutputProcess.Wait()
-		fmt.Printf("Output writer for %s closed\n", mr.ModelName)
+		log.Info().Msgf("Output writer for %s closed", mr.ModelName)
 	}
 
 	return nil
@@ -450,29 +452,25 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 		ref, err := initModel(inputFn, modelName, paramFilename)
 
 		if err != nil {
-			fmt.Println("Couldn't initialise model", modelName)
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal().Stack().Err(err).Str("Model name", modelName).Msg("Couldn't initialise model")
 		}
 
 		ref.TimeSeriesFilename = tsFilename
 		ref.InitialStatesFilename = initStatesFilename
 
 		if simLength == 0 {
-			verbosePrintln("Trying to establish simulation length...")
+			log.Debug().Msg("Trying to establish simulation length...")
 			inputRef := io.H5Ref[float64]{}
 			inputRef.Filename = tsFilename
 			inputRef.Dataset = "/MODELS/" + modelName + "/inputs"
 			if inputRef.Exists() {
 				inputShp, err := inputRef.Shape()
 				if err != nil {
-					fmt.Println("Couldn't query input dimensions", modelName)
-					fmt.Println(err)
-					os.Exit(1)
+					log.Fatal().Stack().Err(err).Str("Model Name", modelName).Msg("Couldn't query input dimensions")
 				}
 				simLength = inputShp[sim.DIMI_TIMESTEP]
 			}
-			verbosePrintf("Simulation has %d timesteps", simLength)
+			log.Debug().Msgf("Simulation has %d timesteps", simLength)
 		}
 
 		destFn := outputPaths[modelName]
@@ -489,7 +487,7 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 
 			if destFn != defaultOutputFn {
 				exe_path, _ := osext.Executable()
-				fmt.Printf("Configuring external write process: %s\n", exe_path)
+				log.Info().Msgf("Configuring external write process: %s", exe_path)
 				write_cmd := exec.Command(exe_path, "-writer", destFn)
 				reader, writer := gio.Pipe()
 				write_cmd.Stdin = reader
@@ -497,12 +495,10 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 				ref.OutputWriter = writer
 				write_cmd.Start()
 				ref.OutputProcess = write_cmd
-				// os.Exit(1)
 			}
 		}
 
-		verbosePrintln("Batches for ", ref.ModelName, ref.Batches)
-		verbosePrintln("Generations for ", ref.ModelName, ref.Generations)
+		log.Debug().Str("Model Name", ref.ModelName).Any("Batches:", ref.Batches).Any("Generations", ref.Generations).Msg("")
 		models[modelName] = ref
 		genCount = len(ref.Generations)
 		nodeCount += int(ref.Batches[len(ref.Batches)-1])

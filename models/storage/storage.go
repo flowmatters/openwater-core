@@ -2,9 +2,10 @@ package storage
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"slices"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/flowmatters/openwater-core/conv/units"
 	"github.com/flowmatters/openwater-core/util/fn"
@@ -92,7 +93,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 		}
 		res, err := fn.Piecewise(vol, volumes, ys)
 		if err != nil {
-			panic(err)
+			log.Panic().Stack().Err(err).Msg("")
 		}
 		return res
 	}
@@ -128,7 +129,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 
 	err := checkStorageConfiguration(nLVA, volumes)
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Msg("")
 		return
 	}
 
@@ -230,7 +231,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 				if testVol < 0.0 {
 					if subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE {
 						// report()
-						panic("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS")
+						log.Panic().Stack().Err(err).Msg("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS")
 						// return
 					}
 					subtimestep = math.Max(subtimestep*0.5, MIN_TIMESTEP_SECONDS_NEGATIVE)
@@ -254,7 +255,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 							break
 						}
 					} else if subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE {
-						panic("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE")
+						log.Panic().Stack().Err(err).Msg("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE")
 						// return
 					}
 				}
@@ -271,7 +272,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 			volume = volume + (inflow+(netAtmosphericFluxDepthPerSecond*avgArea)-avgOutflow)*subtimestep
 			if volume < 0 {
 				// report()
-				panic(err)
+				log.Panic().Stack().Err(err).Msg("")
 			}
 
 			if volume > volCurveMax {

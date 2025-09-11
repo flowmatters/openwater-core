@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	_ "path/filepath"
@@ -11,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/rs/zerolog/log"
 
 	"gopkg.in/yaml.v2"
 )
@@ -63,7 +64,7 @@ type ModelSpec struct {
 func processPath(path string) {
 	fi, err := os.Stat(path)
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Msg("")
 		return
 	}
 
@@ -95,7 +96,7 @@ func transform(spec ModelSpec) ModelSpec {
 			for _, d := range dimensions {
 				dims[d] = struct{}{}
 			}
-			fmt.Println(paramName, dimensions)
+			log.Info().Any(paramName, dimensions).Msg("")
 		}
 
 		txt := fmt.Sprint(v.Value)
@@ -144,7 +145,7 @@ func transform(spec ModelSpec) ModelSpec {
 		for _, d := range v.Dimensions {
 			for i, p := range spec.ParameterSpecs {
 				if strings.Compare(p.Name, d) == 0 {
-					fmt.Printf("%s is a dimension of %s\n", p.Name, v.Name)
+					log.Info().Msgf("%s is a dimension of %s", p.Name, v.Name)
 					spec.ParameterSpecs[i].IsDimension = true
 				}
 			}
@@ -157,7 +158,7 @@ func transform(spec ModelSpec) ModelSpec {
 
 	for _, v := range spec.ParameterSpecs {
 		if v.IsDimension {
-			fmt.Printf("%s is a dimension\n", v.Name)
+			log.Info().Msgf("%s is a dimension", v.Name)
 		}
 	}
 	return spec
@@ -166,16 +167,16 @@ func transform(spec ModelSpec) ModelSpec {
 func processFile(fn string) {
 	//	directory := filepath.Dir(fn)
 
-	contents, err := ioutil.ReadFile(fn)
+	contents, err := os.ReadFile(fn)
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Msg("")
 		return
 	}
 
 	packageRe := regexp.MustCompile("^\\s*package\\s+(\\w+)")
 	packageMatch := packageRe.FindSubmatch(contents)
 	if packageMatch == nil {
-		fmt.Printf("No package declaration in %s\n", fn)
+		log.Info().Msgf("No package declaration in %s", fn)
 		return
 	}
 	packageName := packageMatch[1]
@@ -195,7 +196,7 @@ func processFile(fn string) {
 		desc := make(ModelSpecs) // := make(map[interface{}]interface{})
 		err = yaml.Unmarshal(spec, &desc)
 		if err != nil {
-			fmt.Println(err)
+			log.Error().Stack().Err(err).Msg("")
 			return
 		}
 
@@ -224,9 +225,7 @@ func generateWrapper(desc ModelSpec) {
 		"lower": strings.ToLower}).ParseGlob(templatePath)
 
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println("Could not parse templates. Exiting")
-		os.Exit(1)
+		log.Fatal().Stack().Err(err).Msg("Could not parse templates. Exiting")
 	}
 	tmpl = tmpl.Funcs(template.FuncMap{
 		"inc": func(n int) int {
@@ -235,10 +234,10 @@ func generateWrapper(desc ModelSpec) {
 
 	dir := filepath.Dir(desc.Filename)
 	destFn := filepath.Join(dir, fmt.Sprintf("generated_%s.go", desc.Name))
-	fmt.Printf("Writing to %s\n", destFn)
+	log.Info().Msgf("Writing to %s", destFn)
 	dest, err := os.Create(destFn)
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Msg("")
 		return
 	}
 	defer dest.Close()
@@ -288,7 +287,7 @@ func generateWrapper(desc ModelSpec) {
 
 	err = tmpl.ExecuteTemplate(dest, "generated_struct.got", desc)
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Stack().Err(err).Msg("")
 		return
 	}
 }
