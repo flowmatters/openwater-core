@@ -4,6 +4,10 @@ import (
 	"C"
 	"unsafe"
 
+	"log"
+	"os"
+	"runtime/pprof"
+
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/data/cdata"
 	_ "github.com/flowmatters/openwater-core/models"
@@ -19,7 +23,17 @@ func RunSingleModel(
 	params *C.double, nParameters, nParameterSets C.int,
 	states *C.double, nCells, nStates C.int,
 	outputs *C.double, nOutputCells, nOutputs, nOutputTimesteps C.int,
-	initStates bool) {
+	initStates bool, cpuprofile *C.char) {
+
+	if cpuprofile != nil && C.GoString(cpuprofile) != "" {
+		f, err := os.Create(C.GoString(cpuprofile))
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
+
 	gName := C.GoString(modelName)
 	model := sim.Catalog[gName]()
 

@@ -17,7 +17,17 @@ test_model.h5
 test_model_outputs.h5
 
 .idea
+.vscode
 
 ow-test
-# IDE files
-.vscode
+
+ow-inspect
+ow-sim
+ow-single
+ows-ensemble
+!cmd/ow-inspect
+!cmd/ow-sim
+!cmd/ow-single
+!cmd/ows-ensemble
+spike-ndarray-hdf5
+libopenwater.h
