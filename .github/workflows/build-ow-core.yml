@@ -1,8 +1,6 @@
 name: build-ow-core
 on:
   push:
-    tags:
-      - 'v*.*.*'
   schedule:
     - cron: '0 2 * * 0'
   workflow_dispatch:
@@ -53,28 +51,6 @@ jobs:
         - name: build
           run: ./build/ci/all.sh
           shell: bash
-        - name: Find built files
-          run: |
-            echo "=== Searching for built files ==="
-            echo "Current directory: $(pwd)"
-            echo ""
-            echo "Looking for .exe files:"
-            find . -name "*.exe" -type f 2>/dev/null | head -20
-            echo ""
-            echo "Looking for libopenwater files:"
-            find . -name "libopenwater.*" -type f 2>/dev/null
-            echo ""
-            echo "Checking GOPATH:"
-            echo "GOPATH=$GOPATH"
-            echo "GOBIN=$GOBIN"
-            [ -d "$GOPATH/bin" ] && ls -la "$GOPATH/bin" || echo "No GOPATH/bin"
-            echo ""
-            echo "Checking ~/go/bin:"
-            [ -d ~/go/bin ] && ls -la ~/go/bin | head -20 || echo "No ~/go/bin"
-            echo ""
-            echo "Checking parent bin:"
-            [ -d ../bin ] && ls -la ../bin || echo "No ../bin"
-          shell: bash
         - name: upload build
           uses: actions/upload-artifact@v4
           with:
@@ -86,30 +62,14 @@ jobs:
               libopenwater.so
         - name: Zip Nightly
           run: |
-            echo "Current directory:"
-            pwd
-            echo ""
-            echo "Checking for binaries in ~/go/bin..."
-            ls -la ~/go/bin/ 2>/dev/null | grep -E "\.(exe|dll)$" || echo "No binaries in ~/go/bin"
-            echo ""
-            echo "Checking for libopenwater in ../bin..."
-            ls -la ../bin/ 2>/dev/null || echo "No ../bin directory"
-            echo ""
-            echo "Creating build archive..."
             mkdir -p build_temp
-            # Copy executables from GOPATH/bin where 'go install' puts them
-            cp ~/go/bin/ow-inspect.exe build_temp/ 2>/dev/null || echo "Warning: ow-inspect.exe not found"
-            cp ~/go/bin/ow-single.exe build_temp/ 2>/dev/null || echo "Warning: ow-single.exe not found"
-            cp ~/go/bin/ow-sim.exe build_temp/ 2>/dev/null || echo "Warning: ow-sim.exe not found"
-            cp ~/go/bin/ows-ensemble.exe build_temp/ 2>/dev/null || echo "Warning: ows-ensemble.exe not found"
-            # libopenwater files are in ../bin (parent directory)
-            cp ../bin/libopenwater.h build_temp/ 2>/dev/null || echo "Warning: libopenwater.h not found"
-            cp ../bin/libopenwater.so build_temp/ 2>/dev/null || echo "Warning: libopenwater.so not found"
-            # Copy HDF5 DLLs
+            cp ~/go/bin/ow-inspect.exe build_temp/
+            cp ~/go/bin/ow-single.exe build_temp/
+            cp ~/go/bin/ow-sim.exe build_temp/
+            cp ~/go/bin/ows-ensemble.exe build_temp/
+            cp ../bin/libopenwater.h build_temp/
+            cp ../bin/libopenwater.so build_temp/
             cp 1.8.21/bin/*.dll build_temp/
-            echo ""
-            echo "Build temp contents:"
-            ls -la build_temp/
             cd build_temp
             tar -acf ../build.zip *
             cd ..
