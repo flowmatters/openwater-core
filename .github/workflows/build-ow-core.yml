@@ -53,6 +53,28 @@ jobs:
         - name: build
           run: ./build/ci/all.sh
           shell: bash
+        - name: Find built files
+          run: |
+            echo "=== Searching for built files ==="
+            echo "Current directory: $(pwd)"
+            echo ""
+            echo "Looking for .exe files:"
+            find . -name "*.exe" -type f 2>/dev/null | head -20
+            echo ""
+            echo "Looking for libopenwater files:"
+            find . -name "libopenwater.*" -type f 2>/dev/null
+            echo ""
+            echo "Checking GOPATH:"
+            echo "GOPATH=$GOPATH"
+            echo "GOBIN=$GOBIN"
+            [ -d "$GOPATH/bin" ] && ls -la "$GOPATH/bin" || echo "No GOPATH/bin"
+            echo ""
+            echo "Checking ~/go/bin:"
+            [ -d ~/go/bin ] && ls -la ~/go/bin | head -20 || echo "No ~/go/bin"
+            echo ""
+            echo "Checking parent bin:"
+            [ -d ../bin ] && ls -la ../bin || echo "No ../bin"
+          shell: bash
         - name: upload build
           uses: actions/upload-artifact@v4
           with:
