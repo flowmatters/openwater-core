@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e  # Exit on any error
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
     ./build/ci/osx.sh
     python3 -m venv ow-test

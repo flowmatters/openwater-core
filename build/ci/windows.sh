@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e  # Exit on any error
+
 # choco install python --version=3.7.2
 # cp /c/Python37/python.exe /c/Python37/python3.exe
 
