@@ -1,6 +1,8 @@
 name: build-ow-core
 on:
   push:
+    tags:
+      - 'v*.*.*'
   schedule:
     - cron: '0 2 * * 0'
   workflow_dispatch:
@@ -23,13 +25,27 @@ jobs:
               libopenwater.so
         - name: Zip nightly
           run: printf "ow-inspect\now-single\now-sim\nows-ensemble\nlibopenwater.h\nlibopenwater.so" | zip build.zip -@ 
+        - name: Rename for versioned release
+          if: github.ref_type == 'tag'
+          run: mv build.zip build-linux.zip
         - name: Release Nightly
+          if: github.ref_type != 'tag'
           uses: softprops/action-gh-release@v1
           with:
             name: ubuntu-Nightly
             files: build.zip
             fail_on_unmatched_files: true
             tag_name: Nightly-ubuntu
+        - name: Release Version
+          if: github.ref_type == 'tag'
+          uses: softprops/action-gh-release@v1
+          with:
+            name: ${{ github.ref_name }}
+            files: build-linux.zip
+            fail_on_unmatched_files: true
+            tag_name: ${{ github.ref_name }}
+            draft: false
+            prerelease: false
   build-windows:
     runs-on: windows-latest
     steps:
@@ -48,13 +64,27 @@ jobs:
               libopenwater.so
         - name: Zip Nightly
           run: echo "1.8.21/bin/*.dll" "libopenwater.h" "libopenwater.so" "*.exe" | tar -acf build.zip -T -
+        - name: Rename for versioned release
+          if: github.ref_type == 'tag'
+          run: mv build.zip build-windows.zip
         - name: Release Nightly
+          if: github.ref_type != 'tag'
           uses: softprops/action-gh-release@v1
           with:
             name: windows-Nightly
             files: build.zip
             fail_on_unmatched_files: true
             tag_name: Nightly-windows
+        - name: Release Version
+          if: github.ref_type == 'tag'
+          uses: softprops/action-gh-release@v1
+          with:
+            name: ${{ github.ref_name }}
+            files: build-windows.zip
+            fail_on_unmatched_files: true
+            tag_name: ${{ github.ref_name }}
+            draft: false
+            prerelease: false
   build-osx:
     runs-on: macos-latest
     steps:
@@ -74,10 +104,24 @@ jobs:
             libopenwater.so
       - name: Zip nightly
         run: printf "ow-inspect\now-single\now-sim\nows-ensemble\nlibopenwater.h\nlibopenwater.so" | zip build.zip -@ 
+      - name: Rename for versioned release
+        if: github.ref_type == 'tag'
+        run: mv build.zip build-macos.zip
       - name: Release Nightly
+        if: github.ref_type != 'tag'
         uses: softprops/action-gh-release@v1
         with:
           name: osx-Nightly
           files: build.zip
           fail_on_unmatched_files: true
           tag_name: Nightly-osx
+      - name: Release Version
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.ref_name }}
+          files: build-macos.zip
+          fail_on_unmatched_files: true
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
