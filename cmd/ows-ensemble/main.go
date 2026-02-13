@@ -9,7 +9,10 @@ import (
 	"github.com/flowmatters/openwater-core/io"
 	_ "github.com/flowmatters/openwater-core/models"
 	"github.com/flowmatters/openwater-core/sim"
+	"github.com/flowmatters/openwater-core/util"
 )
+
+var showVersion = flag.Bool("version", false, "display version information")
 
 func max(a, b int) int {
 	if a > b {
@@ -20,6 +23,14 @@ func max(a, b int) int {
 
 func main() {
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("ows-ensemble %s\n", util.FullVersion())
+		fmt.Printf("Signature: %s\n", util.GetSignatureHash())
+		fmt.Printf("Build: %s (%s)\n", util.BuildTime, util.BuildSHA)
+		os.Exit(0)
+	}
+
 	args := flag.Args()
 
 	if len(args) < 4 {

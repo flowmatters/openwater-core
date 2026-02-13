@@ -2,16 +2,19 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"runtime/pprof"
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"gonum.org/v1/hdf5"
 
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
 	_ "github.com/flowmatters/openwater-core/models"
 	"github.com/flowmatters/openwater-core/sim"
+	"github.com/flowmatters/openwater-core/util"
 )
 
 const (
@@ -30,6 +33,15 @@ const (
 func main() {
 	flag.Parse()
 	setupLogger()
+
+	if *showVersion {
+		fmt.Printf("ow-sim %s\n", util.FullVersion())
+		fmt.Printf("Signature: %s\n", util.GetSignatureHash())
+		fmt.Printf("Build: %s (%s)\n", util.BuildTime, util.BuildSHA)
+		os.Exit(0)
+	}
+
+	hdf5.DisplayErrors(false)
 
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)

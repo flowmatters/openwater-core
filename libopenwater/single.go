@@ -12,7 +12,23 @@ import (
 	"github.com/flowmatters/openwater-core/data/cdata"
 	_ "github.com/flowmatters/openwater-core/models"
 	"github.com/flowmatters/openwater-core/sim"
+	"github.com/flowmatters/openwater-core/util"
 )
+
+//export ow_version
+func ow_version() *C.char {
+	return C.CString(util.FullVersion())
+}
+
+//export ow_short_version
+func ow_short_version() *C.char {
+	return C.CString(util.ShortVersion())
+}
+
+//export ow_signature_hash
+func ow_signature_hash() *C.char {
+	return C.CString(util.GetSignatureHash())
+}
 
 //export RunSingleModel
 func RunSingleModel(

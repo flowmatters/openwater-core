@@ -21,6 +21,7 @@ var statesOutputFile = flag.String("final-states", "", "specify file for final s
 
 var splitOutputs = flag.String("outputs", "", "split output files by model type. Specify as <model>:<fn>,<model>:<fn>,...")
 var writerMode = flag.Bool("writer", false, "operate as an output writer for another simulation process")
+var showVersion = flag.Bool("version", false, "display version information")
 
 func init() {
 	const usage = "show progress of simulation generations"

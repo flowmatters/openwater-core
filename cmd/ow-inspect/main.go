@@ -1,38 +1,49 @@
 package main
 
 import (
-	"flag"
-  _ "github.com/flowmatters/openwater-core/models"
-  "github.com/flowmatters/openwater-core/sim"
-	"os"
 	"encoding/json"
+	"flag"
+	"fmt"
+	"os"
+
+	_ "github.com/flowmatters/openwater-core/models"
+	"github.com/flowmatters/openwater-core/sim"
+	"github.com/flowmatters/openwater-core/util"
 )
 
-func main(){
-//	jsonFormat := flag.Bool("json",false,"Output in JSON format")
+var showVersion = flag.Bool("version", false, "display version information")
 
-  flag.Parse()
-  args := flag.Args()
+func main() {
+	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("ow-inspect %s\n", util.FullVersion())
+		fmt.Printf("Signature: %s\n", util.GetSignatureHash())
+		fmt.Printf("Build: %s (%s)\n", util.BuildTime, util.BuildSHA)
+		os.Exit(0)
+	}
+
+	args := flag.Args()
 
 	var models []string
-  if len(args)==0 {
-		models = make([]string,len(sim.Catalog))
+	if len(args) == 0 {
+		models = make([]string, len(sim.Catalog))
 		i := 0
 		for k := range sim.Catalog {
 			models[i] = k
 			i++
 		}
-  } else {
+	} else {
 		models = args
 	}
 
 	allModels := make(map[string]sim.ModelDescription)
-	for _,modelName := range models {
-		model := sim.Catalog[modelName]();
-		allModels[modelName] = model.Description();
+	for _, modelName := range models {
+		model := sim.Catalog[modelName]()
+		allModels[modelName] = model.Description()
 	}
 
 	encoder := json.NewEncoder(os.Stdout)
-	encoder.SetIndent(""," ")
+	encoder.SetIndent("", " ")
 	encoder.Encode(allModels)
 }
