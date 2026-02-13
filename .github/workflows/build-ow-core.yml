@@ -64,11 +64,18 @@ jobs:
               libopenwater.so
         - name: Zip Nightly
           run: |
+            echo "Current directory contents:"
+            ls -la
+            echo "Creating build archive..."
             mkdir -p build_temp
-            cp *.exe build_temp/
+            [ -f ow-inspect.exe ] && cp ow-inspect.exe build_temp/ || echo "No ow-inspect.exe"
+            [ -f ow-single.exe ] && cp ow-single.exe build_temp/ || echo "No ow-single.exe"
+            [ -f ow-sim.exe ] && cp ow-sim.exe build_temp/ || echo "No ow-sim.exe"
+            [ -f ows-ensemble.exe ] && cp ows-ensemble.exe build_temp/ || echo "No ows-ensemble.exe"
             cp libopenwater.h libopenwater.so build_temp/
             cp 1.8.21/bin/*.dll build_temp/
             cd build_temp
+            ls -la
             tar -acf ../build.zip *
             cd ..
           shell: bash
