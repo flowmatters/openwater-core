@@ -64,18 +64,32 @@ jobs:
               libopenwater.so
         - name: Zip Nightly
           run: |
-            echo "Current directory contents:"
+            echo "Current directory:"
+            pwd
             ls -la
+            echo ""
+            echo "Looking for built binaries..."
+            find . -name "*.exe" -type f 2>/dev/null || echo "No .exe in current dir tree"
+            echo ""
+            echo "Checking GOPATH/bin..."
+            ls -la ~/go/bin/ 2>/dev/null || echo "No ~/go/bin"
+            echo ""
             echo "Creating build archive..."
             mkdir -p build_temp
-            [ -f ow-inspect.exe ] && cp ow-inspect.exe build_temp/ || echo "No ow-inspect.exe"
-            [ -f ow-single.exe ] && cp ow-single.exe build_temp/ || echo "No ow-single.exe"
-            [ -f ow-sim.exe ] && cp ow-sim.exe build_temp/ || echo "No ow-sim.exe"
-            [ -f ows-ensemble.exe ] && cp ows-ensemble.exe build_temp/ || echo "No ows-ensemble.exe"
-            cp libopenwater.h libopenwater.so build_temp/
+            # Copy from GOPATH/bin where 'go install' puts them
+            cp ~/go/bin/ow-inspect.exe build_temp/ 2>/dev/null || echo "Warning: ow-inspect.exe not found"
+            cp ~/go/bin/ow-single.exe build_temp/ 2>/dev/null || echo "Warning: ow-single.exe not found"
+            cp ~/go/bin/ow-sim.exe build_temp/ 2>/dev/null || echo "Warning: ow-sim.exe not found"
+            cp ~/go/bin/ows-ensemble.exe build_temp/ 2>/dev/null || echo "Warning: ows-ensemble.exe not found"
+            # libopenwater files should be in current dir
+            cp libopenwater.h build_temp/ 2>/dev/null || echo "Warning: libopenwater.h not found"
+            cp libopenwater.so build_temp/ 2>/dev/null || echo "Warning: libopenwater.so not found"
+            # Copy DLLs
             cp 1.8.21/bin/*.dll build_temp/
+            echo ""
+            echo "Build temp contents:"
+            ls -la build_temp/
             cd build_temp
-            ls -la
             tar -acf ../build.zip *
             cd ..
           shell: bash
