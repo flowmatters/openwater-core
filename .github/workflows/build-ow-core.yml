@@ -70,9 +70,7 @@ jobs:
             cp ../bin/libopenwater.h build_temp/
             cp ../bin/libopenwater.so build_temp/
             cp 1.8.21/bin/*.dll build_temp/
-            cd build_temp
-            zip -r ../build.zip *
-            cd ..
+            7z a -tzip build.zip ./build_temp/*
           shell: bash
         - name: Rename for versioned release
           if: github.ref_type == 'tag'
