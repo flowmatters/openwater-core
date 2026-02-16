@@ -77,19 +77,68 @@ echo -e "Version: ${GREEN}${VERSION}${NC}"
 echo -e "Tag name: ${GREEN}${TAG_NAME}${NC}"
 echo
 
-# Check if tag already exists
+# Check if tag already exists locally
+TAG_EXISTS_LOCALLY=false
+TAG_EXISTS_REMOTELY=false
+
 if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
-    echo -e "${RED}Error: Tag '${TAG_NAME}' already exists${NC}"
-    echo "Delete it first with: git tag -d ${TAG_NAME}"
-    exit 1
+    TAG_EXISTS_LOCALLY=true
+    LOCAL_TAG_COMMIT=$(git rev-parse "$TAG_NAME")
+    CURRENT_COMMIT=$(git rev-parse HEAD)
+
+    echo -e "${YELLOW}WARNING: Tag '${TAG_NAME}' already exists locally${NC}"
+    echo "Current commit: ${CURRENT_COMMIT:0:7}"
+    echo "Tagged commit:  ${LOCAL_TAG_COMMIT:0:7}"
+    echo
+
+    if [ "$LOCAL_TAG_COMMIT" = "$CURRENT_COMMIT" ]; then
+        echo -e "${YELLOW}Tag points to the current commit.${NC}"
+    else
+        echo -e "${YELLOW}Tag points to a different commit!${NC}"
+    fi
 fi
 
-# Confirm tagging
-read -p "Create and push tag '${TAG_NAME}'? (y/N) " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Aborted."
-    exit 1
+# Check if tag exists on remote
+if git ls-remote --tags origin | grep -q "refs/tags/$TAG_NAME"; then
+    TAG_EXISTS_REMOTELY=true
+    echo -e "${YELLOW}WARNING: Tag '${TAG_NAME}' already exists on remote${NC}"
+fi
+
+# Handle existing tags
+if [ "$TAG_EXISTS_LOCALLY" = true ] || [ "$TAG_EXISTS_REMOTELY" = true ]; then
+    echo
+    echo -e "${YELLOW}Do you want to replace the existing tag?${NC}"
+    echo "This will:"
+    if [ "$TAG_EXISTS_LOCALLY" = true ]; then
+        echo "  - Delete local tag '${TAG_NAME}'"
+    fi
+    if [ "$TAG_EXISTS_REMOTELY" = true ]; then
+        echo "  - Force push to replace remote tag '${TAG_NAME}'"
+        echo -e "  ${RED}WARNING: This will trigger a new build and may affect existing releases!${NC}"
+    fi
+    echo
+    read -p "Replace existing tag? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Aborted."
+        exit 1
+    fi
+
+    # Delete local tag if it exists
+    if [ "$TAG_EXISTS_LOCALLY" = true ]; then
+        echo "Deleting local tag '${TAG_NAME}'..."
+        git tag -d "$TAG_NAME"
+    fi
+fi
+
+# Confirm tagging (only if not already confirmed above)
+if [ "$TAG_EXISTS_LOCALLY" = false ] && [ "$TAG_EXISTS_REMOTELY" = false ]; then
+    read -p "Create and push tag '${TAG_NAME}'? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Aborted."
+        exit 1
+    fi
 fi
 
 # Create annotated tag
@@ -99,7 +148,13 @@ git tag -a "$TAG_NAME" -m "Release $VERSION"
 
 # Push tag to origin
 echo "Pushing tag to origin..."
-git push origin "$TAG_NAME"
+if [ "$TAG_EXISTS_REMOTELY" = true ]; then
+    # Force push to replace remote tag
+    git push --force origin "$TAG_NAME"
+    echo -e "${YELLOW}Force pushed to replace remote tag${NC}"
+else
+    git push origin "$TAG_NAME"
+fi
 
 echo
 echo -e "${GREEN}✓ Tag '${TAG_NAME}' created and pushed${NC}"
