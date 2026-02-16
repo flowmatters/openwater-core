@@ -71,7 +71,7 @@ jobs:
             cp ../bin/libopenwater.so build_temp/
             cp 1.8.21/bin/*.dll build_temp/
             cd build_temp
-            tar -acf ../build.zip *
+            zip -r ../build.zip *
             cd ..
           shell: bash
         - name: Rename for versioned release
