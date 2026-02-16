@@ -15,7 +15,14 @@ do
 done
 
 echo libopenwater
-go build -buildmode=c-shared -o libopenwater.so ./libopenwater 
+if [[ "$OSTYPE" == "msys"* || "$OSTYPE" == "cygwin"* || "$OSTYPE" == "win"* ]]; then
+  LIB_EXT=dll
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  LIB_EXT=dylib
+else
+  LIB_EXT=so
+fi
+go build -buildmode=c-shared -o libopenwater.$LIB_EXT ./libopenwater
 mkdir -p ../bin
 cp libopenwater.* ../bin
 

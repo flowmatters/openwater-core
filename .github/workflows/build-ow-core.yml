@@ -59,7 +59,7 @@ jobs:
               *.exe
               1.8.21/bin/*.dll
               libopenwater.h
-              libopenwater.so
+              libopenwater.dll
         - name: Zip Nightly
           run: |
             mkdir -p build_temp
@@ -68,7 +68,7 @@ jobs:
             cp ~/go/bin/ow-sim.exe build_temp/
             cp ~/go/bin/ows-ensemble.exe build_temp/
             cp ../bin/libopenwater.h build_temp/
-            cp ../bin/libopenwater.so build_temp/
+            cp ../bin/libopenwater.dll build_temp/
             cp 1.8.21/bin/*.dll build_temp/
             7z a -tzip build.zip ./build_temp/*
           shell: bash
@@ -110,9 +110,9 @@ jobs:
             ow-sim
             ows-ensemble
             libopenwater.h
-            libopenwater.so
+            libopenwater.dylib
       - name: Zip nightly
-        run: printf "ow-inspect\now-single\now-sim\nows-ensemble\nlibopenwater.h\nlibopenwater.so" | zip build.zip -@ 
+        run: printf "ow-inspect\now-single\now-sim\nows-ensemble\nlibopenwater.h\nlibopenwater.dylib" | zip build.zip -@
       - name: Rename for versioned release
         if: github.ref_type == 'tag'
         run: mv build.zip build-macos.zip
