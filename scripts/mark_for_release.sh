@@ -56,12 +56,12 @@ if ! git diff --cached --quiet 2>/dev/null || ! git diff --quiet 2>/dev/null || 
     fi
 fi
 
-# Get version from ow-sim
-if [ ! -f "./ow-sim" ]; then
-    echo -e "${RED}Error: ow-sim not found. Build the project first.${NC}"
-    exit 1
-fi
+# Build to ensure binaries are up to date with current commit
+echo "Building..."
+./build/build.sh
+echo
 
+# Get version from ow-sim
 VERSION_OUTPUT=$(./ow-sim --version 2>/dev/null | head -1)
 VERSION=$(echo "$VERSION_OUTPUT" | awk '{print $2}')
 
