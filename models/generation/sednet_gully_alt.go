@@ -6,6 +6,7 @@ import (
 
 /*OW-SPEC
 DynamicSednetGullyAlt:
+	symbol: GD
 	inputs:
 		quickflow: m^3.s^-1
 		year: year

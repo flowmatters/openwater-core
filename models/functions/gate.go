@@ -2,6 +2,7 @@ package functions
 
 /*OW-SPEC
 Gate:
+	symbol: Gt
 	inputs:
 		trigger:
 		incoming:

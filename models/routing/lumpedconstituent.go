@@ -6,6 +6,7 @@ const MINIMUM_VOLUME = 1e-2
 
 /*OW-SPEC
 LumpedConstituentRouting:
+  symbol: LC
   inputs:
 		inflowLoad: kg.s^-1
 		lateralLoad: kg.s^-1

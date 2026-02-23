@@ -7,6 +7,7 @@ import (
 /*
 OW-SPEC
 SednetDissolvedNutrientGeneration:
+	  symbol: Dn
 
 	  inputs:
 			quickflow: m^3.s^-1

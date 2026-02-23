@@ -2,6 +2,7 @@ package functions
 
 /*OW-SPEC
 DateGenerator:
+	symbol: DG
 	inputs:
 		tick:
 	states:

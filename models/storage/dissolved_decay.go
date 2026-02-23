@@ -8,6 +8,7 @@ import (
 
 /* OW-SPEC
 StorageDissolvedDecay:
+	symbol: SD
 	inputs:
 		inflowMass: kg.s^-1
 		inflow: m^3.s^-1

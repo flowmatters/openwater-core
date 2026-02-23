@@ -2,6 +2,7 @@ package routing
 
 /*OW-SPEC
 InstreamCoarseSediment:
+	symbol: CS
 	inputs:
 		upstreamMass:
 		lateralMass:

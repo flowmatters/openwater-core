@@ -2,6 +2,7 @@ package functions
 
 /*OW-SPEC
 Input:
+	symbol: In
 	inputs:
 		input:
 	states:

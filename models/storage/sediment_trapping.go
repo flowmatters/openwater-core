@@ -8,6 +8,7 @@ import (
 
 /* OW-SPEC
 StorageParticulateTrapping:
+	symbol: PT
 	inputs:
 		inflowLoad: kg.s^-1
 		inflow: m^3.s^-1

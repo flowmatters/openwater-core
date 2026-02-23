@@ -6,6 +6,7 @@ import (
 
 /*OW-SPEC
 DepthToRate:
+  symbol: D2R
   inputs:
 		input: mm
 	states:

@@ -8,6 +8,7 @@ import (
 
 /*OW-SPEC
 GR4J:
+  symbol: G4
   inputs:
     rainfall: mm
     pet: mm

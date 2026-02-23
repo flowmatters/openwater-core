@@ -6,6 +6,7 @@ import (
 
 /*OW-SPEC
 InstreamParticulateNutrient:
+	symbol: PN
 	inputs:
 		incomingMassUpstream:
 		incomingMassLateral:

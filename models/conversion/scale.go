@@ -2,6 +2,7 @@ package conversion
 
 /*OW-SPEC
 ApplyScalingFactor:
+  symbol: SF
   inputs:
 		input:
 	states:

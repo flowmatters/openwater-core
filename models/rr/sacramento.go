@@ -8,6 +8,7 @@ import (
 
 /*OW-SPEC
 Sacramento:
+	symbol: Sa
 	inputs:
 		rainfall: mm
 		pet: mm

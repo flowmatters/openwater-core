@@ -2,6 +2,7 @@ package functions
 
 /*OW-SPEC
 BaseflowFilter:
+	symbol: BF
 	inputs:
 		streamflow:
 	states:

@@ -4,6 +4,7 @@ package routing
 
 /*OW-SPEC
 Muskingum:
+  symbol: Mk
   inputs:
 		inflow: m^3.s^-1
 		lateral: m^3.s^-1

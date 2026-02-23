@@ -2,6 +2,7 @@ package rr
 
 /*OW-SPEC
 Surm:
+  symbol: Su
   inputs:
     rainfall: mm
     pet: mm

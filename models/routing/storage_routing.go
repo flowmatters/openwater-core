@@ -16,6 +16,7 @@ const (
 
 /*OW-SPEC
 StorageRouting:
+  symbol: SR
   inputs:
 		inflow: m^3.s^-1
 		lateral: m^3.s^-1

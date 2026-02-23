@@ -2,6 +2,7 @@ package functions
 
 /*OW-SPEC
 Sum:
+	symbol: Sm
 	inputs:
 		i1:
 		i2:

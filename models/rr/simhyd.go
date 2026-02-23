@@ -2,6 +2,7 @@ package rr
 
 /*OW-SPEC
 Simhyd:
+  symbol: Sh
   inputs:
     rainfall: mm
     pet: mm

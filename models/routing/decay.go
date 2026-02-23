@@ -6,6 +6,7 @@ import (
 
 /*OW-SPEC
 ConstituentDecay:
+	symbol: CD
 	inputs:
 		inflowLoad: kg.s^-1
 		lateralLoad: kg.s^-1

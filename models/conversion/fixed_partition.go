@@ -2,6 +2,7 @@ package conversion
 
 /*OW-SPEC
 FixedPartition:
+  symbol: FP
   inputs:
 		input:
 	states:

@@ -2,6 +2,7 @@ package functions
 
 /*OW-SPEC
 ComputeProportion:
+	symbol: CP
 	inputs:
 		numerator:
 		denominator:

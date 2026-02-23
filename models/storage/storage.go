@@ -22,6 +22,7 @@ const (
 
 /* OW-SPEC
 Storage:
+  symbol: WB
   inputs:
 		rainfall: mm
 		pet: mm

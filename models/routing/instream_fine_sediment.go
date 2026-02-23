@@ -8,6 +8,7 @@ import (
 
 /*OW-SPEC
 InstreamFineSediment:
+	symbol: FS
 	inputs:
 		upstreamMass:
 		lateralMass:

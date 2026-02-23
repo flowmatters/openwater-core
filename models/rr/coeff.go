@@ -2,6 +2,7 @@ package rr
 
 /* OW-SPEC
 RunoffCoefficient:
+  symbol: RC
   inputs:
     rainfall: mm
   states:

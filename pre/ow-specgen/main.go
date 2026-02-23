@@ -38,6 +38,7 @@ type VariableSpec struct {
 type ModelSpec struct {
 	Filename       string
 	Name           string
+	Symbol         string
 	Package        string
 	Inputs         yaml.MapSlice
 	States         yaml.MapSlice

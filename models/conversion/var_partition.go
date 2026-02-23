@@ -2,6 +2,7 @@ package conversion
 
 /*OW-SPEC
 VariablePartition:
+  symbol: VP
   inputs:
 		input:
 		fraction:

@@ -9,6 +9,7 @@ import (
 
 /*OW-SPEC
 BankErosion:
+	symbol: BE
 	inputs:
 		downstreamFlowVolume:
 		totalVolume:

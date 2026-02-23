@@ -8,6 +8,7 @@ import (
 
 /*OW-SPEC
 DynamicSednetGully:
+	symbol: GO
 	inputs:
 		quickflow: m^3.s^-1
 		year: year

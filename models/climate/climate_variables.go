@@ -6,6 +6,7 @@ import (
 
 /*OW-SPEC
 ClimateVariables:
+	symbol: CV
 	inputs:
 		dryBulb: degC
 		humidity: '%'

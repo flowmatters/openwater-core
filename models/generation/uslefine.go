@@ -8,6 +8,7 @@ import (
 
 /*OW-SPEC
 USLEFineSedimentGeneration:
+  symbol: UF
   inputs:
     quickflow: m^3.s^-1
 		baseflow: m^3.s^-

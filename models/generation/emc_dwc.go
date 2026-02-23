@@ -6,6 +6,7 @@ import (
 
 /*OW-SPEC
 EmcDwc:
+	symbol: ED
 	inputs:
 		quickflow: m^3.s^-1
 		baseflow: m^3.s^-1

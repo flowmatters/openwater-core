@@ -21,6 +21,7 @@ const (
 )
 
 type ModelDescription struct {
+	Symbol     string
 	Parameters []ParameterDescription
 	States     []string
 	Inputs     []string

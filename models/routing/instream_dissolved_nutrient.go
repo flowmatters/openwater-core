@@ -9,6 +9,7 @@ import (
 
 /*OW-SPEC
 InstreamDissolvedNutrientDecay:
+	symbol: DN
 	inputs:
 		incomingMassUpstream:
 		incomingMassLateral:

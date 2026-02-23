@@ -6,6 +6,7 @@ import (
 
 /*OW-SPEC
 SednetParticulateNutrientGeneration:
+	symbol: Pn
 	inputs:
 		fineSedModelFineSheetGeneratedKg:
 		fineSedModelCoarseSheetGeneratedKg:

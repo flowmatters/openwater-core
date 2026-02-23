@@ -6,6 +6,7 @@ import (
 
 /*OW-SPEC
 PartitionDemand:
+	symbol: PD
 	inputs:
 		input:
 		demand:

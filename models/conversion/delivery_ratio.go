@@ -2,6 +2,7 @@ package conversion
 
 /*OW-SPEC
 DeliveryRatio:
+  symbol: DR
   inputs:
 		input:
 	states:

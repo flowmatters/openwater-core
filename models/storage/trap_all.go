@@ -2,6 +2,7 @@ package storage
 
 /* OW-SPEC
 StorageTrapAll:
+	symbol: TA
 	inputs:
 		inflowMass: kg.s^-1
 		inflow: m^3.s^-1

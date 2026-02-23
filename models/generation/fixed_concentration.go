@@ -6,6 +6,7 @@ import (
 
 /*OW-SPEC
 FixedConcentration:
+	symbol: FC
 	inputs:
 		flow: m^3.s^-1
   states:

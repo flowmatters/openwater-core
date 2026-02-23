@@ -10,6 +10,7 @@ import (
 
 /*OW-SPEC
 RatingCurvePartition:
+  symbol: RP
   inputs:
 		input:
 	states:
