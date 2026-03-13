@@ -1,7 +1,5 @@
 package m
 
-//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "NumT=NUMBERS"
-
 // type NumT generic.Number
 
 type Number interface {

@@ -20,13 +20,31 @@ const (
 	DIMO_TIMESTEP int = 2
 )
 
+type VariableDescription struct {
+	Name  string
+	Units string
+}
+
 type ModelDescription struct {
 	Symbol     string
+	Group      string
 	Parameters []ParameterDescription
 	States     []string
-	Inputs     []string
-	Outputs    []string
+	Inputs     []VariableDescription
+	Outputs    []VariableDescription
 	Dimensions []string
+}
+
+func DescribeVariable(name string, units string) VariableDescription {
+	return VariableDescription{Name: name, Units: units}
+}
+
+func VariableNames(vars []VariableDescription) []string {
+	names := make([]string, len(vars))
+	for i, v := range vars {
+		names[i] = v.Name
+	}
+	return names
 }
 
 type ParameterDescription struct {

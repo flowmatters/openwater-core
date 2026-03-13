@@ -13,7 +13,6 @@ import (
 	"gonum.org/v1/hdf5"
 )
 
-//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "[T]=float64,float32,int32,uint32,int64,uint64,int,uint"
 
 type H5Ref[T data.Number] struct {
 	Filename string

@@ -4,8 +4,6 @@ import (
 	"github.com/flowmatters/openwater-core/util/slice"
 )
 
-//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "[T]=float64,float32,int32,uint32,int64,uint64,int,uint"
-
 // type T generic.Number
 
 // type NDArray interface {

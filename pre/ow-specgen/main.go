@@ -19,7 +19,7 @@ import (
 
 const templatePath = "pre/ow-specgen/*.got"
 const floatTemplate = "[+-]?([0-9]*[.])?[0-9]+"
-const parameterTemplate = `(\[(?P<Min>%s),(?P<Max>%s)\]((?P<Units>[\s]+))?)?\s*(?P<Description>[^,]*)(,\s*default=(?P<Default>%s))?`
+const parameterTemplate = `(\[(?P<Min>%s),(?P<Max>%s)\](?P<Units>[a-zA-Z/%%^0-9·.\-]*)?)?\s*(?P<Description>[^,]*)(,\s*default=(?P<Default>%s))?`
 const dimensionTemplate = `\[([_a-zA-Z][_a-zA-Z0-9]*)(,([_a-zA-Z][_a-zA-Z0-9]*))*\]`
 
 type ModelSpecs map[string]ModelSpec
@@ -41,11 +41,13 @@ type ModelSpec struct {
 	Symbol         string
 	Package        string
 	Inputs         yaml.MapSlice
+	InputSpecs     []VariableSpec
 	States         yaml.MapSlice
 	Dimensions     []string
 	Parameters     yaml.MapSlice
 	ParameterSpecs []VariableSpec
 	Outputs        yaml.MapSlice
+	OutputSpecs    []VariableSpec
 	Implementation yaml.MapSlice
 	Init           yaml.MapSlice
 	ExtractStates  yaml.MapSlice
@@ -110,9 +112,9 @@ func transform(spec ModelSpec) ModelSpec {
 		r := regexp.MustCompile(fmt.Sprintf(parameterTemplate, floatTemplate, floatTemplate, floatTemplate))
 		matches := r.FindStringSubmatch(txt)
 
-		units := matches[7]
-		description := matches[8]
-		defaultVal, err := strconv.ParseFloat(matches[10], 64)
+		units := matches[6]
+		description := matches[7]
+		defaultVal, err := strconv.ParseFloat(matches[9], 64)
 		if err != nil {
 			defaultVal = 0.0
 		}
@@ -163,6 +165,35 @@ func transform(spec ModelSpec) ModelSpec {
 			log.Info().Str("Dimension", v.Name).Msg("Is a dimension")
 		}
 	}
+
+	// Parse input specs
+	spec.InputSpecs = make([]VariableSpec, len(spec.Inputs))
+	for i, v := range spec.Inputs {
+		name := fmt.Sprint(v.Key)
+		units := ""
+		if v.Value != nil {
+			units = fmt.Sprint(v.Value)
+		}
+		spec.InputSpecs[i] = VariableSpec{
+			Name:  name,
+			Units: units,
+		}
+	}
+
+	// Parse output specs
+	spec.OutputSpecs = make([]VariableSpec, len(spec.Outputs))
+	for i, v := range spec.Outputs {
+		name := fmt.Sprint(v.Key)
+		units := ""
+		if v.Value != nil {
+			units = fmt.Sprint(v.Value)
+		}
+		spec.OutputSpecs[i] = VariableSpec{
+			Name:  name,
+			Units: units,
+		}
+	}
+
 	return spec
 }
 

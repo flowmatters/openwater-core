@@ -128,8 +128,8 @@ func computeSignatureHash() string {
 
 		sig := ModelSignature{
 			Name:       modelName,
-			Inputs:     copyStrings(desc.Inputs),
-			Outputs:    copyStrings(desc.Outputs),
+			Inputs:     sim.VariableNames(desc.Inputs),
+			Outputs:    sim.VariableNames(desc.Outputs),
 			States:     copyStrings(desc.States),
 			Dimensions: copyStrings(desc.Dimensions),
 			Parameters: make([]ParameterSignature, len(desc.Parameters)),

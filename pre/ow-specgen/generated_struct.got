@@ -79,10 +79,12 @@ func (m *{{.Name}})  Description() sim.ModelDescription{
   sim.DescribeParameter("{{$v.Name}}",{{$v.Default}},"{{$v.Description}}",[]float64{ {{index $v.Range 0}}, {{index $v.Range 1}} },"{{$v.Units}}",{{$v.Name}}Dims),
   {{- end -}} }
 
-  result.Inputs = []string{
-  {{range $k,$v := .Inputs }}"{{$v.Key}}",{{- end -}} }
-  result.Outputs = []string{
-  {{range $k,$v := .Outputs }}"{{$v.Key}}",{{- end -}} }
+  result.Group = "{{.Package}}"
+
+  result.Inputs = []sim.VariableDescription{
+  {{range $v := .InputSpecs }}sim.DescribeVariable("{{$v.Name}}", "{{$v.Units}}"),{{- end -}} }
+  result.Outputs = []sim.VariableDescription{
+  {{range $v := .OutputSpecs }}sim.DescribeVariable("{{$v.Name}}", "{{$v.Units}}"),{{- end -}} }
 
   result.States = []string{
   {{range $k,$v := .States }}"{{$v.Key}}",{{- end -}} }

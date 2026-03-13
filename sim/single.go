@@ -94,7 +94,7 @@ func (m singleModel) Initialise() (error, TimeSteppingModel, data.ND3[float64], 
 	}
 	var inputs data.ND3[float64] = nil
 	for i, p := range desc.Inputs {
-		thisInput := m.Inputs.Find(p)
+		thisInput := m.Inputs.Find(p.Name)
 		if thisInput == nil {
 			warnings = append(warnings, fmt.Sprintf("Missing input: %s, using 0", p))
 			continue
@@ -178,7 +178,7 @@ func encodeResults(w io.Writer, runLogs []string, results RunResults,
 			length := outputArray.Len(1)
 			for i, output := range description.Outputs {
 				singleOutput := outputArray.Slice([]int{i, 0}, []int{1, length}, []int{1, 1}).MustReshape([]int{length})
-				outputMap[output] = owjs.JsonSafeArray(singleOutput, 0)
+				outputMap[output.Name] = owjs.JsonSafeArray(singleOutput, 0)
 			}
 			overall.RunResults.Outputs = outputMap
 		} else {

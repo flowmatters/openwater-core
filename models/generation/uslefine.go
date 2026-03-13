@@ -11,12 +11,12 @@ USLEFineSedimentGeneration:
   symbol: UF
   inputs:
     quickflow: m^3.s^-1
-		baseflow: m^3.s^-
+		baseflow: m^3.s^-1
 		rainfall: mm
-		KLSC: '[0,100000000] KLSC'
-		KLSC_Fine : '[0,100000000] KLSC'
-		CovOrCFact: '[] Average C Factor'
-		dayOfYear: dayOfYear
+		KLSC:
+		KLSC_Fine:
+		CovOrCFact:
+		dayOfYear:
   states:
   parameters:
     S: '[0,5000]mm Mean Summer Rainfall'

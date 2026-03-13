@@ -1,6 +1,5 @@
 package data
 
-//go:generate genny -in=$GOFILE -out=gen-$GOFILE gen "[T]=float64,float32,int32,uint32,int64,uint64,int,uint"
 
 import (
 	//	"fmt"
