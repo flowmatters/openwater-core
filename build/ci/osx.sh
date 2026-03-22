@@ -14,6 +14,18 @@ brew install hdf5
 # sudo mkdir -p /usr/local
 sudo ln -s /opt/homebrew/include /usr/local/include
 sudo ln -s /opt/homebrew/lib /usr/local/lib
+
+if [ "$STATIC_HDF5" = "1" ]; then
+    echo "Configuring static HDF5 linking..."
+    HDF5_LIB_DIR=$(brew --prefix hdf5)/lib
+
+    # Remove shared libraries so -lhdf5 resolves to static archives
+    rm -f "${HDF5_LIB_DIR}"/libhdf5*.dylib
+
+    # HDF5 static archives depend on zlib
+    echo "export CGO_LDFLAGS=\"-lz\"" > compilation_vars.txt
+    echo "Static HDF5 linking configured (${HDF5_LIB_DIR})"
+fi
 # echo "usr"
 # ls -a /usr/local/include | grep hdf5
 # ls -a /usr/local/lib | grep hdf5

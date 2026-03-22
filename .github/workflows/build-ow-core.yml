@@ -7,6 +7,8 @@ on:
 jobs:
   build-linux:
     runs-on: ubuntu-latest
+    env:
+      STATIC_HDF5: "1"
     steps:
         - uses: actions/checkout@v4
         - run: ./build/ci/all.sh

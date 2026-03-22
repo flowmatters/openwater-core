@@ -10,10 +10,14 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
     ./build/ci/linux.sh
     python3 -m venv ow-test
     source ow-test/bin/activate
-else 
+else
     # Windows
     echo "build windows"
     ./build/ci/windows.sh
+fi
+
+# Source platform-specific compilation variables (e.g. static HDF5 flags)
+if [ -f compilation_vars.txt ]; then
     source compilation_vars.txt
 fi
 export VENV_DIR=bin
