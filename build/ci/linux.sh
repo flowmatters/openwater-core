@@ -16,7 +16,7 @@ if [ "$STATIC_HDF5" = "1" ]; then
     # Repeat hdf5_hl/hdf5 after the package's own -lhdf5 -lhdf5_hl to resolve
     # circular static archive dependencies (hdf5_hl references hdf5 symbols).
     # Also link szip (libaec) and other transitive deps of the static archives.
-    echo "export CGO_LDFLAGS=\"-lhdf5_hl -lhdf5 -lsz -lz -ldl -lm -lpthread\"" > compilation_vars.txt
+    echo "export CGO_LDFLAGS=\"-L${HDF5_LIB_DIR} -lhdf5_hl -lhdf5 -lsz -lz -ldl -lm -lpthread\"" > compilation_vars.txt
     echo "Static HDF5 linking configured (${HDF5_LIB_DIR})"
 fi
 
