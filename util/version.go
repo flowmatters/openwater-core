@@ -13,7 +13,7 @@ import (
 const (
 	VersionMajor  = 1
 	VersionMinor  = 0
-	VersionPatch  = 0
+	VersionPatch  = 1
 	VersionBranch = "" // Empty for main branch, e.g., "exp-nutrient" for experimental
 )
 
