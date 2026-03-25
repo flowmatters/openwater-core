@@ -193,11 +193,16 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		gen.Parameters = parameters.(data.ND2[float64])
 
 		stateRef := mr.GetReference(genSlice, "states")
-		states, err := stateRef.Load()
-		if err != nil {
-			return nil, err
+		if stateRef.Exists() {
+			states, err := stateRef.Load()
+			if err != nil {
+				return nil, err
+			}
+			gen.States = states.(data.ND2[float64])
+		} else {
+			log.Debug().Str("Model Name", mr.ModelName).Msg("No states saved. Initialising states")
+			gen.States = gen.Model.InitialiseStates(gen.Count)
 		}
-		gen.States = states.(data.ND2[float64])
 	}
 	return mr.Generations[i], nil
 }
