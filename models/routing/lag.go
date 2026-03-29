@@ -34,11 +34,12 @@ Lag:
 		lag
 */
 
-func initLag(timeLag float64) data.ND2[float64] {
+func initLag(timeLag float64) (data.ND2[float64], []int) {
 	lags := make([]float64, int(timeLag))
 
 	result := packLagStates(lags)
-	return result
+	sizes := []int{int(timeLag)}
+	return result, sizes
 }
 
 func extractLagStates(states []float64) []float64 {

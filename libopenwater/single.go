@@ -107,6 +107,36 @@ func GetStatesSize(
 	return C.int(states.Len(1))
 }
 
+//export GetStateSizes
+func GetStateSizes(
+	modelName *C.char,
+	params *C.double, nParameters, nParameterSets C.int,
+	sizes *C.int, nSizes C.int) C.int {
+
+	model := setupModel(modelName, params, nParameters, nParameterSets)
+
+	type stateSizer interface {
+		StateSizes() []int
+	}
+
+	desc := model.Description()
+	nStates := len(desc.States)
+
+	if ss, ok := model.(stateSizer); ok {
+		goSizes := ss.StateSizes()
+		for i := 0; i < len(goSizes) && i < int(nSizes); i++ {
+			*(*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(sizes)) + uintptr(i)*unsafe.Sizeof(*sizes))) = C.int(goSizes[i])
+		}
+		return C.int(len(goSizes))
+	}
+
+	// Model does not implement StateSizes — every state is size 1.
+	for i := 0; i < nStates && i < int(nSizes); i++ {
+		*(*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(sizes)) + uintptr(i)*unsafe.Sizeof(*sizes))) = 1
+	}
+	return C.int(nStates)
+}
+
 //export InitialiseModelStates
 func InitialiseModelStates(
 	modelName *C.char,

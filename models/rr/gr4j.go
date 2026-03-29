@@ -45,22 +45,16 @@ GR4J:
 		rainfall runoff
 */
 
-func initGR4J(x1 float64, x2 float64, x3 float64, x4 float64) data.ND2[float64] {
-	// Initialise states
-	// * S
-	// * nUH1
-	// * nUH2
-
-	// * q1 (nUH2)
-	// * q9 (nUH1)
-
+func initGR4J(x1 float64, x2 float64, x3 float64, x4 float64) (data.ND2[float64], []int) {
 	var n1 = int(math.Ceil(x4))
 	var n2 = int(math.Ceil(2 * x4))
 	q1 := make([]float64, n2)
 	q9 := make([]float64, n1)
 
 	result := packGR4JStates(0.0, 0.0, n1, n2, q1, q9)
-	return result
+	// Per-state sizes: s(1), r(1), n1(1), n2(1), q1(n2), q9(n1)
+	sizes := []int{1, 1, 1, 1, n2, n1}
+	return result, sizes
 }
 
 func extractGR4JStates(states []float64) (float64, float64, int, int, []float64, []float64) {

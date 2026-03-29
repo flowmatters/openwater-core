@@ -145,15 +145,23 @@ func (m *{{.Name}}) InitialiseStates(n int) data.ND2[float64] {
 		{{lower $v.Key}} := m.{{$v.Key}}[i%{{lower $v.Key}}Len]
     {{end}}
 
-		states := {{.InitFunc}}({{range $i, $v := .Parameters}}{{lower $v.Key}},{{end}})
+		states, _ := {{.InitFunc}}({{range $i, $v := .Parameters}}{{lower $v.Key}},{{end}})
 
     if result==nil {
       result = data.NewArray2D[float64](n,states.Len(1))
     }
     result.ApplySlice([]int{i,0},[]int{1,1},states)
 	}
- 
+
 	return result
+}
+
+func (m *{{.Name}}) StateSizes() []int {
+  {{range $i, $v := .Parameters}}
+  {{lower $v.Key}} := m.{{$v.Key}}[0]
+  {{end}}
+  _, sizes := {{.InitFunc}}({{range $i, $v := .Parameters}}{{lower $v.Key}},{{end}})
+  return sizes
 }
 {{end}}
 
