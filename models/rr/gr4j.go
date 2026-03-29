@@ -67,7 +67,7 @@ func extractGR4JStates(states []float64) (float64, float64, int, int, []float64,
 	r := states[1]
 	n1 := int(states[2])
 	n2 := int(states[3])
-	q1 := states[4:]
+	q1 := states[4:4+n2]
 	q9 := states[4+n2:]
 	return s, r, n1, n2, q1, q9
 }
@@ -76,7 +76,7 @@ func packGR4JStates(s, r float64, n1, n2 int, q1, q9 []float64) data.ND2[float64
 	result := data.NewArray2D[float64](1, 4+n1+n2)
 	//result := make(sim.StateSet, 3+n1+n2)
 	result.Set2(0, 0, s)
-	result.Set2(0, 1, s)
+	result.Set2(0, 1, r)
 	result.Set2(0, 2, float64(n1))
 	result.Set2(0, 3, float64(n2))
 
@@ -101,11 +101,14 @@ func gr4j(rainfall []float64, pet []float64, s0 float64, r0 float64,
 	var R = r0
 
 	var SH1 []float64 = make([]float64, n1)
-	var i = 0
 	for i := 0; i < n1; i++ {
-		SH1[i] = math.Pow((float64)(i+1)/x4, 5.0/2.0)
+		t := float64(i + 1)
+		if t < x4 {
+			SH1[i] = math.Pow(t/x4, 5.0/2.0)
+		} else {
+			SH1[i] = 1.0
+		}
 	}
-	SH1[n1-1] = 1.0
 
 	var UH1 = make([]float64, n1)
 	UH1[0] = SH1[0]
@@ -114,14 +117,16 @@ func gr4j(rainfall []float64, pet []float64, s0 float64, r0 float64,
 	}
 
 	var SH2 = make([]float64, n2)
-	for i := 0; i <= int(x4-1); i++ {
-		SH2[i] = 0.5 * math.Pow((float64)(i+1)/x4, 5.0/2.0)
+	for i := 0; i < n2; i++ {
+		t := float64(i + 1)
+		if t < x4 {
+			SH2[i] = 0.5 * math.Pow(t/x4, 5.0/2.0)
+		} else if t < 2*x4 {
+			SH2[i] = 1 - 0.5*math.Pow(2-t/x4, 5.0/2.0)
+		} else {
+			SH2[i] = 1.0
+		}
 	}
-	i++
-	for ; i < n2; i++ {
-		SH2[i] = 1 - 0.5*math.Pow(2-(float64)(i+1)/x4, 5.0/2.0)
-	}
-	SH2[n2-1] = 1.0
 	UH2 := make([]float64, n2)
 	UH2[0] = SH2[0]
 	for i := 1; i < n2; i++ {
@@ -161,8 +166,8 @@ func gr4j(rainfall []float64, pet []float64, s0 float64, r0 float64,
 		var Qd float64 = 0.0
 		var Qr float64 = 0.0
 		var ech float64 = 0.0
-		var todaysRainfall float64 = rainfall[i]
-		var todaysPET float64 = pet[i]
+		var todaysRainfall float64 = rainfall[day]
+		var todaysPET float64 = pet[day]
 		//----------------Production-------------------------
 		var ws float64 = 0
 		if todaysRainfall > todaysPET {
