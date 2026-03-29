@@ -50,19 +50,10 @@ func RunSingleModel(
 		defer pprof.StopCPUProfile()
 	}
 
-	gName := C.GoString(modelName)
-	model := sim.Catalog[gName]()
+	model := setupModel(modelName, params, nParameters, nParameterSets)
 
 	iArray := cdata.NewCArray[float64](unsafe.Pointer(inputs), []int{int(nInputSets), int(nInputs), int(nTimesteps)}).(data.ND3[float64])
-	pArray := cdata.NewCArray[float64](unsafe.Pointer(params), []int{int(nParameters), int(nParameterSets)}).(data.ND2[float64])
 	oArray := cdata.NewCArray[float64](unsafe.Pointer(outputs), []int{int(nOutputCells), int(nOutputs), int(nOutputTimesteps)}).(data.ND3[float64])
-
-	dimSizes := model.FindDimensions(pArray.(data.ND2[float64]))
-	if len(dimSizes) > 0 {
-		model.InitialiseDimensions(dimSizes)
-	}
-
-	model.ApplyParameters(pArray)
 	// coeffSlice := pArray.Slice([]int{0, 0}, []int{1, int(nParameterSets)}, nil).(data.ND1[float64])
 	// i := 0
 	// coeff := coeffSlice.Get1(i % coeffSlice.Len1())
@@ -83,4 +74,52 @@ func RunSingleModel(
 		sOrig := cdata.NewCArray[float64](unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2[float64])
 		sOrig.CopyFrom(sArray)
 	}
+}
+
+// setupModel creates a model instance from the catalog, applies dimension
+// information and parameters, and returns the ready-to-use model.
+func setupModel(modelName *C.char, params *C.double, nParameters, nParameterSets C.int) sim.TimeSteppingModel {
+	gName := C.GoString(modelName)
+	model := sim.Catalog[gName]()
+
+	pArray := cdata.NewCArray[float64](unsafe.Pointer(params), []int{int(nParameters), int(nParameterSets)}).(data.ND2[float64])
+
+	dimSizes := model.FindDimensions(pArray)
+	if len(dimSizes) > 0 {
+		model.InitialiseDimensions(dimSizes)
+	}
+
+	model.ApplyParameters(pArray)
+	return model
+}
+
+//export GetStatesSize
+func GetStatesSize(
+	modelName *C.char,
+	params *C.double, nParameters, nParameterSets C.int) C.int {
+
+	model := setupModel(modelName, params, nParameters, nParameterSets)
+
+	states := model.InitialiseStates(1)
+	if states == nil {
+		return 0
+	}
+	return C.int(states.Len(1))
+}
+
+//export InitialiseModelStates
+func InitialiseModelStates(
+	modelName *C.char,
+	params *C.double, nParameters, nParameterSets C.int,
+	states *C.double, nCells, nStates C.int) {
+
+	model := setupModel(modelName, params, nParameters, nParameterSets)
+
+	sArray := model.InitialiseStates(int(nCells))
+	if sArray == nil {
+		return
+	}
+
+	sOrig := cdata.NewCArray[float64](unsafe.Pointer(states), []int{int(nCells), int(nStates)}).(data.ND2[float64])
+	sOrig.CopyFrom(sArray)
 }
