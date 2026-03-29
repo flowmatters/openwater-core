@@ -9,6 +9,7 @@ import (
 /*OW-SPEC
 Sacramento:
 	symbol: Sa
+	reference: Burnash, R.J.C., Ferral, R.L., McGuire, R.A., 1973. A Generalized Streamflow Simulation System. Joint Federal-State River Forecast Center, Sacramento, California.
 	inputs:
 		rainfall: mm
 		pet: mm

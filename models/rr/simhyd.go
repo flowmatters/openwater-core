@@ -3,6 +3,7 @@ package rr
 /*OW-SPEC
 Simhyd:
   symbol: Sh
+  reference: Chiew, F.H.S., Peel, M.C., Western, A.W., 2002. Application and testing of the simple rainfall-runoff model SIMHYD. In Mathematical Models of Small Watershed Hydrology and Applications, edited by V.P. Singh and D.K. Frevert, Water Resources Publications, Littleton, Colorado, 335-367.
   inputs:
     rainfall: mm
     pet: mm

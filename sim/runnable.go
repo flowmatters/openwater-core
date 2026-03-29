@@ -28,6 +28,7 @@ type VariableDescription struct {
 type ModelDescription struct {
 	Symbol     string
 	Group      string
+	Reference  string                `json:",omitempty"`
 	Parameters []ParameterDescription
 	States     []string
 	Inputs     []VariableDescription

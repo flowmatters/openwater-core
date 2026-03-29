@@ -39,6 +39,7 @@ type ModelSpec struct {
 	Filename       string
 	Name           string
 	Symbol         string
+	Reference      string
 	Package        string
 	Inputs         yaml.MapSlice
 	InputSpecs     []VariableSpec

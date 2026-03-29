@@ -70,6 +70,7 @@ func init() {
 func (m *{{.Name}})  Description() sim.ModelDescription{
 	var result sim.ModelDescription
   result.Symbol = "{{.Symbol}}"
+  {{if .Reference}}result.Reference = "{{.Reference}}"{{end}}
   {{range $v := .ParameterSpecs }}
   {{$v.Name}}Dims := []string{
     {{ if $v.Dimensions }}{{ range $d := $v.Dimensions }}"{{$d}}",{{end}}{{end}}  }

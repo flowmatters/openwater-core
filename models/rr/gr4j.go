@@ -9,6 +9,7 @@ import (
 /*OW-SPEC
 GR4J:
   symbol: G4
+  reference: Perrin, C., Michel, C., Andreassian, V., 2003. Improvement of a parsimonious model for streamflow simulation. Journal of Hydrology 279, 275-289.
   inputs:
     rainfall: mm
     pet: mm
