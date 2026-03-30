@@ -12,15 +12,15 @@ Simhyd:
     Groundwater:
     TotalStore:
   parameters:
-    baseflowCoefficient: ''
-    imperviousThreshold: ''
-    infiltrationCoefficient: ''
-		infiltrationShape: ''
-		interflowCoefficient: ''
-		perviousFraction: ''
-		rainfallInterceptionStoreCapacity: ''
-		rechargeCoefficient: ''
-		soilMoistureStoreCapacity: ''
+    baseflowCoefficient: '[0.003,0.3] Baseflow linear recession parameter - fraction of groundwater store released as baseflow each timestep, default=0.1'
+    imperviousThreshold: '[0,5]mm Rainfall threshold for impervious area runoff - depression storage on impervious surfaces, default=1.0'
+    infiltrationCoefficient: '[0,400]mm Maximum infiltration loss parameter - controls infiltration capacity when soil is dry, default=200.0'
+    infiltrationShape: '[0,10] Infiltration loss exponent - controls how rapidly infiltration capacity decreases as soil moisture increases, default=1.5'
+    interflowCoefficient: '[0,1] Constant of proportionality in interflow equation - fraction of infiltrated water that becomes interflow scaled by soil moisture fraction, default=0.3'
+    perviousFraction: '[0,1] Fraction of catchment area that is pervious, default=0.9'
+    rainfallInterceptionStoreCapacity: '[0.5,5]mm Interception store capacity - maximum depth of rainfall intercepted by vegetation and lost to evaporation, default=2.5'
+    rechargeCoefficient: '[0,1] Constant of proportionality in groundwater recharge equation - fraction of infiltrated water after interflow that recharges groundwater, default=0.1'
+    soilMoistureStoreCapacity: '[1,500]mm Soil moisture storage capacity - maximum depth of water the soil moisture store can hold, default=200.0'
 	outputs:
 		runoff: mm
 		quickflow: mm
