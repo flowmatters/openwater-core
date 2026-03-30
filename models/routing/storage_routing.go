@@ -30,7 +30,7 @@ StorageRouting:
 		InflowBias:
 		RoutingConstant:
 		RoutingPower:
-		area:
+		area: m^2 surface area of the link. Used for calculating net evaporation flux
 		deadStorage:
 		DeltaT: '[1,86400] Timestep, default=86400'
 	outputs:
