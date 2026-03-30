@@ -12,8 +12,8 @@ EmcDwc:
 		baseflow: m^3.s^-1
   states:
   parameters:
-		EMC: '[0.1,10000]mg.L^-1 Event Mean Concentration'
-		DWC: '[0.1,10000]mg.L^-1 Dry Weather Concentration'
+		EMC: '[0,10000]mg.L^-1 Event Mean Concentration'
+		DWC: '[0,10000]mg.L^-1 Dry Weather Concentration'
 	outputs:
 		quickLoad: kg.s^-1
 		slowLoad: kg.s^-1
