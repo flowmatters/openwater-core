@@ -24,7 +24,9 @@ else
         -DHDF5_BUILD_HL_LIB=ON \
         -DALLOW_UNSUPPORTED=ON \
         -DHDF5_ENABLE_SZIP_SUPPORT=OFF \
+        -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF \
         -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_STATIC_LIBS=OFF \
         -DBUILD_TESTING=OFF \
         -DCMAKE_BUILD_TYPE=Release
     cmake --build . --config Release --parallel
