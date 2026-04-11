@@ -4,13 +4,23 @@ on:
   schedule:
     - cron: '0 2 * * 0'
   workflow_dispatch:
+
+env:
+  HDF5_VERSION: "1.14.6"
+
 jobs:
   build-linux:
     runs-on: ubuntu-latest
     env:
       STATIC_HDF5: "1"
+      HDF5_INSTALL_DIR: /home/runner/hdf5-install
     steps:
         - uses: actions/checkout@v4
+        - name: Cache HDF5
+          uses: actions/cache@v4
+          with:
+            path: ${{ env.HDF5_INSTALL_DIR }}
+            key: hdf5-${{ env.HDF5_VERSION }}-linux-threadsafe-v1
         - run: ./build/ci/all.sh
         - name: upload build
           uses: actions/upload-artifact@v4
@@ -24,7 +34,7 @@ jobs:
               libopenwater.h
               libopenwater.so
         - name: Zip nightly
-          run: printf "ow-inspect\now-single\now-sim\nows-ensemble\nlibopenwater.h\nlibopenwater.so" | zip build.zip -@ 
+          run: printf "ow-inspect\now-single\now-sim\nows-ensemble\nlibopenwater.h\nlibopenwater.so" | zip build.zip -@
         - name: Rename for versioned release
           if: github.ref_type == 'tag'
           run: mv build.zip build-linux.zip
@@ -50,6 +60,11 @@ jobs:
     runs-on: windows-latest
     steps:
         - uses: actions/checkout@v4
+        - name: Cache HDF5
+          uses: actions/cache@v4
+          with:
+            path: hdf5-install
+            key: hdf5-${{ env.HDF5_VERSION }}-windows-threadsafe-v1
         - name: build
           run: ./build/ci/all.sh
           shell: bash
@@ -59,7 +74,7 @@ jobs:
             name: windows-${{ github.sha }}
             path: |
               *.exe
-              1.8.21/bin/*.dll
+              hdf5-dlls/*.dll
               libopenwater.h
               libopenwater.dll
         - name: Zip Nightly
@@ -71,7 +86,7 @@ jobs:
             cp ~/go/bin/ows-ensemble.exe build_temp/
             cp ../bin/libopenwater.h build_temp/
             cp ../bin/libopenwater.dll build_temp/
-            cp 1.8.21/bin/*.dll build_temp/
+            cp hdf5-dlls/*.dll build_temp/
             7z a -tzip build.zip ./build_temp/*
           shell: bash
         - name: Rename for versioned release
@@ -98,8 +113,15 @@ jobs:
             prerelease: false
   build-osx:
     runs-on: macos-latest
+    env:
+      HDF5_INSTALL_DIR: /Users/runner/hdf5-install
     steps:
       - uses: actions/checkout@v4
+      - name: Cache HDF5
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.HDF5_INSTALL_DIR }}
+          key: hdf5-${{ env.HDF5_VERSION }}-macos-threadsafe-v1
       - name: build
         run: ./build/ci/all.sh
       - name: upload build
