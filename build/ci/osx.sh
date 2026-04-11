@@ -25,6 +25,7 @@ else
         -DHDF5_BUILD_HL_LIB=ON \
         -DALLOW_UNSUPPORTED=ON \
         -DHDF5_ENABLE_SZIP_SUPPORT=OFF \
+        -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF \
         -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_TESTING=OFF \
         -DCMAKE_C_FLAGS="-fPIC" \
@@ -35,17 +36,9 @@ else
     echo "HDF5 installed to ${HDF5_INSTALL_DIR}"
 fi
 
-# Point compiler/linker at the custom HDF5 install.
-# gonum/hdf5 expects headers/libs in standard include/lib paths, so we
-# symlink to /usr/local (macOS doesn't have a default HDF5 in /usr/local).
-sudo ln -sf "${HDF5_INSTALL_DIR}/include" /usr/local/include
-sudo ln -sf "${HDF5_INSTALL_DIR}/lib" /usr/local/lib
-
-if [ "$STATIC_HDF5" = "1" ]; then
-    echo "Configuring static HDF5 linking..."
-    # Remove shared libs if any leaked through
-    rm -f "${HDF5_INSTALL_DIR}/lib"/libhdf5*.dylib 2>/dev/null || true
-    echo "export CGO_CFLAGS=\"-I${HDF5_INSTALL_DIR}/include\"" > compilation_vars.txt
-    echo "export CGO_LDFLAGS=\"-L${HDF5_INSTALL_DIR}/lib -lhdf5_hl -lhdf5 -lz\"" >> compilation_vars.txt
-    echo "Static HDF5 linking configured (${HDF5_INSTALL_DIR})"
-fi
+# Point compiler/linker at the custom HDF5 install via CGO flags.
+# We always write compilation_vars.txt (not just when STATIC_HDF5 is set)
+# because the symlink approach is fragile on macOS runners.
+echo "export CGO_CFLAGS=\"-I${HDF5_INSTALL_DIR}/include\"" > compilation_vars.txt
+echo "export CGO_LDFLAGS=\"-L${HDF5_INSTALL_DIR}/lib -lhdf5_hl -lhdf5\"" >> compilation_vars.txt
+echo "CGO flags configured for ${HDF5_INSTALL_DIR}"
