@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 
 	"github.com/rs/zerolog/log"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/flowmatters/openwater-core/io"
 	"github.com/flowmatters/openwater-core/io/protobuf"
 	"github.com/flowmatters/openwater-core/sim"
+	"gonum.org/v1/hdf5"
 	"github.com/golang/protobuf/proto"
 	"github.com/kardianos/osext"
 )
@@ -56,6 +58,24 @@ type modelReference struct {
 	OutputWriter          *gio.PipeWriter
 	OutputProcess         *exec.Cmd
 	outputsInitialised    bool
+
+	// genMu serializes access to Generations[]. GetGeneration may be called
+	// concurrently from parallel link-loop workers: the original implementation
+	// was write-before-init (publishes &gen before populating gen.Inputs), so
+	// without a lock two workers racing on the same uninitialized (model, gen)
+	// could see a partially-constructed modelGeneration and nil-deref on
+	// Inputs/Outputs. The lock is taken only around the nil-check and
+	// initialization path; fully-initialized generations are effectively
+	// cache-hits that still take+release the lock but do no HDF5 work.
+	genMu sync.Mutex
+
+	// Cached existence checks for the input file's per-model datasets.
+	// The input file structure is read-only during a run, so these only need
+	// to be checked once per model (in initModel), avoiding 2 x Exists()
+	// calls per GetGeneration init — each of which opens+reads the HDF5 file
+	// and contends with the writer on the global HDF5 mutex.
+	hasInputs bool
+	hasStates bool
 }
 
 func initModel(fn, model, paramFn string) (*modelReference, error) {
@@ -77,6 +97,16 @@ func initModel(fn, model, paramFn string) (*modelReference, error) {
 	}
 	result.Dimensions = dimensions
 	result.Generations = make([]*modelGeneration, len(batches))
+
+	// Cache whether this model has stored inputs/states datasets.
+	// Checked once here to avoid per-generation Exists() calls inside
+	// GetGeneration which are expensive (file-open + H5Lexists + close)
+	// and contend with the writer on the global HDF5 mutex.
+	inputRef := io.H5Ref[float64]{Filename: fn, Dataset: "/MODELS/" + model + "/inputs"}
+	result.hasInputs = inputRef.Exists()
+	stateRef := io.H5Ref[float64]{Filename: fn, Dataset: "/MODELS/" + model + "/states"}
+	result.hasStates = stateRef.Exists()
+
 	return &result, nil
 }
 
@@ -143,6 +173,8 @@ func (mr *modelReference) GetReference(genSlice []int, element string) io.H5Ref[
 }
 
 func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
+	mr.genMu.Lock()
+	defer mr.genMu.Unlock()
 	if mr.Generations[i] == nil {
 		log.Debug().Int("Generation", i).Str("Model Name", mr.ModelName).Msg("Initialising generation for model")
 		gen := modelGeneration{}
@@ -169,39 +201,78 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		}
 
 		inputRef := mr.GetReference(genSlice, "inputs")
-		inputsExist := inputRef.Exists()
-		if inputsExist {
-			inputs, err := inputRef.Load()
-			if err == nil {
-				gen.Inputs = inputs.(data.ND3[float64])
-				mr.SimLength = inputs.Len(sim.DIMI_TIMESTEP)
-			} else {
-				inputsExist = false
-			}
-		}
-
-		if !inputsExist {
-			log.Debug().Str("Model Name", mr.ModelName).Msg("No inputs saved. Initialising inputs array")
-			gen.Inputs = data.NewArray3D[float64](gen.Count, len(gen.Model.Description().Inputs), mr.SimLength)
-		}
-
 		paramRef := mr.GetReference(genSlice, "parameters")
-		parameters, err := paramRef.Load()
-		if err != nil {
-			return nil, err
-		}
-		gen.Parameters = parameters.(data.ND2[float64])
-
 		stateRef := mr.GetReference(genSlice, "states")
-		if stateRef.Exists() {
-			states, err := stateRef.Load()
+
+		// Batch HDF5 reads: when inputs, parameters, and states all live in
+		// the same file (the common case), open the file once under a single
+		// global-mutex acquisition. This reduces contention with the writer
+		// goroutine from 2-3 separate lock+open+close cycles per init down
+		// to one. Falls back to individual Load() calls when files differ.
+		sameFile := inputRef.Filename == paramRef.Filename && paramRef.Filename == stateRef.Filename
+		if sameFile {
+			err = io.WithReadFile(paramRef.Filename, func(f *hdf5.File) error {
+				if mr.hasInputs {
+					inputs, err := inputRef.LoadFromFile(f)
+					if err == nil {
+						gen.Inputs = inputs.(data.ND3[float64])
+						mr.SimLength = inputs.Len(sim.DIMI_TIMESTEP)
+					}
+				}
+				if gen.Inputs == nil {
+					gen.Inputs = data.NewArray3D[float64](gen.Count, len(gen.Model.Description().Inputs), mr.SimLength)
+				}
+
+				parameters, err := paramRef.LoadFromFile(f)
+				if err != nil {
+					return prefix("loading parameters: ", err)
+				}
+				gen.Parameters = parameters.(data.ND2[float64])
+
+				if mr.hasStates {
+					states, err := stateRef.LoadFromFile(f)
+					if err != nil {
+						return prefix("loading states: ", err)
+					}
+					gen.States = states.(data.ND2[float64])
+				} else {
+					gen.States = gen.Model.InitialiseStates(gen.Count)
+				}
+				return nil
+			})
 			if err != nil {
 				return nil, err
 			}
-			gen.States = states.(data.ND2[float64])
 		} else {
-			log.Debug().Str("Model Name", mr.ModelName).Msg("No states saved. Initialising states")
-			gen.States = gen.Model.InitialiseStates(gen.Count)
+			// Rare case: data spread across multiple files.
+			inputsLoaded := false
+			if mr.hasInputs {
+				inputs, loadErr := inputRef.Load()
+				if loadErr == nil {
+					gen.Inputs = inputs.(data.ND3[float64])
+					mr.SimLength = inputs.Len(sim.DIMI_TIMESTEP)
+					inputsLoaded = true
+				}
+			}
+			if !inputsLoaded {
+				gen.Inputs = data.NewArray3D[float64](gen.Count, len(gen.Model.Description().Inputs), mr.SimLength)
+			}
+
+			parameters, loadErr := paramRef.Load()
+			if loadErr != nil {
+				return nil, loadErr
+			}
+			gen.Parameters = parameters.(data.ND2[float64])
+
+			if mr.hasStates {
+				states, loadErr := stateRef.Load()
+				if loadErr != nil {
+					return nil, loadErr
+				}
+				gen.States = states.(data.ND2[float64])
+			} else {
+				gen.States = gen.Model.InitialiseStates(gen.Count)
+			}
 		}
 	}
 	return mr.Generations[i], nil
@@ -214,67 +285,6 @@ func (mr *modelReference) PurgeGeneration(i int) {
 
 func (mr *modelReference) TotalRuns() int {
 	return int(mr.Batches[len(mr.Batches)-1])
-}
-
-func (mr *modelReference) initialiseTimeSeriesDataset(label string, refShape []int) error {
-	ref := io.H5Ref[float64]{}
-	ref.Filename = mr.OutputFilename
-	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
-	count := mr.TotalRuns()
-	return ref.Create([]int{count, refShape[1], refShape[2]}, math.NaN(), false)
-}
-
-func (mr *modelReference) initialiseStatesDataset(label string, refShape []int) error {
-	ref := io.H5Ref[float64]{}
-	ref.Filename = mr.FinalStatesFilename
-	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
-	count := mr.TotalRuns()
-	return ref.Create([]int{count, refShape[1]}, math.NaN(), false)
-}
-
-func (mr *modelReference) InitialiseOutputs(refGeneration int) error {
-	gen, err := mr.GetGeneration(refGeneration)
-	if err != nil {
-		return prefix(fmt.Sprintf("Couldn't get generation for %s: ", mr.ModelName), err)
-	}
-
-	if mr.WriteOutputs {
-		err = mr.initialiseTimeSeriesDataset("outputs", gen.Outputs.Shape())
-		if err != nil {
-			return prefix("Couldn't init dataset for outputs: ", err)
-		}
-	}
-
-	if mr.WriteInputs {
-		err = mr.initialiseTimeSeriesDataset("inputs", gen.Inputs.Shape())
-		if err != nil {
-			return prefix("Couldn't init dataset for inputs: ", err)
-		}
-	}
-
-	if mr.WriteStates {
-		err = mr.initialiseStatesDataset("states", gen.States.Shape())
-		if err != nil {
-			return prefix("Couldn't init dataset for states: ", err)
-		}
-	}
-
-	mr.outputsInitialised = true
-	return nil
-}
-
-func (mr *modelReference) writeTimeSeries(label string, data data.ND3[float64], loc int32) error {
-	ref := io.H5Ref[float64]{}
-	ref.Filename = mr.OutputFilename
-	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
-	return ref.WriteSlice(data, []int{int(loc), 0, 0})
-}
-
-func (mr *modelReference) writeStates(label string, data data.ND2[float64], loc int32) error {
-	ref := io.H5Ref[float64]{}
-	ref.Filename = mr.FinalStatesFilename
-	ref.Dataset = "/MODELS/" + mr.ModelName + "/" + label
-	return ref.WriteSlice(data, []int{int(loc), 0})
 }
 
 func (mr *modelReference) writeProtobuf(generation int) error {
@@ -344,6 +354,9 @@ func (mr *modelReference) generationLocation(generation int) int32 {
 
 }
 
+// WriteData writes generation outputs/inputs/states. Opens the output
+// file once for all datasets in this model's generation (rather than once
+// per dataset).
 func (mr *modelReference) WriteData(generation int) error {
 	gen, err := mr.GetGeneration(generation)
 	if err != nil {
@@ -358,9 +371,11 @@ func (mr *modelReference) WriteData(generation int) error {
 		return mr.writeProtobuf(generation)
 	}
 
+	// Initialise output datasets on first write (needs separate lock
+	// acquisitions because Create opens/creates the file).
 	if !mr.outputsInitialised {
 		if gen.Outputs.Len(0) > 0 {
-			err = mr.InitialiseOutputs(generation)
+			err = mr.initialiseOutputsViaCreate(generation)
 			if err != nil {
 				return prefix("Couldn't initialise outputs: ", err)
 			}
@@ -374,23 +389,68 @@ func (mr *modelReference) WriteData(generation int) error {
 		loc = mr.Batches[generation-1]
 	}
 
+	// Batch the actual data writes under a single file-open.
+	if mr.OutputFilename == mr.FinalStatesFilename {
+		return io.WithWriteFile(mr.OutputFilename, func(f *hdf5.File) error {
+			return mr.writeAllDatasets(f, f, gen, loc)
+		})
+	}
+	return io.WithWriteFile(mr.OutputFilename, func(outF *hdf5.File) error {
+		return io.WithWriteFile(mr.FinalStatesFilename, func(stF *hdf5.File) error {
+			return mr.writeAllDatasets(outF, stF, gen, loc)
+		})
+	})
+}
+
+func (mr *modelReference) initialiseOutputsViaCreate(refGeneration int) error {
+	gen, err := mr.GetGeneration(refGeneration)
+	if err != nil {
+		return prefix(fmt.Sprintf("Couldn't get generation for %s: ", mr.ModelName), err)
+	}
+
+	if mr.WriteOutputs {
+		ref := io.H5Ref[float64]{Filename: mr.OutputFilename, Dataset: "/MODELS/" + mr.ModelName + "/outputs"}
+		if err := ref.Create([]int{mr.TotalRuns(), gen.Outputs.Shape()[1], gen.Outputs.Shape()[2]}, math.NaN(), false); err != nil {
+			return prefix("Couldn't init dataset for outputs: ", err)
+		}
+	}
+
 	if mr.WriteInputs {
-		err = mr.writeTimeSeries("inputs", gen.Inputs, loc)
-		if err != nil {
+		ref := io.H5Ref[float64]{Filename: mr.OutputFilename, Dataset: "/MODELS/" + mr.ModelName + "/inputs"}
+		if err := ref.Create([]int{mr.TotalRuns(), gen.Inputs.Shape()[1], gen.Inputs.Shape()[2]}, math.NaN(), false); err != nil {
+			return prefix("Couldn't init dataset for inputs: ", err)
+		}
+	}
+
+	if mr.WriteStates {
+		ref := io.H5Ref[float64]{Filename: mr.FinalStatesFilename, Dataset: "/MODELS/" + mr.ModelName + "/states"}
+		if err := ref.Create([]int{mr.TotalRuns(), gen.States.Shape()[1]}, math.NaN(), false); err != nil {
+			return prefix("Couldn't init dataset for states: ", err)
+		}
+	}
+
+	mr.outputsInitialised = true
+	return nil
+}
+
+func (mr *modelReference) writeAllDatasets(outputFile, statesFile *hdf5.File, gen *modelGeneration, loc int32) error {
+	if mr.WriteInputs {
+		ref := io.H5Ref[float64]{Filename: mr.OutputFilename, Dataset: "/MODELS/" + mr.ModelName + "/inputs"}
+		if err := ref.WriteSliceToFile(outputFile, gen.Inputs, []int{int(loc), 0, 0}); err != nil {
 			return prefix("Writing inputs ", err)
 		}
 	}
 
 	if mr.WriteOutputs {
-		err = mr.writeTimeSeries("outputs", gen.Outputs, loc)
-		if err != nil {
+		ref := io.H5Ref[float64]{Filename: mr.OutputFilename, Dataset: "/MODELS/" + mr.ModelName + "/outputs"}
+		if err := ref.WriteSliceToFile(outputFile, gen.Outputs, []int{int(loc), 0, 0}); err != nil {
 			return prefix("Writing outputs ", err)
 		}
 	}
 
 	if mr.WriteStates {
-		err = mr.writeStates("states", gen.States, loc)
-		if err != nil {
+		ref := io.H5Ref[float64]{Filename: mr.FinalStatesFilename, Dataset: "/MODELS/" + mr.ModelName + "/states"}
+		if err := ref.WriteSliceToFile(statesFile, gen.States, []int{int(loc), 0}); err != nil {
 			return prefix("Writing states", err)
 		}
 	}
@@ -420,11 +480,35 @@ func writeFor(modelName, includeFlag, excludeFlag string, defaultVal bool) bool 
 	return defaultVal
 }
 
+func inList(csv, name string) bool {
+	if csv == "" {
+		return false
+	}
+	for _, item := range strings.Split(csv, ",") {
+		if item == name {
+			return true
+		}
+	}
+	return false
+}
+
 func writeInputs(modelName string, defaultVal bool) bool {
+	if *noInputs {
+		return false
+	}
+	if *onlyInputsFor != "" {
+		return inList(*onlyInputsFor, modelName)
+	}
 	return writeFor(modelName, *inputsFor, *noInputsFor, defaultVal)
 }
 
 func writeOutputs(modelName string) bool {
+	if *noOutputs {
+		return false
+	}
+	if *onlyOutputsFor != "" {
+		return inList(*onlyOutputsFor, modelName)
+	}
 	return writeFor(modelName, *outputsFor, *noOutputsFor, true)
 }
 

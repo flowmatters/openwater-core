@@ -3,7 +3,6 @@ package io
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -23,8 +22,6 @@ type H5Ref[T data.Number] struct {
 func (h H5Ref[T]) Load() (data.ND[T], error) {
 	rLockHDF5(h.Filename)
 	defer rUnlockHDF5(h.Filename)
-	// mu.RLock()
-	// defer mu.RUnlock()
 
 	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
 	if err != nil {
@@ -32,6 +29,18 @@ func (h H5Ref[T]) Load() (data.ND[T], error) {
 	}
 	defer f.Close()
 
+	return h.loadFromOpenFile(f)
+}
+
+// LoadFromFile loads data from an already-open HDF5 file handle. The
+// caller must hold the global HDF5 mutex and manage the file lifecycle.
+// Use this via WithReadFile for batching multiple reads under a single
+// mutex acquisition.
+func (h H5Ref[T]) LoadFromFile(f *hdf5.File) (data.ND[T], error) {
+	return h.loadFromOpenFile(f)
+}
+
+func (h H5Ref[T]) loadFromOpenFile(f *hdf5.File) (data.ND[T], error) {
 	ds, err := f.OpenDataset(h.Dataset)
 	if err != nil {
 		return nil, err
@@ -140,6 +149,16 @@ func (h H5Ref[T]) Create(shape []int, fillValue T, compress bool) error {
 	return err
 }
 
+// CreateInFile creates a dataset in an already-open HDF5 file. The caller
+// must hold the global HDF5 mutex and manage the file lifecycle.
+func (h H5Ref[T]) CreateInFile(f *hdf5.File, shape []int, fillValue T, compress bool) error {
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue, compress)
+	if err == nil {
+		ds.Close()
+	}
+	return err
+}
+
 func (h H5Ref[T]) WriteSlice(data data.ND[T], loc []int) error {
 	lockHDF5(h.Filename)
 	defer unlockHDF5(h.Filename)
@@ -150,6 +169,18 @@ func (h H5Ref[T]) WriteSlice(data data.ND[T], loc []int) error {
 	}
 	defer f.Close()
 
+	return h.writeSliceToOpenFile(f, data, loc)
+}
+
+// WriteSliceToFile writes a slice of data into an already-open HDF5 file.
+// The caller must hold the global HDF5 mutex and manage the file lifecycle.
+// Use via WithWriteFile for batching multiple writes under a single mutex
+// acquisition and file open.
+func (h H5Ref[T]) WriteSliceToFile(f *hdf5.File, data data.ND[T], loc []int) error {
+	return h.writeSliceToOpenFile(f, data, loc)
+}
+
+func (h H5Ref[T]) writeSliceToOpenFile(f *hdf5.File, data data.ND[T], loc []int) error {
 	ds, err := f.OpenDataset(h.Dataset)
 	if err != nil {
 		return err
@@ -305,40 +336,70 @@ func ParseH5Ref[T data.Number](path string) H5Ref[T] {
 	return H5Ref[T]{components[0], components[1], nil}
 }
 
+// Exists reports whether the object (dataset or group) at h.Dataset is
+// present in h.Filename. It walks the path one component at a time using
+// H5Lexists (a cheap library-native check), rather than enumerating every
+// child of every group along the path as the earlier implementation did.
+//
+// For a path like /MODELS/Foo/inputs on a file containing 27 top-level
+// models the old implementation did four fresh file opens and four
+// full-group enumerations; the new implementation does one file open, a
+// handful of H5Lexists calls, and a couple of OpenGroup/Close pairs, all
+// under a single acquisition of the global HDF5 mutex.
 func (h H5Ref[T]) Exists() bool {
-	components := strings.Split(h.Dataset, "/")
+	lockHDF5(h.Filename)
+	defer unlockHDF5(h.Filename)
 
-	path := "/"
-	for ix, comp := range components {
-		if len(comp) == 0 {
-			continue
+	f, err := hdf5.OpenFile(h.Filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	path := strings.Trim(h.Dataset, "/")
+	if path == "" {
+		return true
+	}
+	components := strings.Split(path, "/")
+
+	// Track groups we open along the walk so we can close them all on exit
+	// via a single defer — matters if some intermediate OpenGroup succeeds
+	// but a later check fails.
+	var openGroups []*hdf5.Group
+	defer func() {
+		for _, g := range openGroups {
+			g.Close()
 		}
+	}()
 
-		ref := H5Ref[T]{Filename: h.Filename, Dataset: path}
+	// Check first component at the file root.
+	if !f.LinkExists(components[0]) {
+		return false
+	}
+	if len(components) == 1 {
+		return true
+	}
+	grp, err := f.OpenGroup(components[0])
+	if err != nil {
+		return false
+	}
+	openGroups = append(openGroups, grp)
 
-		if ix == (len(components) - 1) {
-			datasets, err := ref.GetDatasets()
-
-			if err != nil {
-				return false
-			}
-			if findInSlice(datasets, comp) >= 0 {
-				return true
-			}
+	// Walk the remaining components inside the currently-open group.
+	for i := 1; i < len(components); i++ {
+		if !grp.LinkExists(components[i]) {
+			return false
 		}
-
-		groups, err := ref.GetGroups()
-
+		if i == len(components)-1 {
+			return true
+		}
+		next, err := grp.OpenGroup(components[i])
 		if err != nil {
 			return false
 		}
-		if findInSlice(groups, comp) < 0 {
-			return false
-		}
-
-		path = fmt.Sprintf("%s/%s", path, comp)
+		openGroups = append(openGroups, next)
+		grp = next
 	}
-
 	return true
 }
 

@@ -1,5 +1,18 @@
 package io
 
+/*
+#include "hdf5.h"
+
+// h5_is_threadsafe wraps H5is_library_threadsafe which is always present
+// in libhdf5 (even non-threadsafe builds export it — it returns false).
+static int h5_is_threadsafe() {
+    hbool_t ts = 0;
+    if (H5is_library_threadsafe(&ts) < 0) return 0;
+    return (int)ts;
+}
+*/
+import "C"
+
 import (
 	"errors"
 	"os"
@@ -10,13 +23,39 @@ import (
 	"github.com/flowmatters/openwater-core/conv"
 	"github.com/flowmatters/openwater-core/util/m"
 	"github.com/flowmatters/openwater-core/util/slice"
+	"github.com/rs/zerolog/log"
 	"gonum.org/v1/hdf5"
 )
 
-var mu sync.RWMutex
+// hdf5ThreadSafe is true when the linked libhdf5 was built with
+// --enable-threadsafe. Detected once at package init via the C API
+// H5is_library_threadsafe. When true, libhdf5 handles its own internal
+// locking and the Go-side lock functions become no-ops. When false, we
+// fall back to a process-wide sync.Mutex that serializes every HDF5 call.
+var hdf5ThreadSafe bool
 
-// var masterMU sync.RWMutex
-// var mus = make(map[string]*sync.RWMutex)
+// mu serializes HDF5 operations when libhdf5 is NOT thread-safe. When
+// libhdf5 IS thread-safe, rLockHDF5/lockHDF5 are no-ops and the library's
+// internal recursive mutex handles serialization at a finer granularity
+// (per-cgo-call rather than per-Go-function), which significantly reduces
+// contention between the main goroutine's reads and the writer goroutine's
+// writes.
+var mu sync.Mutex
+
+func init() {
+	hdf5ThreadSafe = C.h5_is_threadsafe() != 0
+	if hdf5ThreadSafe {
+		log.Info().Msg("HDF5 library is thread-safe — Go-side locking disabled")
+	} else {
+		log.Debug().Msg("HDF5 library is NOT thread-safe — using Go-side global mutex")
+	}
+}
+
+// IsHDF5ThreadSafe reports whether the linked HDF5 library was built with
+// thread-safety support. Exposed for diagnostics (e.g. ow-sim -version).
+func IsHDF5ThreadSafe() bool {
+	return hdf5ThreadSafe
+}
 
 // errorString is a trivial implementation of error.
 type errorString struct {
@@ -28,50 +67,61 @@ func (e *errorString) Error() string {
 }
 
 func rLockHDF5(fn string) {
-	// masterMU.Lock()
-	// defer masterMU.Unlock()
-	mu.RLock()
-	// mutex,ok := mus[fn]
-	// if !ok {
-	// 	newMutex := &sync.RWMutex{}
-	// 	mus[fn] = newMutex
-	// 	mutex = newMutex
-	// }
-	// mutex.RLock()
+	if !hdf5ThreadSafe {
+		mu.Lock()
+	}
 }
 
 func rUnlockHDF5(fn string) {
-	// masterMU.Lock()
-	// defer masterMU.Unlock()
-
-	mu.RUnlock()
-	// mus[fn].RUnlock()
+	if !hdf5ThreadSafe {
+		mu.Unlock()
+	}
 }
 
 func lockHDF5(fn string) {
-	// masterMU.Lock()
-	// defer masterMU.Unlock()
-
-	mu.Lock()
-	// mutex,ok := mus[fn]
-	// if !ok {
-	// 	newMutex := &sync.RWMutex{}
-	// 	mus[fn] = newMutex
-	// 	mutex = newMutex
-	// }
-	// mutex.Lock()
+	if !hdf5ThreadSafe {
+		mu.Lock()
+	}
 }
 
 func unlockHDF5(fn string) {
-	// masterMU.Lock()
-	// defer masterMU.Unlock()
-
-	mu.Unlock()
-	// mus[fn].Unlock()
+	if !hdf5ThreadSafe {
+		mu.Unlock()
+	}
 }
 
 func prefix(msg string, e error) error {
 	return &errorString{msg + e.Error()}
+}
+
+// WithReadFile opens an HDF5 file for reading under the global HDF5 mutex
+// (when needed) and passes the open file handle to fn. The file is closed
+// and the mutex released when fn returns. This allows multiple datasets
+// from the same file to be read under a single mutex acquisition rather
+// than paying the open/lock/close cycle per dataset.
+func WithReadFile(filename string, fn func(f *hdf5.File) error) error {
+	lockHDF5(filename)
+	defer unlockHDF5(filename)
+	f, err := hdf5.OpenFile(filename, hdf5.F_ACC_RDONLY)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return fn(f)
+}
+
+// WithWriteFile opens an HDF5 file for read-write under the global HDF5
+// mutex and passes the open file handle to fn. The file is closed and
+// the mutex released when fn returns. Mirrors WithReadFile for writes.
+func WithWriteFile(filename string, fn func(f *hdf5.File) error) error {
+	lockHDF5(filename)
+	defer unlockHDF5(filename)
+	f, err := openWriteOrCreate(filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return fn(f)
 }
 
 func makeHyperslab(slice [][]int, dims []int) (offset, stride, count, block []uint) {

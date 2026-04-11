@@ -13,6 +13,10 @@ var outputsFor = flag.String("outputs-for", "", "only write model outputs for sp
 var inputsFor = flag.String("inputs-for", "", "only write final model inputs for specified models. Specify as command separated list of model names")
 var noOutputsFor = flag.String("no-outputs-for", "", "do not write model outputs for specified models. Specify as command separated list of model names")
 var noInputsFor = flag.String("no-inputs-for", "", "do not write final model inputs for specified models. Specify as command separated list of model names")
+var noOutputs = flag.Bool("no-outputs", false, "do not write model outputs for any models")
+var noInputs = flag.Bool("no-inputs", false, "do not write final model inputs for any models")
+var onlyOutputsFor = flag.String("only-outputs-for", "", "only write model outputs for the specified models (strict whitelist). Specify as comma separated list of model names")
+var onlyInputsFor = flag.String("only-inputs-for", "", "only write final model inputs for the specified models (strict whitelist). Specify as comma separated list of model names")
 
 var parameterInputFile = flag.String("parameters", "", "specify file for model parameters")
 var statesInputFile = flag.String("initial-states", "", "specify file for initial states")
@@ -22,6 +26,7 @@ var statesOutputFile = flag.String("final-states", "", "specify file for final s
 var splitOutputs = flag.String("outputs", "", "split output files by model type. Specify as <model>:<fn>,<model>:<fn>,...")
 var writerMode = flag.Bool("writer", false, "operate as an output writer for another simulation process")
 var showVersion = flag.Bool("version", false, "display version information")
+var linkWorkers = flag.Int("link-workers", 0, "number of worker goroutines for parallel link processing; 0 = auto (min(NumCPU, 8))")
 
 func init() {
 	const usage = "show progress of simulation generations"
