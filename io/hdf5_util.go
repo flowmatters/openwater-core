@@ -180,7 +180,7 @@ func shapesMatch(ds *hdf5.Dataset, shape []int) bool {
 	return slice.Equal(dsShape, shape)
 }
 
-func openOrCreateDataset(f *hdf5.File, path string, shape []int, exampleValue interface{}, compress bool) (*hdf5.Dataset, error) {
+func openOrCreateDataset(f *hdf5.File, path string, shape []int, exampleValue interface{}, compressLevel int) (*hdf5.Dataset, error) {
 	ds, err := f.OpenDataset(path)
 	if err == nil {
 		if !shapesMatch(ds, shape) {
@@ -195,10 +195,10 @@ func openOrCreateDataset(f *hdf5.File, path string, shape []int, exampleValue in
 		return nil, prefix("Cannot open root group in file "+f.FileName()+": ", err)
 	}
 	defer rootGroup.Close()
-	return createDataset(rootGroup, path, shape, exampleValue, compress)
+	return createDataset(rootGroup, path, shape, exampleValue, compressLevel)
 }
 
-func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interface{}, compress bool) (*hdf5.Dataset, error) {
+func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interface{}, compressLevel int) (*hdf5.Dataset, error) {
 	paths := strings.Split(path, "/")
 	if paths[0] == "" {
 		paths = paths[1:]
@@ -217,14 +217,24 @@ func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interfa
 		}
 		defer space.Close()
 
-		if compress {
+		if compressLevel > 0 {
 			dcpl, err := hdf5.NewPropList(hdf5.P_DATASET_CREATE)
 			if err != nil {
 				return nil, prefix("Cannot create property list", err)
 			}
 			defer dcpl.Close()
 
-			dcpl.SetDeflate(hdf5.DefaultCompression)
+			// Deflate requires chunked storage. Chunk along the first
+			// dimension (nodes): [1, dim1, dim2, ...]. This matches the
+			// per-node write pattern in WriteSlice and gives good
+			// compression (each chunk is one node's full timeseries).
+			chunkDims := make([]uint, len(dims))
+			copy(chunkDims, dims)
+			chunkDims[0] = 1
+			if err := dcpl.SetChunk(chunkDims); err != nil {
+				return nil, prefix("Cannot set chunk dimensions", err)
+			}
+			dcpl.SetDeflate(compressLevel)
 
 			ds, err := g.CreateDatasetWith(paths[0], dtype, space, dcpl)
 			if err != nil {
@@ -248,7 +258,7 @@ func createDataset(g *hdf5.Group, path string, shape []int, exampleValue interfa
 		}
 	}
 	defer group.Close()
-	ds, err := createDataset(group, strings.Join(paths[1:], "/"), shape, exampleValue, compress)
+	ds, err := createDataset(group, strings.Join(paths[1:], "/"), shape, exampleValue, compressLevel)
 	if err != nil {
 		return nil, prefix(paths[0]+": ", err)
 	}

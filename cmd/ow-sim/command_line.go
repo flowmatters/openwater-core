@@ -27,6 +27,8 @@ var splitOutputs = flag.String("outputs", "", "split output files by model type.
 var writerMode = flag.Bool("writer", false, "operate as an output writer for another simulation process")
 var showVersion = flag.Bool("version", false, "display version information")
 var linkWorkers = flag.Int("link-workers", 0, "number of worker goroutines for parallel link processing; 0 = auto (min(NumCPU, 8))")
+var compressOutputs = flag.Int("compress-outputs", 0, "compress output datasets with deflate (gzip) at the given level (1=fastest, 9=best, 0=off). Reduces output file size at some CPU cost")
+var maxWriteAhead = flag.Int("max-write-ahead", 4, "max generations the simulation can run ahead of the output writer. Lower values reduce peak memory; higher values allow more overlap. 0 = unlimited")
 
 func init() {
 	const usage = "show progress of simulation generations"

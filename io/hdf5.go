@@ -117,7 +117,7 @@ func (h H5Ref[T]) Write(data data.ND[T]) error {
 	}
 	defer f.Close()
 
-	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)), false)
+	ds, err := openOrCreateDataset(f, h.Dataset, data.Shape(), data.Get(data.NewIndex(0)), 0)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,9 @@ func (h H5Ref[T]) Write(data data.ND[T]) error {
 	return nil
 }
 
-func (h H5Ref[T]) Create(shape []int, fillValue T, compress bool) error {
+// Create creates a new dataset. compressLevel 0 means no compression;
+// 1-9 sets deflate (gzip) compression at that level.
+func (h H5Ref[T]) Create(shape []int, fillValue T, compressLevel int) error {
 	lockHDF5(h.Filename)
 	defer unlockHDF5(h.Filename)
 
@@ -142,7 +144,7 @@ func (h H5Ref[T]) Create(shape []int, fillValue T, compress bool) error {
 	}
 	defer f.Close()
 
-	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue, compress)
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue, compressLevel)
 	if err == nil {
 		ds.Close()
 	}
@@ -151,8 +153,8 @@ func (h H5Ref[T]) Create(shape []int, fillValue T, compress bool) error {
 
 // CreateInFile creates a dataset in an already-open HDF5 file. The caller
 // must hold the global HDF5 mutex and manage the file lifecycle.
-func (h H5Ref[T]) CreateInFile(f *hdf5.File, shape []int, fillValue T, compress bool) error {
-	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue, compress)
+func (h H5Ref[T]) CreateInFile(f *hdf5.File, shape []int, fillValue T, compressLevel int) error {
+	ds, err := openOrCreateDataset(f, h.Dataset, shape, fillValue, compressLevel)
 	if err == nil {
 		ds.Close()
 	}

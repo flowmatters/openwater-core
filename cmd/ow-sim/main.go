@@ -161,6 +161,12 @@ func run_simulation(args []string) {
 		writingDone[i] = make(chan struct{})
 	}
 
+	// Backpressure: limit how far main can get ahead of the writer. Without
+	// this, main runs all N gens while the writer is still on gen K, and
+	// gens K..N-1 each hold their full Outputs+Inputs arrays (~2-3 GB per
+	// gen for large models). Configurable via -max-write-ahead (default 4).
+	writeAhead := *maxWriteAhead
+
 	for i := 0; i < genCount; i++ {
 		pcComplete := 100.0 * float64(nodesCompleted) / float64(nodeCount)
 		log.Info().Float64("Percent Complete", pcComplete).Int("Generation", i+1).Int("Total Generations", genCount).Msg("Generation progress")
@@ -175,17 +181,41 @@ func run_simulation(args []string) {
 		// asynchronous: one goroutine per generation, strictly ordered via
 		// writingDone[g-1] -> writingDone[g].
 		if outputFn != "" {
+			// Backpressure: if the writer is more than writeAhead gens
+			// behind, wait for it to catch up before spawning another writer.
+			// This ensures at most writeAhead gens of Outputs/Inputs/etc
+			// are live at any time, preventing OOM on large models.
+			if writeAhead > 0 && i >= writeAhead {
+				<-writingDone[i-writeAhead]
+				for _, modelName := range modelNames {
+					models[modelName].PurgeGeneration(i - writeAhead)
+				}
+			}
+
 			go func(g int) {
 				if g > 0 {
 					<-writingDone[g-1]
-					for _, modelName := range modelNames {
-						models[modelName].PurgeGeneration(g - 1)
+					// Purge gen g-1 if it wasn't already purged by the
+					// backpressure check above. With backpressure, main
+					// purges gen (i-writeAhead) and the writer purges the
+					// remaining gens in between.
+					if writeAhead <= 0 || g-1 >= i-writeAhead+1 {
+						for _, modelName := range modelNames {
+							models[modelName].PurgeGeneration(g - 1)
+						}
 					}
 				}
 
 				writeGeneration(g, models, modelNames)
 				close(writingDone[g])
 			}(i)
+		} else if i > 0 {
+			// No output file: purge the previous generation immediately.
+			// Without this, generations accumulate in memory forever because
+			// PurgeGeneration only lived inside the writer goroutine above.
+			for _, modelName := range modelNames {
+				models[modelName].PurgeGeneration(i - 1)
+			}
 		}
 		// === /WRITE GENERATION OUTPUTS ===
 
@@ -344,7 +374,18 @@ func run_simulation(args []string) {
 
 	if outputFn != "" {
 		<-writingDone[genCount-1]
+		// Purge the final generation (the writer chain purges g-1 when g
+		// starts, but nobody purges the last generation).
+		for _, modelName := range modelNames {
+			models[modelName].PurgeGeneration(genCount - 1)
+		}
 		log.Debug().Int("Generation", genCount-1).Msg("Final generation finished writing")
+	} else {
+		// No output file: purge the final generation (earlier gens were
+		// purged in the main loop's else branch).
+		for _, modelName := range modelNames {
+			models[modelName].PurgeGeneration(genCount - 1)
+		}
 	}
 
 	simEnd := time.Now()

@@ -408,23 +408,28 @@ func (mr *modelReference) initialiseOutputsViaCreate(refGeneration int) error {
 		return prefix(fmt.Sprintf("Couldn't get generation for %s: ", mr.ModelName), err)
 	}
 
+	compressLevel := *compressOutputs
+
 	if mr.WriteOutputs {
 		ref := io.H5Ref[float64]{Filename: mr.OutputFilename, Dataset: "/MODELS/" + mr.ModelName + "/outputs"}
-		if err := ref.Create([]int{mr.TotalRuns(), gen.Outputs.Shape()[1], gen.Outputs.Shape()[2]}, math.NaN(), false); err != nil {
+		if err := ref.Create([]int{mr.TotalRuns(), gen.Outputs.Shape()[1], gen.Outputs.Shape()[2]}, math.NaN(), compressLevel); err != nil {
 			return prefix("Couldn't init dataset for outputs: ", err)
 		}
 	}
 
 	if mr.WriteInputs {
 		ref := io.H5Ref[float64]{Filename: mr.OutputFilename, Dataset: "/MODELS/" + mr.ModelName + "/inputs"}
-		if err := ref.Create([]int{mr.TotalRuns(), gen.Inputs.Shape()[1], gen.Inputs.Shape()[2]}, math.NaN(), false); err != nil {
+		if err := ref.Create([]int{mr.TotalRuns(), gen.Inputs.Shape()[1], gen.Inputs.Shape()[2]}, math.NaN(), compressLevel); err != nil {
 			return prefix("Couldn't init dataset for inputs: ", err)
 		}
 	}
 
 	if mr.WriteStates {
+		// States are 2D [nodes, vars] and typically tiny — don't compress.
+		// Also avoids issues with zero-dimension states (e.g. models with
+		// no state variables produce [N, 0] which can't be chunked).
 		ref := io.H5Ref[float64]{Filename: mr.FinalStatesFilename, Dataset: "/MODELS/" + mr.ModelName + "/states"}
-		if err := ref.Create([]int{mr.TotalRuns(), gen.States.Shape()[1]}, math.NaN(), false); err != nil {
+		if err := ref.Create([]int{mr.TotalRuns(), gen.States.Shape()[1]}, math.NaN(), 0); err != nil {
 			return prefix("Couldn't init dataset for states: ", err)
 		}
 	}
