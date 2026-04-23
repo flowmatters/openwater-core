@@ -350,3 +350,124 @@ func TestCopyNativeToNative(t *testing.T) {
 
 	testCopyFrom(t, src, dest)
 }
+
+func TestCArrayMaximum(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{3, 4}
+
+	cArray := makeCArrayForTest[float64](shape)
+	assert.Equal(11.0, cArray.Maximum())
+}
+
+func TestCArrayMinimum(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{3, 4}
+
+	cArray := makeCArrayForTest[float64](shape)
+	assert.Equal(0.0, cArray.Minimum())
+}
+
+func TestCArrayReroll(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{3, 4}
+
+	cArray := makeCArrayForTest[float64](shape)
+
+	// Unroll to Go slice, modify, then reroll back
+	unrolled := cArray.Unroll()
+	for i := range unrolled {
+		unrolled[i] = float64(i * 100)
+	}
+
+	cArray.Reroll()
+
+	// Verify the C array now has the modified values
+	assert.Equal(0.0, cArray.Get([]int{0, 0}))
+	assert.Equal(100.0, cArray.Get([]int{0, 1}))
+	assert.Equal(400.0, cArray.Get([]int{1, 0}))
+	assert.Equal(1100.0, cArray.Get([]int{2, 3}))
+}
+
+func TestCArrayCopyFromNonContiguous(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{4, 6}
+
+	cArray := makeCArrayForTest[float64](shape)
+
+	// Non-contiguous source: every other column from a native array
+	src := data.ARange[float64](12).MustReshape([]int{4, 3})
+
+	// Copy into first 3 columns of C array
+	cArray.ApplySlice([]int{0, 0}, nil, src)
+
+	assert.Equal(0.0, cArray.Get([]int{0, 0}))
+	assert.Equal(1.0, cArray.Get([]int{0, 1}))
+	assert.Equal(2.0, cArray.Get([]int{0, 2}))
+	assert.Equal(3.0, cArray.Get([]int{1, 0}))
+	assert.Equal(11.0, cArray.Get([]int{3, 2}))
+
+	// Original data beyond the applied region is untouched
+	assert.Equal(3.0, cArray.Get([]int{0, 3}))
+}
+
+func TestCArrayGet1Set1(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{5}
+
+	cArray := makeCArrayForTest[float64](shape)
+
+	assert.Equal(0.0, cArray.Get1(0))
+	assert.Equal(3.0, cArray.Get1(3))
+
+	cArray.Set1(2, 99.0)
+	assert.Equal(99.0, cArray.Get1(2))
+}
+
+func TestCArrayGet2Set2(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{3, 4}
+
+	cArray := makeCArrayForTest[float64](shape)
+
+	assert.Equal(0.0, cArray.Get2(0, 0))
+	assert.Equal(5.0, cArray.Get2(1, 1))
+
+	cArray.Set2(1, 1, 500.0)
+	assert.Equal(500.0, cArray.Get2(1, 1))
+}
+
+func TestCArrayGet3Set3(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{2, 3, 4}
+
+	cArray := makeCArrayForTest[float64](shape)
+
+	assert.Equal(0.0, cArray.Get3(0, 0, 0))
+	assert.Equal(1.0, cArray.Get3(0, 0, 1))
+	assert.Equal(4.0, cArray.Get3(0, 1, 0))
+	assert.Equal(12.0, cArray.Get3(1, 0, 0))
+
+	cArray.Set3(1, 2, 3, 999.0)
+	assert.Equal(999.0, cArray.Get3(1, 2, 3))
+}
+
+func TestCArrayApply1(t *testing.T) {
+	assert := assert.New(t)
+	shape := []int{6}
+
+	cArray := makeCArrayForTest[float64](shape)
+
+	cArray.Apply1(1, 2, []float64{99.0, 88.0})
+	assert.Equal(0.0, cArray.Get1(0))
+	assert.Equal(99.0, cArray.Get1(1))
+	assert.Equal(2.0, cArray.Get1(2))
+	assert.Equal(88.0, cArray.Get1(3))
+}
+
+func TestCArrayReshapeSizeMismatch(t *testing.T) {
+	shape := []int{3, 4}
+	cArray := makeCArrayForTest[float64](shape)
+
+	_, err := cArray.Reshape([]int{5, 5})
+	assert.NotNil(t, err)
+}

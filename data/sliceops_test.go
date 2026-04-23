@@ -91,3 +91,53 @@ func TestIncrement(t *testing.T) {
 	Increment(vec, shape)
 	assert.Equal([]int{4, 0, 0}, vec)
 }
+
+func TestIncrementWrapsToZero(t *testing.T) {
+	assert := assert.New(t)
+
+	shape := []int{2, 3}
+	vec := []int{1, 2} // last valid index
+	Increment(vec, shape)
+	assert.Equal([]int{0, 0}, vec)
+}
+
+func TestOffsets(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.Equal([]int{1}, Offsets([]int{5}))
+	assert.Equal([]int{4, 1}, Offsets([]int{3, 4}))
+	assert.Equal([]int{12, 4, 1}, Offsets([]int{2, 3, 4}))
+}
+
+func TestIDivMod(t *testing.T) {
+	assert := assert.New(t)
+
+	// For a 2x3x4 array, offsets are [12, 4, 1], dims are [2, 3, 4]
+	dims := []int{2, 3, 4}
+	offsets := Offsets(dims)
+
+	// Linear index 0 -> [0,0,0]
+	assert.Equal([]int{0, 0, 0}, IDivMod(0, offsets, dims))
+	// Linear index 5 -> [0,1,1]
+	assert.Equal([]int{0, 1, 1}, IDivMod(5, offsets, dims))
+	// Linear index 23 -> [1,2,3]
+	assert.Equal([]int{1, 2, 3}, IDivMod(23, offsets, dims))
+}
+
+func TestArgmax(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.Equal(0, Argmax([]int{5, 1, 2}))
+	assert.Equal(1, Argmax([]int{1, 5, 2}))
+	assert.Equal(2, Argmax([]int{1, 2, 5}))
+	assert.Equal(0, Argmax([]int{5}))
+	assert.Equal(2, Argmax([]int{1, 1, 4}))
+}
+
+func TestMaximumSlice(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.Equal(5, Maximum([]int{5, 1, 2}))
+	assert.Equal(5, Maximum([]int{1, 5, 2}))
+	assert.Equal(5, Maximum([]int{1, 2, 5}))
+}

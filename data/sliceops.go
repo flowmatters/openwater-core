@@ -78,7 +78,7 @@ func Argmax(vector []int) int {
 	for i, v := range vector[1:] {
 		if v > maxFound {
 			maxFound = v
-			res = i
+			res = i + 1
 		}
 	}
 	return int(res)

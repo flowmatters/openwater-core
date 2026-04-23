@@ -265,7 +265,13 @@ func makeCArrayForTest[T data.Number](shape []int) *ndC[T] {
 func (nd *ndC[T]) Reroll() {
 	if nd.UnrolledTo == nil {
 		log.Error().Msg("Cannot reroll from nil ptr")
+		return
 	}
 	vals := *nd.UnrolledTo
-	nd.Apply([]int{0}, 0, 1, vals)
+	idx := nd.NewIndex(0)
+	shape := nd.Shape()
+	for _, v := range vals {
+		nd.Set(idx, v)
+		data.Increment(idx, shape)
+	}
 }
