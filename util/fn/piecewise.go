@@ -27,8 +27,17 @@ func Piecewise(x float64, xs, ys []float64) (y float64, err error) {
 		return
 	}
 	x0 := xs[i]
+	if j >= len(xs) {
+		fmt.Printf("x=%f, xs=%v, i=%d, j=%d\n", x, xs, i, j)
+		err = fmt.Errorf("Index j=%d out of range for xs of length %d", j, len(xs))
+		return
+	}
 	x1 := xs[j]
 
+	if x1 == x0 {
+		err = fmt.Errorf("Division by zero: x0 (%f) == x1 (%f)", x0, x1)
+		return
+	}
 	frac := (x - x0) / (x1 - x0) // What if x1==x0?
 
 	y0 := ys[i]
