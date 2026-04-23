@@ -74,7 +74,8 @@ func sednetGully(quickflow, year, annualRunoff_ts, annualLoad_ts []float64,
 			activityFactor = averageGullyActivityFactor
 		}
 
-		if runoffRate == 0 || annualRunoff == 0 { //|| annualAverageSedimentSupply == 0 {
+		const MIN_RUNOFF_THRESHOLD = 1e-8 // m3/s — below Source's minimum non-zero quickflow
+		if runoffRate < MIN_RUNOFF_THRESHOLD || annualRunoff == 0 { //|| annualAverageSedimentSupply == 0 {
 			fineLoad[day] = 0
 			coarseLoad[day] = 0
 			continue
