@@ -146,7 +146,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 
 		targetMinCap := targetMinimumCapacity[i]
 		targetMaxVol := volCurveMax - targetMinCap
-		autoAdjustDemand := false //true
+		autoAdjustDemand := true
 
 		inflow := inflowTS[i]
 		origDemand := demandTS[i]
@@ -182,7 +182,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 
 			demand = origDemand
 			if autoAdjustDemand && (volume > targetMaxVol) {
-				demand = math.Max(origDemand, 0.0001*(volume-targetMaxVol)/subtimestep)
+				demand = math.Max(origDemand, (volume-targetMaxVol)/timeRemaining)
 			}
 
 			// demand = origDemand
@@ -277,7 +277,7 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 			}
 
 			if volume > volCurveMax {
-				overTopRatio := math.Min(volume/volCurveMax, 2.0)
+				overTopRatio := volume / volCurveMax
 				excessOutflow := math.Max((overTopRatio*maxSpill)-avgOutflow, 0.0)
 				excessOutflowVolume := excessOutflow * subtimestep
 				excessOutflowVolume = math.Max(math.Min(excessOutflowVolume, volume-volCurveMax), 0.0)
