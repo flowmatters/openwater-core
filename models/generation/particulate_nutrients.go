@@ -1,6 +1,8 @@
 package generation
 
 import (
+	"math"
+
 	u "github.com/flowmatters/openwater-core/conv/units"
 )
 
@@ -53,7 +55,7 @@ func particulateNutrients(fineSedModelFineSheetGeneratedKg, fineSedModelCoarseSh
 	const CREAMS_CONSTANT = 1.2
 	//All calcs done in units / day then converted back to units per sec for E2 consumption
 	n := len(fineSedModelCoarseSheetGeneratedKg)
-	// areaHa := area * units.SQUARE_METRES_TO_HECTARES
+	areaHa := area * u.SQUARE_METRES_TO_HECTARES
 
 	for day := 0; day < n; day++ {
 
@@ -64,27 +66,21 @@ func particulateNutrients(fineSedModelFineSheetGeneratedKg, fineSedModelCoarseSh
 		Hillslope_ErosionLoad_kg := fineSedModelFineSheetGeneratedKg[day] + fineSedModelCoarseSheetGeneratedKg[day]
 		Gully_ErosionLoad_kg := fineSedModelFineGullyGeneratedKg[day] + fineSedModelCoarseGullyGeneratedKg[day]
 
-		//This is only ever set to true during APSIM parameterisation
 		if Do_P_CREAMS_Enrichment > 0.5 {
+			logComponent := 0.0
+			if Hillslope_ErosionLoad_kg > 0 && areaHa > 0 {
+				// Erosion inputs are in kg/s but CREAMS formula expects kg/day
+				logComponent = 2.4 - 0.27*math.Log(Hillslope_ErosionLoad_kg*u.SECONDS_PER_DAY/areaHa)
+			}
 
-			// logComponent := 0.0
-			// //Enrichment is, for some reason, limited to just the hillslope contribution (spec doc quite clear about this)
-			// if Hillslope_ErosionLoad_kg > 0 && areaHa > 0 {
-			// 	logComponent = 2.4 - 0.27*math.Log(Hillslope_ErosionLoad_kg/areaHa)
-			// }
+			PEnrichment := CREAMS_CONSTANT
+			if logComponent > 0 {
+				PEnrichment = CREAMS_CONSTANT * logComponent
+			}
 
-			// PEnrichment := CREAMS_CONSTANT
-			// if logComponent > 0 {
-			// 	//equates to a soil load of 7250 hg/ha/day or less
-			// 	PEnrichment = CREAMS_CONSTANT * logComponent
-			// }
-
-			// //double PEnrichment = creamsConstant * (2.4 - 0.27 * Math.Log(soilLoad / areaHa));
-			// //RDS changed a suspected typo in the next line 27-9-2011 - changed hillDeliveryRatio * 0.1 to hillDeliveryRatio * 0.01 - meant to convert percent to ratio
-			// Hillslope_Particulate_load_kg = Hillslope_ErosionLoad_kg * nutSurfSoilConc * PEnrichment * hillDeliveryRatio * 0.01
-
-			Hillslope_Particulate_load_kg = Hillslope_ErosionLoad_kg * nutSurfSoilConc * Nutrient_Enrichment_Ratio * (hillDeliveryRatio * u.PERCENT_TO_PROPORTION)
-			Gully_Particulate_load_kg = Gully_ErosionLoad_kg * nutSubSoilConc * Nutrient_Enrichment_Ratio_Gully * (gullyDeliveryRatio * u.PERCENT_TO_PROPORTION)
+			Hillslope_Particulate_load_kg = Hillslope_ErosionLoad_kg * nutSurfSoilConc * PEnrichment * (hillDeliveryRatio * u.PERCENT_TO_PROPORTION)
+			// TODO: Confirm expected behaviour - gully contribution not calculated in CREAMS branch. Commenting out to match Source for now.
+			// Gully_Particulate_load_kg = Gully_ErosionLoad_kg * nutSubSoilConc * Nutrient_Enrichment_Ratio_Gully * (gullyDeliveryRatio * u.PERCENT_TO_PROPORTION)
 
 		} else {
 			//normal SedNet approach, where the NER itself will determine if enrichmemnt occurs
