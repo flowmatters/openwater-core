@@ -32,6 +32,7 @@ InstreamFineSediment:
 		fineSedSettVelocity:
 		fineSedReMobVelocity:
 		durationInSeconds: '[1,86400] Timestep, default=86400'
+		fractionOverbankToFloodplain: '[0,1] Proportion of overbank flow (flow above bankFullFlow) that reaches the floodplain, default=1'
 	outputs:
 		loadDownstream:
 		loadToFloodplain:
@@ -55,7 +56,8 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 	bankFullFlow, fineSedSettVelocityFlood, floodPlainArea,
 	linkWidth, linkLength, linkSlope, bankHeight,
 	propBankHeightForFineDep, sedBulkDensity, manningsN,
-	fineSedSettVelocity, fineSedReMobVelocity, durationInSeconds float64,
+	fineSedSettVelocity, fineSedReMobVelocity, durationInSeconds,
+	fractionOverbankToFloodplain float64,
 	loadDownstream, loadToFloodplain, loadToChannelDeposition, floodplainDepositionFraction, channelDepositionFraction []float64) (float64, float64) {
 
 	if bankFullFlow <= 1e-8 {
@@ -113,7 +115,7 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 		combinedConstituentStorageBeforeDeposition := totalDailyConstsituentMass
 
 		floodPlainDepositionFine_Kg_per_Day := floodPlainDepositionEmperical(outflowRate, totalDailyConstsituentMass,
-			bankFullFlow, fineSedSettVelocityFlood, floodPlainArea)
+			bankFullFlow, fineSedSettVelocityFlood, floodPlainArea, fractionOverbankToFloodplain)
 		//Remove flood plain deposited material from Constituent Storage
 		totalDailyConstsituentMass -= floodPlainDepositionFine_Kg_per_Day
 
@@ -165,7 +167,7 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 }
 
 func floodPlainDepositionEmperical(outflow, totalDailyConstsituentMass,
-	bankFullFlow, fineSedSettVelocityFlood, floodPlainArea float64) float64 {
+	bankFullFlow, fineSedSettVelocityFlood, floodPlainArea, fractionOverbankToFloodplain float64) float64 {
 
 	if (outflow < bankFullFlow) || (bankFullFlow == 0.0) {
 		return 0.0
@@ -173,7 +175,11 @@ func floodPlainDepositionEmperical(outflow, totalDailyConstsituentMass,
 
 	FloodPlainDepositionFine_Kg_per_Day := 0.0
 
-	Qf := outflow - bankFullFlow
+	// Only the specified fraction of overbank flow reaches the floodplain
+	Qf := (outflow - bankFullFlow) * fractionOverbankToFloodplain
+	if Qf <= 0.0 {
+		return 0.0
+	}
 	FloodFlowProp := Qf / outflow
 	expTerm := -1 * ((fineSedSettVelocityFlood * floodPlainArea) / Qf)
 
