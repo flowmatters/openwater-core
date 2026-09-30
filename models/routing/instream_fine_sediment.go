@@ -96,7 +96,7 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 		// FloodPlainDepositionFine_Kg_per_Day = 0
 		// proportionDepositedFloodplain = 0
 		// proportionDepositedBed = 0
-		// totalDailyConstsituentMass = 0
+		// totalDailyConstituentMass = 0
 
 		// STC_Dep_t = 0
 		// STC_Mob_t = 0
@@ -108,16 +108,16 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 		outflowNow := outflowRate * durationInSeconds
 		reachVolumeNow := reachVolume[i]
 
-		totalDailyConstsituentMass := totalStoredMass + incomingMassNow
+		totalDailyConstituentMass := totalStoredMass + incomingMassNow
 		totalVolume := reachVolumeNow + outflowNow
 
 		//Use this for assessing proportions deposited on floodplain and stream bed
-		combinedConstituentStorageBeforeDeposition := totalDailyConstsituentMass
+		combinedConstituentStorageBeforeDeposition := totalDailyConstituentMass
 
-		floodPlainDepositionFine_Kg_per_Day := floodPlainDepositionEmperical(outflowRate, totalDailyConstsituentMass,
+		floodPlainDepositionFine_Kg_per_Day := floodPlainDepositionEmperical(outflowRate, totalDailyConstituentMass,
 			bankFullFlow, fineSedSettVelocityFlood, floodPlainArea, fractionOverbankToFloodplain)
 		//Remove flood plain deposited material from Constituent Storage
-		totalDailyConstsituentMass -= floodPlainDepositionFine_Kg_per_Day
+		totalDailyConstituentMass -= floodPlainDepositionFine_Kg_per_Day
 
 		proportionDepositedFloodplain := 0.0
 		//Stop division by zero
@@ -127,7 +127,7 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 
 		//This will modify netStreamDepositionFineSed as it processes
 		//will only access the amoutn left for deposition that has remained post-flood assessment
-		netStreamDepositionFineSed := inChannelStorage(outflowRate, totalVolume, totalDailyConstsituentMass, channelStoreFine,
+		netStreamDepositionFineSed := inChannelStorage(outflowRate, totalVolume, totalDailyConstituentMass, channelStoreFine,
 			linkWidth, linkSlope, manningsN, fineSedSettVelocity, fineSedReMobVelocity, maxStorage)
 
 		proportionDepositedChannel := 0.0
@@ -137,7 +137,7 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 		}
 
 		channelStoreFine += netStreamDepositionFineSed
-		totalDailyConstsituentMass -= netStreamDepositionFineSed
+		totalDailyConstituentMass -= netStreamDepositionFineSed
 
 		// //Stop division by zero
 		// if combinedConstituentStorageBeforeDeposition > 0 {
@@ -148,11 +148,11 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 		outflowLoad := 0.0
 
 		if totalVolume > 0 {
-			concentration := totalDailyConstsituentMass / totalVolume
+			concentration := totalDailyConstituentMass / totalVolume
 			totalStoredMass = concentration * reachVolumeNow
 			outflowLoad = concentration * outflowRate
 		} else {
-			totalStoredMass = 0.0 // totalDailyConstsituentMass
+			totalStoredMass = 0.0 // totalDailyConstituentMass
 		}
 
 		//this gets apportioned to outflow & storage by concentration in StorageRoutingConstituentProvider.ProcessLumped
@@ -166,7 +166,7 @@ func instreamFineSediment(upstreamMass, lateralMass, reachLocalMass, reachVolume
 	return channelStoreFine, totalStoredMass
 }
 
-func floodPlainDepositionEmperical(outflow, totalDailyConstsituentMass,
+func floodPlainDepositionEmperical(outflow, totalDailyConstituentMass,
 	bankFullFlow, fineSedSettVelocityFlood, floodPlainArea, fractionOverbankToFloodplain float64) float64 {
 
 	if (outflow < bankFullFlow) || (bankFullFlow == 0.0) {
@@ -184,11 +184,11 @@ func floodPlainDepositionEmperical(outflow, totalDailyConstsituentMass,
 	expTerm := -1 * ((fineSedSettVelocityFlood * floodPlainArea) / Qf)
 
 	//This will be zero if FloodPlainArea_M2 is zero
-	FloodPlainDepositionFine_Kg_per_Day = totalDailyConstsituentMass * FloodFlowProp * (1.0 - math.Exp(expTerm))
+	FloodPlainDepositionFine_Kg_per_Day = totalDailyConstituentMass * FloodFlowProp * (1.0 - math.Exp(expTerm))
 
 	//safety net, shouldn't happen given the eqn above
-	if FloodPlainDepositionFine_Kg_per_Day > totalDailyConstsituentMass {
-		FloodPlainDepositionFine_Kg_per_Day = totalDailyConstsituentMass
+	if FloodPlainDepositionFine_Kg_per_Day > totalDailyConstituentMass {
+		FloodPlainDepositionFine_Kg_per_Day = totalDailyConstituentMass
 	}
 
 	return FloodPlainDepositionFine_Kg_per_Day
@@ -218,7 +218,7 @@ func floodPlainDepositionEmperical(outflow, totalDailyConstsituentMass,
 // /<summary>
 // /This is the long term channel storage component. Not to be confused with the much more transient Flow Routing Storage
 // /<//summary>
-func inChannelStorage(outflow, totalVolume, totalDailyConstsituentMass, initialChannelStore,
+func inChannelStorage(outflow, totalVolume, totalDailyConstituentMass, initialChannelStore,
 	linkWidth, linkSlope, manningsN,
 	fineSedSettVelocity, fineSedReMobVelocity, maxStorage float64) float64 {
 
@@ -237,7 +237,7 @@ func inChannelStorage(outflow, totalVolume, totalDailyConstsituentMass, initialC
 	//Will be 1 for sub-cats with no sub-streams
 	propTotalStreamFootprint := 1.0 //thisSegChannelFootprint / (subStreamsFootprintArea + linkArea)
 
-	loadInStreamBeforeDep_tons := totalDailyConstsituentMass * units.KG_TO_TONNES
+	loadInStreamBeforeDep_tons := totalDailyConstituentMass * units.KG_TO_TONNES
 	loadInThisSegBeforeDep_tons := propTotalStreamFootprint * loadInStreamBeforeDep_tons
 
 	outflowVal := outflow * propTotalStreamFootprint
