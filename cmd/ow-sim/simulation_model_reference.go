@@ -389,16 +389,10 @@ func (mr *modelReference) WriteData(generation int) error {
 		loc = mr.Batches[generation-1]
 	}
 
-	// Batch the actual data writes under a single file-open.
-	if mr.OutputFilename == mr.FinalStatesFilename {
-		return io.WithWriteFile(mr.OutputFilename, func(f *hdf5.File) error {
-			return mr.writeAllDatasets(f, f, gen, loc)
-		})
-	}
-	return io.WithWriteFile(mr.OutputFilename, func(outF *hdf5.File) error {
-		return io.WithWriteFile(mr.FinalStatesFilename, func(stF *hdf5.File) error {
-			return mr.writeAllDatasets(outF, stF, gen, loc)
-		})
+	// Batch the actual data writes under a single file-open (and a single
+	// lock acquisition, whether or not states go to a separate file).
+	return io.WithWriteFiles(mr.OutputFilename, mr.FinalStatesFilename, func(outF, stF *hdf5.File) error {
+		return mr.writeAllDatasets(outF, stF, gen, loc)
 	})
 }
 

@@ -20,8 +20,15 @@ jobs:
           uses: actions/cache@v4
           with:
             path: ${{ env.HDF5_INSTALL_DIR }}
-            key: hdf5-${{ env.HDF5_VERSION }}-linux-threadsafe-v1
+            key: hdf5-${{ env.HDF5_VERSION }}-linux-threadsafe-v2
         - run: ./build/ci/all.sh
+        - name: Cache non-thread-safe HDF5
+          uses: actions/cache@v4
+          with:
+            path: /home/runner/hdf5-install-nonthreadsafe
+            key: hdf5-${{ env.HDF5_VERSION }}-linux-nonthreadsafe-v1
+        - name: Test io against a non-thread-safe libhdf5
+          run: ./build/ci/test-nonthreadsafe-hdf5.sh
         - name: upload build
           uses: actions/upload-artifact@v4
           with:
@@ -64,7 +71,7 @@ jobs:
           uses: actions/cache@v4
           with:
             path: hdf5-install
-            key: hdf5-${{ env.HDF5_VERSION }}-windows-threadsafe-v1
+            key: hdf5-${{ env.HDF5_VERSION }}-windows-threadsafe-v2
         - name: build
           run: ./build/ci/all.sh
           shell: bash
@@ -121,7 +128,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.HDF5_INSTALL_DIR }}
-          key: hdf5-${{ env.HDF5_VERSION }}-macos-threadsafe-v1
+          key: hdf5-${{ env.HDF5_VERSION }}-macos-threadsafe-v2
       - name: build
         run: ./build/ci/all.sh
       - name: upload build

@@ -31,3 +31,7 @@ ows-ensemble
 !cmd/ows-ensemble
 spike-ndarray-hdf5
 libopenwater.h
+
+# HDF5 build/link configuration (see docs/HDF5.md)
+hdf5-install/
+compilation_vars.txt

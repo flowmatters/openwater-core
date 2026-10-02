@@ -10,6 +10,23 @@ static int h5_is_threadsafe() {
     if (H5is_library_threadsafe(&ts) < 0) return 0;
     return (int)ts;
 }
+
+// In threadsafe libhdf5 builds the auto-error-print setting (the callback
+// installed via H5Eset_auto2) lives on a per-thread error stack. Silencing
+// on the main thread does not silence worker threads that the Go runtime
+// uses to service cgo calls for parallel goroutines. h5_ensure_silenced
+// installs the NULL handler on the current thread's default stack the
+// first time it runs there; subsequent calls on the same thread are a
+// trivial branch on the thread-local guard. Callers must hold the OS
+// thread (runtime.LockOSThread) so the next cgo call lands on the same
+// thread we just silenced.
+static __thread int _h5_thread_silenced = 0;
+static void h5_ensure_silenced() {
+    if (!_h5_thread_silenced) {
+        H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+        _h5_thread_silenced = 1;
+    }
+}
 */
 import "C"
 
@@ -17,6 +34,7 @@ import (
 	"errors"
 	"os"
 	"reflect"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -66,13 +84,29 @@ func (e *errorString) Error() string {
 	return e.s
 }
 
+// Each lock/unlock pair pins the goroutine to its OS thread and ensures
+// HDF5's per-thread auto-error-print is silenced on that thread. The OS
+// thread pin is required even when libhdf5 is thread-safe (so go-side
+// mutex is skipped) because cgo otherwise lets the goroutine migrate
+// between cgo calls, and we need the silence to apply to the same thread
+// that subsequently runs the HDF5 ops.
+//
+// Order matters: acquire mu FIRST, then pin. A goroutine that parks on a
+// sync.Mutex while its M is locked takes that M out of service, forcing
+// the scheduler to spin up a replacement thread for the P. Pinning after
+// the mutex keeps waiters unpinned, so the thread pool stays at ~GOMAXPROCS
+// instead of growing to one thread per concurrent HDF5 caller.
+
 func rLockHDF5(fn string) {
 	if !hdf5ThreadSafe {
 		mu.Lock()
 	}
+	runtime.LockOSThread()
+	C.h5_ensure_silenced()
 }
 
 func rUnlockHDF5(fn string) {
+	runtime.UnlockOSThread()
 	if !hdf5ThreadSafe {
 		mu.Unlock()
 	}
@@ -82,9 +116,12 @@ func lockHDF5(fn string) {
 	if !hdf5ThreadSafe {
 		mu.Lock()
 	}
+	runtime.LockOSThread()
+	C.h5_ensure_silenced()
 }
 
 func unlockHDF5(fn string) {
+	runtime.UnlockOSThread()
 	if !hdf5ThreadSafe {
 		mu.Unlock()
 	}
@@ -113,6 +150,8 @@ func WithReadFile(filename string, fn func(f *hdf5.File) error) error {
 // WithWriteFile opens an HDF5 file for read-write under the global HDF5
 // mutex and passes the open file handle to fn. The file is closed and
 // the mutex released when fn returns. Mirrors WithReadFile for writes.
+// fn must not call back into anything that takes the HDF5 mutex — see
+// WithWriteFiles for writing to two files together.
 func WithWriteFile(filename string, fn func(f *hdf5.File) error) error {
 	lockHDF5(filename)
 	defer unlockHDF5(filename)
@@ -122,6 +161,32 @@ func WithWriteFile(filename string, fn func(f *hdf5.File) error) error {
 	}
 	defer f.Close()
 	return fn(f)
+}
+
+// WithWriteFiles is WithWriteFile for two files at once: both are opened
+// read-write under a single acquisition of the global HDF5 mutex. When the
+// two names are the same file it is opened once and fn receives the same
+// handle twice.
+//
+// Use this rather than nesting WithWriteFile calls. The Go-side mutex is not
+// reentrant, so a nested call deadlocks whenever libhdf5 is not thread-safe.
+func WithWriteFiles(first, second string, fn func(f1, f2 *hdf5.File) error) error {
+	lockHDF5(first)
+	defer unlockHDF5(first)
+	f1, err := openWriteOrCreate(first, true)
+	if err != nil {
+		return err
+	}
+	defer f1.Close()
+	if second == first {
+		return fn(f1, f1)
+	}
+	f2, err := openWriteOrCreate(second, true)
+	if err != nil {
+		return err
+	}
+	defer f2.Close()
+	return fn(f1, f2)
 }
 
 func makeHyperslab(slice [][]int, dims []int) (offset, stride, count, block []uint) {
