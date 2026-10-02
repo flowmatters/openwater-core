@@ -149,7 +149,6 @@ cell-run. With it, nothing measurable.
 Reports go in the **results** file, struct-of-arrays:
 
 ```
-/REPORTS/signature                 string[1]             engine model signature
 /REPORTS/<Model>/run               int32[n]              global run index
 /REPORTS/<Model>/timestep          int32[n]              -1 for configuration faults
 /REPORTS/<Model>/code              int32[n]
@@ -207,8 +206,10 @@ Everything needed is already in the model file: `/META/timeperiod`,
 Run and timestep indices are only meaningful against the originating model file.
 `clip.py:291-310` renumbers run indices and `template.py:1526-1529` (`retime`)
 rewrites `META/timeperiod`, either of which would silently re-locate or re-date
-existing reports. Stamp the model file's `signature_hash` and a run identifier
-into `/REPORTS`, and have the Python API refuse on mismatch.
+existing reports. ow-sim stamps every results file with the signature of the
+model file it ran (`model_signature_hash`, a root attribute -- see
+`cmd/ow-sim/stamp.go`), and the Python API refuses to read reports against a
+model file whose `signature_hash` differs.
 
 ### Defaults
 

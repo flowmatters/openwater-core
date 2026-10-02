@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/flowmatters/openwater-core/sim"
 )
@@ -45,6 +46,37 @@ type ParameterSignature struct {
 	Name       string   `json:"name"`
 	Units      string   `json:"units"`
 	Dimensions []string `json:"dimensions"`
+}
+
+// Root attributes that record which openwater-core build wrote an HDF5 file.
+// The first four are the names openwater's Python package stamps model files
+// with, so model files and results files are read the same way. Results files
+// also carry the stamp of the model file they were produced from.
+const (
+	AttrVersion          = "openwater_version"
+	AttrSignature        = "signature_hash"
+	AttrCreatedBy        = "created_by"
+	AttrCreatedTimestamp = "created_timestamp"
+	AttrModelVersion     = "model_openwater_version"
+	AttrModelSignature   = "model_signature_hash"
+)
+
+// AttrVariables is the attribute, on a model's inputs, outputs, states and
+// parameters datasets, that names the variables along the dataset's variable
+// axis. With it a file can be read by name, without the build that wrote it.
+const AttrVariables = "VARIABLES"
+
+// VersionStamp returns the root attributes identifying this build as the
+// writer of a file. createdBy names the program, eg "ow-sim".
+func VersionStamp(createdBy string) map[string]string {
+	return map[string]string{
+		AttrVersion:   FullVersion(),
+		AttrSignature: GetSignatureHash(),
+		AttrCreatedBy: createdBy,
+		// Matches Python's datetime.utcnow().isoformat(), which is what model
+		// files carry.
+		AttrCreatedTimestamp: time.Now().UTC().Format("2006-01-02T15:04:05.000000"),
+	}
 }
 
 // FullVersion returns the complete version string

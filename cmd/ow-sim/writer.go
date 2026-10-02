@@ -11,6 +11,7 @@ import (
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
 	"github.com/flowmatters/openwater-core/io/protobuf"
+	"github.com/flowmatters/openwater-core/sim"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -18,7 +19,19 @@ func initialiseDataset(fn, modelName, label string, shape []int) error {
 	ref := io.H5Ref[float64]{}
 	ref.Filename = fn
 	ref.Dataset = "/MODELS/" + modelName + "/" + label
-	return ref.Create(shape, math.NaN(), 0)
+	if err := ref.Create(shape, math.NaN(), 0); err != nil {
+		return err
+	}
+
+	if factory := sim.Catalog[modelName]; factory != nil {
+		description := factory().Description()
+		variables := description.Outputs
+		if label == "inputs" {
+			variables = description.Inputs
+		}
+		nameVariables(ref, sim.VariableNames(variables), shape[1])
+	}
+	return nil
 }
 
 func writeData(
@@ -39,6 +52,14 @@ func writeData(
 func run_writer(args []string) {
 	fn := args[0]
 	log.Info().Str("Target File", fn).Msg("Writing results from stdin")
+
+	// The simulating process passes the model file so the results can be
+	// traced back to it.
+	modelStamp := map[string]string{}
+	if len(args) > 1 {
+		modelStamp = loadModelStamp(args[1])
+	}
+	stampResultsFile(fn, modelStamp)
 	input := os.Stdin
 
 	for {

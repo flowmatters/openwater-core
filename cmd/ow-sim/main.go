@@ -112,7 +112,10 @@ func run_simulation(args []string) {
 	totalTimeFinalWrite := 0.0
 	totalTimeLinks := 0.0
 
+	modelStamp := loadModelStamp(fn)
+
 	models, genCount, nodeCount := makeModelRefs(modelNames, fn, outputFn)
+	stampOutputFiles(models, modelStamp)
 	nodesCompleted := 0
 
 	// Flat index of model references by model number (the LINKS table uses

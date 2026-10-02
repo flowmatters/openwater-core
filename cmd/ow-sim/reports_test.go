@@ -154,13 +154,6 @@ func TestWriteReportsRoundTrip(t *testing.T) {
 	loadedMessages, err := messages.LoadText()
 	require.NoError(t, err)
 	assert.Equal(t, "did not converge: {0} vs {1}", loadedMessages[0])
-
-	// And the signature stamp, so a reader can detect a mismatched model file.
-	sig := io.H5Ref[int32]{Filename: fn, Dataset: "/REPORTS/signature"}
-	loadedSig, err := sig.LoadText()
-	require.NoError(t, err)
-	require.Len(t, loadedSig, 1)
-	assert.NotEmpty(t, loadedSig[0])
 }
 
 // A model that reported nothing still gets its counts written, so a reader can

@@ -459,12 +459,14 @@ func (mr *modelReference) initialiseOutputsViaCreate(refGeneration int) error {
 	}
 
 	compressLevel := *compressOutputs
+	description := gen.Model.Description()
 
 	if mr.WriteOutputs {
 		ref := io.H5Ref[float64]{Filename: mr.OutputFilename, Dataset: "/MODELS/" + mr.ModelName + "/outputs"}
 		if err := ref.Create([]int{mr.TotalRuns(), gen.Outputs.Shape()[1], gen.Outputs.Shape()[2]}, math.NaN(), compressLevel); err != nil {
 			return prefix("Couldn't init dataset for outputs: ", err)
 		}
+		nameVariables(ref, sim.VariableNames(description.Outputs), gen.Outputs.Shape()[1])
 	}
 
 	if mr.WriteInputs {
@@ -472,6 +474,7 @@ func (mr *modelReference) initialiseOutputsViaCreate(refGeneration int) error {
 		if err := ref.Create([]int{mr.TotalRuns(), gen.Inputs.Shape()[1], gen.Inputs.Shape()[2]}, math.NaN(), compressLevel); err != nil {
 			return prefix("Couldn't init dataset for inputs: ", err)
 		}
+		nameVariables(ref, sim.VariableNames(description.Inputs), gen.Inputs.Shape()[1])
 	}
 
 	if mr.WriteStates {
@@ -482,6 +485,7 @@ func (mr *modelReference) initialiseOutputsViaCreate(refGeneration int) error {
 		if err := ref.Create([]int{mr.TotalRuns(), gen.States.Shape()[1]}, math.NaN(), 0); err != nil {
 			return prefix("Couldn't init dataset for states: ", err)
 		}
+		nameVariables(ref, description.States, gen.States.Shape()[1])
 	}
 
 	mr.outputsInitialised = true
@@ -633,7 +637,9 @@ func makeModelRefs(modelNames []string, inputFn, defaultOutputFn string) (models
 			if destFn != defaultOutputFn {
 				exe_path, _ := osext.Executable()
 				log.Info().Str("Executable Path", exe_path).Msg("Configuring external write process")
-				write_cmd := exec.Command(exe_path, "-writer", destFn)
+				// The writer stamps the file it owns, and needs the model file
+				// to record which one the results came from.
+				write_cmd := exec.Command(exe_path, "-writer", destFn, inputFn)
 				reader, writer := gio.Pipe()
 				write_cmd.Stdin = reader
 				write_cmd.Stdout = os.Stdout

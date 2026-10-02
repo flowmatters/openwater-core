@@ -10,7 +10,6 @@ import (
 	"github.com/flowmatters/openwater-core/data"
 	"github.com/flowmatters/openwater-core/io"
 	"github.com/flowmatters/openwater-core/sim"
-	"github.com/flowmatters/openwater-core/util"
 )
 
 // Model reports are written once, at the end of the run, at their exact final
@@ -28,8 +27,6 @@ func writeReports(models map[string]*modelReference, modelNames []string, output
 		return nil
 	}
 
-	wroteAnything := false
-
 	for _, modelName := range modelNames {
 		mr := models[modelName]
 		if len(mr.reportCatalog) == 0 {
@@ -44,18 +41,9 @@ func writeReports(models map[string]*modelReference, modelNames []string, output
 		if err := writeModelReports(outputFn, modelName, mr.reportCatalog, set); err != nil {
 			return prefix("writing reports for "+modelName+": ", err)
 		}
-		wroteAnything = true
 	}
 
-	if !wroteAnything {
-		return nil
-	}
-
-	// Stamp the engine's model signature. Run and timestep indices in these
-	// datasets are only meaningful against the model file they came from, and
-	// a reader needs to be able to tell when it is looking at the wrong one.
-	sig := io.H5Ref[int32]{Filename: outputFn, Dataset: reportsGroup + "/signature"}
-	return sig.WriteText([]string{util.GetSignatureHash()})
+	return nil
 }
 
 func writeModelReports(outputFn, modelName string, catalog []sim.ReportDescription, set sim.ReportSet) error {

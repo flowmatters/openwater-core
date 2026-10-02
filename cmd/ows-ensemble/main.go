@@ -120,6 +120,20 @@ func main() {
 	err = outputPath.Write(outputs)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Error writing outputs")
+		return
+	}
+
+	// Stamp the file with the build that wrote it and name the output
+	// variables, as ow-sim does for its results.
+	if err := io.SetFileAttributes(outputPath.Filename, util.VersionStamp("ows-ensemble")); err != nil {
+		log.Warn().Err(err).Msg("Couldn't write version stamp")
+	}
+	description := model.Description()
+	if outputs.Len(sim.DIMO_OUTPUT) == len(description.Outputs) {
+		names := sim.VariableNames(description.Outputs)
+		if err := outputPath.SetTextAttribute(util.AttrVariables, names); err != nil {
+			log.Warn().Err(err).Msg("Couldn't record variable names")
+		}
 	}
 
 	// err = outputPath.Write(outputs.States)
