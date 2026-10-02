@@ -260,12 +260,12 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 						// return
 					}
 				}
-				rainfallVolForTimestep += rainfallPerSecond * avgArea * subtimestep
-				evaporationVolForTimestep += petPerSecond * avgArea * subtimestep
 				subtimestep = math.Max(subtimestep*0.5, MIN_TIMESTEP_SECONDS_NEGATIVE)
 			}
 
 			outflowVolume += avgOutflow * subtimestep
+			rainfallVolForTimestep += rainfallPerSecond * units.MILLIMETRES_TO_METRES * avgArea * subtimestep
+			evaporationVolForTimestep += petPerSecond * units.MILLIMETRES_TO_METRES * avgArea * subtimestep
 			// testVol = volume + (inflow+(netAtmosphericFluxDepthPerSecond*avgArea)-avgOutflow) * subtimestep
 			// testArea := cappedPiecewise(testVol,areas)
 			// netAtmosphericFluxInRate = netAtmosphericFluxDepthPerSecond * (area+testArea)/2.0
