@@ -41,6 +41,9 @@ func writeReports(models map[string]*modelReference, modelNames []string, output
 		if err := writeModelReports(outputFn, modelName, mr.reportCatalog, set); err != nil {
 			return prefix("writing reports for "+modelName+": ", err)
 		}
+		// Reports can be the only thing in this file, when every model's
+		// outputs went elsewhere. They still need to say what they came from.
+		outputStamper.Ensure(outputFn)
 	}
 
 	return nil

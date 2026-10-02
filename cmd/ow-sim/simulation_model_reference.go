@@ -488,6 +488,14 @@ func (mr *modelReference) initialiseOutputsViaCreate(refGeneration int) error {
 		nameVariables(ref, description.States, gen.States.Shape()[1])
 	}
 
+	// The files now exist and hold this run's data.
+	if mr.WriteOutputs || mr.WriteInputs {
+		outputStamper.Ensure(mr.OutputFilename)
+	}
+	if mr.WriteStates {
+		outputStamper.Ensure(mr.FinalStatesFilename)
+	}
+
 	mr.outputsInitialised = true
 	return nil
 }

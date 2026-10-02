@@ -112,10 +112,13 @@ func run_simulation(args []string) {
 	totalTimeFinalWrite := 0.0
 	totalTimeLinks := 0.0
 
-	modelStamp := loadModelStamp(fn)
+	// Files are stamped as they are first written, never the ones read from.
+	outputStamper = newFileStamper(loadModelStamp(fn), fn,
+		filenameOrDefault(timeseriesInputFile, fn),
+		filenameOrDefault(parameterInputFile, fn),
+		filenameOrDefault(statesInputFile, fn))
 
 	models, genCount, nodeCount := makeModelRefs(modelNames, fn, outputFn)
-	stampOutputFiles(models, modelStamp)
 	nodesCompleted := 0
 
 	// Flat index of model references by model number (the LINKS table uses

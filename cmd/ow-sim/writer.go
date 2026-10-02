@@ -46,7 +46,11 @@ func writeData(
 	shp := []int{int(cells), int(columns), int(rows)}
 	arr := data.ArrayFromSlice[float64](values, shp)
 
-	return ref.WriteSlice(arr, []int{int(loc), 0, 0})
+	if err := ref.WriteSlice(arr, []int{int(loc), 0, 0}); err != nil {
+		return err
+	}
+	outputStamper.Ensure(fn)
+	return nil
 }
 
 func run_writer(args []string) {
@@ -54,12 +58,12 @@ func run_writer(args []string) {
 	log.Info().Str("Target File", fn).Msg("Writing results from stdin")
 
 	// The simulating process passes the model file so the results can be
-	// traced back to it.
+	// traced back to it. The file is stamped once there is data in it.
 	modelStamp := map[string]string{}
 	if len(args) > 1 {
 		modelStamp = loadModelStamp(args[1])
 	}
-	stampResultsFile(fn, modelStamp)
+	outputStamper = newFileStamper(modelStamp, args[1:]...)
 	input := os.Stdin
 
 	for {

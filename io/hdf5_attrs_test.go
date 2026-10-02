@@ -1,6 +1,7 @@
 package io
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -113,4 +114,30 @@ func TestTextAttributeNeedsTheDataset(t *testing.T) {
 
 	ref := H5Ref[float64]{Filename: fn, Dataset: "/MODELS/Missing/outputs"}
 	assert.Error(t, ref.SetTextAttribute("VARIABLES", []string{"a"}))
+}
+
+func TestStampingAFileThatIsNotHDF5IsAnError(t *testing.T) {
+	// openWriteOrCreate used to return (nil, nil) for a file that exists but
+	// can't be opened read-write, and every caller then dereferenced nil.
+	fn := filepath.Join(t.TempDir(), "not_hdf5.h5")
+	require.NoError(t, os.WriteFile(fn, []byte("this is not an HDF5 file"), 0o644))
+
+	assert.Error(t, SetFileAttributes(fn, map[string]string{"created_by": "test"}))
+
+	ref := H5Ref[float64]{Filename: fn, Dataset: "data"}
+	assert.Error(t, ref.Create([]int{2, 2}, 0, 0), "the same goes for creating a dataset in it")
+}
+
+func TestRemoveFileAttributes(t *testing.T) {
+	fn := filepath.Join(t.TempDir(), "stamped.h5")
+	require.NoError(t, SetFileAttributes(fn, map[string]string{
+		"signature_hash":       "6d3bb266",
+		"model_signature_hash": "deadbeef",
+	}))
+
+	require.NoError(t, RemoveFileAttributes(fn, "model_signature_hash", "never_there"))
+
+	back, err := FileAttributes(fn, "signature_hash", "model_signature_hash")
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"signature_hash": "6d3bb266"}, back)
 }

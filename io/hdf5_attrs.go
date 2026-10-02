@@ -72,6 +72,14 @@ static char* ow_read_str_attr(hid_t loc, const char* name) {
     return result;
 }
 
+// ow_delete_attr removes an attribute if it is there. Not an error if it isn't.
+static herr_t ow_delete_attr(hid_t loc, const char* name) {
+    htri_t exists = H5Aexists(loc, name);
+    if (exists < 0) return -1;
+    if (exists == 0) return 0;
+    return H5Adelete(loc, name);
+}
+
 // ow_write_str_array_attr writes a 1-D array of fixed-length, NUL-padded
 // strings, replacing any existing attribute of that name. packed holds n
 // strings of width bytes each. This is the form h5py produces for a list of
@@ -169,7 +177,8 @@ func readStringAttribute(loc int64, name string) (string, bool) {
 		return "", false
 	}
 	defer C.free(unsafe.Pointer(cValue))
-	return C.GoString(cValue), true
+	// A fixed-length string may be space-padded rather than NUL-padded.
+	return strings.TrimRight(C.GoString(cValue), " "), true
 }
 
 // SetFileAttributesInFile writes string attributes at the root of an open
@@ -199,6 +208,29 @@ func SetFileAttributes(filename string, attrs map[string]string) error {
 	defer f.Close()
 
 	return SetFileAttributesInFile(f, attrs)
+}
+
+// RemoveFileAttributes deletes the named attributes from the root of an
+// existing HDF5 file. Names the file doesn't have are ignored.
+func RemoveFileAttributes(filename string, names ...string) error {
+	lockHDF5(filename)
+	defer unlockHDF5(filename)
+
+	f, err := openWriteOrCreate(filename, false)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	for _, name := range names {
+		cName := C.CString(name)
+		rc := C.ow_delete_attr(C.hid_t(f.ID()), cName)
+		C.free(unsafe.Pointer(cName))
+		if rc < 0 {
+			return errors.New("Cannot remove attribute " + name + " from " + filename)
+		}
+	}
+	return nil
 }
 
 // FileAttributes reads the named string attributes from the root of an HDF5

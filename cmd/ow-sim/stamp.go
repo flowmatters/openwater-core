@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"sync"
+
 	"github.com/rs/zerolog/log"
 
 	"github.com/flowmatters/openwater-core/io"
@@ -23,6 +26,14 @@ func loadModelStamp(modelFn string) map[string]string {
 	if err != nil {
 		log.Debug().Err(err).Str("Model File", modelFn).Msg("Couldn't read version stamp from model file")
 		return map[string]string{}
+	}
+
+	// The Python package writes "unknown" when it can't load the library it
+	// is stamping for. That is the absence of a stamp, not a stamp.
+	for name, value := range stamp {
+		if value == "" || value == "unknown" {
+			delete(stamp, name)
+		}
 	}
 
 	if signature, ok := stamp[util.AttrSignature]; ok && signature != util.GetSignatureHash() {
@@ -49,32 +60,84 @@ func resultsStamp(modelStamp map[string]string) map[string]string {
 	return stamp
 }
 
-// stampResultsFile stamps one file. A failure is logged rather than fatal:
-// the stamp is metadata, and not worth losing a run over.
-func stampResultsFile(fn string, modelStamp map[string]string) {
-	if err := io.SetFileAttributes(fn, resultsStamp(modelStamp)); err != nil {
+// fileStamper stamps each file ow-sim writes, once, at the point the file is
+// first written to.
+//
+// Not earlier: stamping at startup would create the results file before the
+// run has produced anything, so a run that failed would leave a stamped,
+// empty file behind -- and the next run would refuse to start without
+// -overwrite.
+//
+// And never a file the run reads from. -final-states can name the model file
+// itself, to write the final states back into it; that file's stamp says what
+// it was built for and must survive.
+type fileStamper struct {
+	mu         sync.Mutex
+	modelStamp map[string]string
+	inputs     []os.FileInfo
+	done       map[string]bool
+	stamped    int
+}
+
+func newFileStamper(modelStamp map[string]string, inputFiles ...string) *fileStamper {
+	s := &fileStamper{modelStamp: modelStamp, done: make(map[string]bool)}
+	for _, fn := range inputFiles {
+		if info, err := os.Stat(fn); err == nil {
+			s.inputs = append(s.inputs, info)
+		}
+	}
+	return s
+}
+
+// Ensure stamps fn if this stamper hasn't already dealt with it. Safe to call
+// on a nil stamper, and from several goroutines. A failure is logged rather
+// than fatal: the stamp is metadata, and not worth losing a run over.
+func (s *fileStamper) Ensure(fn string) {
+	if s == nil || fn == "" {
+		return
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.done[fn] {
+		return
+	}
+	s.done[fn] = true
+
+	if info, err := os.Stat(fn); err == nil {
+		for _, input := range s.inputs {
+			if os.SameFile(info, input) {
+				log.Debug().Str("Filename", fn).Msg("Not stamping a file this run reads its model from")
+				return
+			}
+		}
+	}
+
+	stamp := resultsStamp(s.modelStamp)
+	if err := io.SetFileAttributes(fn, stamp); err != nil {
 		log.Warn().Err(err).Str("Filename", fn).Msg("Couldn't write version stamp")
+		return
+	}
+	s.stamped++
+
+	// A states or split file can be left over from an earlier run. Don't
+	// let it go on claiming a model file this run didn't use.
+	var stale []string
+	for _, name := range []string{util.AttrModelVersion, util.AttrModelSignature} {
+		if _, ok := stamp[name]; !ok {
+			stale = append(stale, name)
+		}
+	}
+	if len(stale) > 0 {
+		if err := io.RemoveFileAttributes(fn, stale...); err != nil {
+			log.Warn().Err(err).Str("Filename", fn).Msg("Couldn't clear a previous run's model stamp")
+		}
 	}
 }
 
-// stampOutputFiles stamps every file this process writes itself. Files handed
-// to a -writer process are stamped by that process, which is the only one
-// that should have them open.
-func stampOutputFiles(models map[string]*modelReference, modelStamp map[string]string) {
-	stamped := make(map[string]bool)
-	for _, mr := range models {
-		if mr.OutputProcess != nil {
-			continue
-		}
-		for _, fn := range []string{mr.OutputFilename, mr.FinalStatesFilename} {
-			if fn == "" || stamped[fn] {
-				continue
-			}
-			stamped[fn] = true
-			stampResultsFile(fn, modelStamp)
-		}
-	}
-}
+// outputStamper stamps the files this process writes. Nil until a simulation
+// or writer sets it up, in which case nothing is stamped.
+var outputStamper *fileStamper
 
 // nameVariables records the names of the variables along a dataset's variable
 // axis. columns is the size of that axis: when it doesn't match the model's

@@ -209,7 +209,9 @@ rewrites `META/timeperiod`, either of which would silently re-locate or re-date
 existing reports. ow-sim stamps every results file with the signature of the
 model file it ran (`model_signature_hash`, a root attribute -- see
 `cmd/ow-sim/stamp.go`), and the Python API refuses to read reports against a
-model file whose `signature_hash` differs.
+model file whose `signature_hash` differs. That catches a model file built for
+different model interfaces. It does not catch a clipped or retimed copy of the
+right one, which keeps the same signature: there is no per-model identity yet.
 
 ### Defaults
 

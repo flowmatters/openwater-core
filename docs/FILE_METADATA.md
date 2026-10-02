@@ -33,10 +33,23 @@ Who stamps what:
 - **Results files** are stamped by `ow-sim`: the main output file, a separate
   `-final-states` file, and each `-outputs` split file (by the `-writer`
   process that owns it). `ows-ensemble` stamps the file it writes to. The two
-  `model_*` attributes are left out when the model file has no stamp.
+  `model_*` attributes are left out when the model file has no stamp, and are
+  removed from a file left over from an earlier run.
+
+Two rules govern when `ow-sim` stamps (`fileStamper` in `cmd/ow-sim/stamp.go`):
+
+- **A file is stamped when it is first written to, not at startup.** A run that
+  fails before producing anything leaves no results file behind.
+- **A file the run reads from is never stamped.** `-final-states` can name the
+  model file itself, to write states back into it; that file's stamp says what
+  it was built for and is left alone.
 
 `ow-sim` logs a warning when the model file's `signature_hash` differs from its
-own, and runs anyway.
+own, and runs anyway. A stamp value of `unknown`, which the Python package
+writes when it cannot identify the build, counts as no stamp on both sides.
+
+A stamp attribute is a single string. Anything else under one of these names (a
+number, an empty attribute, a list) is ignored by both readers.
 
 Values are variable-length UTF-8 strings, which is what h5py writes for
 `f.attrs[name] = "text"`, so they read back as `str` in Python whichever side
@@ -71,8 +84,16 @@ the loaded library's description; if the dataset has a different number of
 variables than that description, reading raises `VariableMismatchError`
 (override with `allow_variable_mismatch=True`).
 
-On open it also compares the results file's `signature_hash` with the loaded
-library's and warns once on a difference. `releases.model_file_version()`,
+On open it also compares the results file's `signature_hash` with that of the
+openwater-core release in use and warns once on a difference. "In use" means
+the release whose `ow-inspect` supplied the loaded model descriptions
+(`discovery.core_version()`), not the shared library, which is loaded once per
+process and goes stale after `releases.use()`.
+
+The signature identifies a set of model interfaces, not a particular model.
+`model_signature_hash` therefore tells a reader that results did *not* come
+from a given model file when the two differ, but cannot confirm that they did:
+a clipped or retimed copy of the model file carries the same signature. `releases.model_file_version()`,
 `find_installed_for_model()`, `install_for_model()` and `use_for_model()` accept a results file as well
 as a model file, so the matching release can be found and activated from
 either.

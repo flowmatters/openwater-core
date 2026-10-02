@@ -221,11 +221,16 @@ func openWriteOrCreate(fn string, createIfNotExist bool) (*hdf5.File, error) {
 			return nil, prefix("Cannot open file: "+fn, err)
 		}
 
-		if _, err := os.Stat(fn); os.IsNotExist(err) {
-			f, err = hdf5.CreateFile(fn, hdf5.F_ACC_TRUNC)
-			if err != nil {
-				return nil, prefix("Cannot create file: ", err)
-			}
+		if _, statErr := os.Stat(fn); !os.IsNotExist(statErr) {
+			// The file is there but can't be opened read-write: it isn't
+			// HDF5, is locked by another process, or isn't writable.
+			// Returning (nil, nil) here made every caller dereference nil.
+			return nil, prefix("Cannot open existing file for writing: "+fn+": ", err)
+		}
+
+		f, err = hdf5.CreateFile(fn, hdf5.F_ACC_TRUNC)
+		if err != nil {
+			return nil, prefix("Cannot create file: ", err)
 		}
 	}
 	return f, nil
