@@ -11,6 +11,15 @@ LDFLAGS="-X github.com/flowmatters/openwater-core/util.BuildSHA=${BUILD_SHA} -X 
 cd pre/ow-specgen
 go build .
 cd ../..
+
+# Stale generated wrappers are prevented by ow-specgen exiting non-zero on any
+# failure, which `set -e` above turns into an aborted build. Do NOT add an
+# `rm -f generated_*.go` here: deleting and recreating the wrappers immediately
+# before compiling them makes the Go build cache intermittently compile against
+# the pre-deletion state, and build.sh then fails roughly every second run with
+# spurious "undefined" errors. Orphaned wrappers (from a model file that was
+# renamed or removed) are cleared by pre_build.sh, which does not compile
+# straight afterwards.
 ./pre/ow-specgen/ow-specgen models/**/*
 for item in `ls cmd`
 do

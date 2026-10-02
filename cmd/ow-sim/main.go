@@ -398,4 +398,8 @@ func run_simulation(args []string) {
 		Float64("Total Link Time", totalTimeLinks).
 		Float64("Total Final Write Time", totalTimeFinalWrite).
 		Msg("Simulation complete")
+
+	// Reports are written and summarised after everything else: they are
+	// buffered for the whole run, and finaliseReports may exit non-zero.
+	finaliseReports(models, modelNames, outputFn)
 }

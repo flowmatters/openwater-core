@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/flowmatters/openwater-core/conv/units"
+	"github.com/flowmatters/openwater-core/sim"
 	"github.com/flowmatters/openwater-core/util/fn"
 )
 
@@ -18,6 +19,11 @@ const (
 	ALLOWED_ABS_ERROR_RELEASE_RATE = 1e-4
 	ESSENTIALLY_ZERO_RELEASE_RATE  = 1e-4
 	MAX_SUBTIMESTEPS               = 600000
+	// Relative discrepancy in the release rate worth reporting. Well above
+	// ALLOWED_REL_ERROR_RELEASE_RATE: the solver routinely stops refining
+	// slightly outside its convergence tolerance, and that on its own is not
+	// a problem worth telling anyone about.
+	REPORTABLE_REL_ERROR_RELEASE_RATE = 1e-2
 )
 
 /* OW-SPEC
@@ -55,6 +61,13 @@ Storage:
 	init:
 		zero: true
 		lang: go
+	reports:
+		badConfiguration: '[error] storage is unusable: {0} points in the LVA table, maximum volume {1} m^3'
+		subtimestepFloor: '[error] sub-timestep floor of {0} s reached with volume still negative ({1} m^3)'
+		releaseNotConverged: '[warning] release rate did not converge: estimated {0} vs averaged {1} m^3.s^-1 at sub-timestep {2} s'
+		subtimestepBudget: '[warning] sub-timestep budget exhausted: {0} sub-timesteps used against a budget of {1}'
+		notANumber: '[error] computation produced a value that is not a number (volume {0} m^3, inflow {1}, demand {2} m^3.s^-1)'
+		volumeClamped: '[error] storage volume went negative ({0} m^3) and was clamped to zero'
 	tags:
 		storage
 */
@@ -71,12 +84,49 @@ func checkStorageConfiguration(nLVA int, volumes []float64) error {
 	return nil
 }
 
+// abandonCell marks the rest of a cell's outputs as unknown.
+//
+// Filling with NaN rather than leaving zeros is deliberate. A zero is
+// indistinguishable from a real answer, and a storage that silently produced
+// zeros for a whole run is the failure this reporting work set out to make
+// visible. A NaN propagates, shows up in the results, and cannot be mistaken
+// for a number anyone computed.
+func abandonCell(from int, series ...[]float64) {
+	nan := math.NaN()
+	for _, s := range series {
+		for i := from; i < len(s); i++ {
+			s[i] = nan
+		}
+	}
+}
+
+// releaseRateDiscrepancyMatters reports whether the gap left when the solver
+// stops at the sub-timestep floor is big enough to affect the answer.
+func releaseRateDiscrepancyMatters(estimated, averaged float64) bool {
+	scale := math.Max(math.Abs(averaged), ESSENTIALLY_ZERO_RELEASE_RATE)
+	return math.Abs(estimated-averaged) > REPORTABLE_REL_ERROR_RELEASE_RATE*scale
+}
+
 func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVolume, targetMinimumCapacity []float64,
 	initialVolume, initialLevel, initialArea float64,
 	deltaT float64,
 	nLVA int,
 	levels, volumes, areas, minRelease, maxRelease []float64,
-	volumeTS, outflowTS, rainfallVolume, evaporationVolume []float64) (volume, level, area float64) {
+	volumeTS, outflowTS, rainfallVolume, evaporationVolume []float64,
+	rep *sim.Reporter) (volume, level, area float64) {
+	err := checkStorageConfiguration(nLVA, volumes)
+	if err != nil {
+		// Timestep -1: a configuration fault has no timestep.
+		maxVolume := 0.0
+		if len(volumes) > 0 {
+			maxVolume = slices.Max(volumes)
+		}
+		rep.Err2(StorageReportBadConfiguration, -1, float64(nLVA), maxVolume)
+		log.Error().Stack().Err(err).Msg("")
+		abandonCell(0, volumeTS, outflowTS, rainfallVolume, evaporationVolume)
+		return math.NaN(), math.NaN(), math.NaN()
+	}
+
 	idxCurve0 := 0
 	idxCurveN := nLVA - 1
 
@@ -94,7 +144,10 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 		}
 		res, err := fn.Piecewise(vol, volumes, ys)
 		if err != nil {
-			log.Panic().Stack().Err(err).Msg("")
+			// A malformed curve (non-monotonic volumes, say). Returning NaN
+			// hands this to the NaN checks below, which report it against the
+			// cell and abandon it, rather than taking down the whole run.
+			return math.NaN()
 		}
 		return res
 	}
@@ -128,21 +181,17 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 		return true
 	}
 
-	err := checkStorageConfiguration(nLVA, volumes)
-	if err != nil {
-		log.Error().Stack().Err(err).Msg("")
-		return
-	}
-
 	volume = initialVolume
 	n := len(rainfallTS)
 	nSubtimeSteps := 0
+	budgetReported := false
 
 	for i := 0; i < n; i++ {
 		timeRemaining := deltaT
 		subtimestep := deltaT
 
 		outflowVolume := 0.0
+		releaseReported := false
 
 		targetMinCap := targetMinimumCapacity[i]
 		targetMaxVol := volCurveMax - targetMinCap
@@ -152,6 +201,11 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 		origDemand := demandTS[i]
 		demand := origDemand
 
+		if math.IsNaN(demand) || math.IsNaN(inflow) {
+			rep.Err3(StorageReportNotANumber, int32(i), volume, inflow, demand)
+			abandonCell(i, volumeTS, outflowTS, rainfallVolume, evaporationVolume)
+			return math.NaN(), math.NaN(), math.NaN()
+		}
 		// volumeOverTarget := math.Max(0.0, volume - targetMaxVol)
 		// if volumeOverTarget > 0.0 {
 		// 	// Adjust once per timestep
@@ -184,11 +238,15 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 			if autoAdjustDemand && (volume > targetMaxVol) {
 				demand = math.Max(origDemand, (volume-targetMaxVol)/timeRemaining)
 			}
-
 			// demand = origDemand
 			// if (volume) > volCurveMax {
 			// 	demand = math.Max(origDemand,(volume-volCurveMax)/(timeRemaining))
 			// }
+			if math.IsNaN(demand) {
+				rep.Err3(StorageReportNotANumber, int32(i), volume, inflow, demand)
+				abandonCell(i, volumeTS, outflowTS, rainfallVolume, evaporationVolume)
+				return math.NaN(), math.NaN(), math.NaN()
+			}
 
 			// demand = origDemand
 			// if (volume+inflow*timeRemaining) > volCurveMax {
@@ -201,7 +259,11 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 			// }
 
 			estOutflow := releaseRate(demand, volume)
-
+			if math.IsNaN(estOutflow) {
+				rep.Err3(StorageReportNotANumber, int32(i), volume, inflow, demand)
+				abandonCell(i, volumeTS, outflowTS, rainfallVolume, evaporationVolume)
+				return math.NaN(), math.NaN(), math.NaN()
+			}
 			area = cappedPiecewise(volume, areas)
 			// netAtmosphericFluxInRate := netAtmosphericFluxDepthPerSecond * area
 
@@ -212,6 +274,13 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 
 			for {
 				testVol = volume + ((inflow-estOutflow)+(netAtmosphericFluxDepthPerSecond*area))*subtimestep
+				// Check for NaNs
+				if math.IsNaN(testVol) {
+					rep.Err3(StorageReportNotANumber, int32(i), volume, inflow, demand)
+					abandonCell(i, volumeTS, outflowTS, rainfallVolume, evaporationVolume)
+					return math.NaN(), math.NaN(), math.NaN()
+				}
+
 				// demand = origDemand
 				// if volume > targetMaxVol {
 				// 	overAmount := volume - targetMaxVol
@@ -231,9 +300,13 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 
 				if testVol < 0.0 {
 					if subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE {
-						// report()
-						log.Panic().Stack().Err(err).Msg("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS")
-						// return
+						// The sub-timestep cannot shrink further and the
+						// storage still wants to go negative. Empty it and
+						// carry on: the volume is bounded and the report says
+						// the answer is not to be trusted.
+						rep.Err2(StorageReportSubtimestepFloor, int32(i), subtimestep, testVol)
+						testVol = 0.0
+						break
 					}
 					subtimestep = math.Max(subtimestep*0.5, MIN_TIMESTEP_SECONDS_NEGATIVE)
 				} else {
@@ -253,11 +326,19 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 						}
 
 						if subtimestep <= MIN_TIMESTEP_SECONDS_POSITIVE {
+							// Once per timestep at most: this loop runs many
+							// times per timestep, and "the solver stopped here"
+							// is a property of the day, not of each attempt.
+							if !releaseReported && releaseRateDiscrepancyMatters(estOutflow, avgOutflow) {
+								rep.Warn3(StorageReportReleaseNotConverged, int32(i),
+									estOutflow, avgOutflow, subtimestep)
+								releaseReported = true
+							}
 							break
 						}
 					} else if subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE {
-						log.Panic().Stack().Err(err).Msg("testVol < 0.0 and subtimestep <= MIN_TIMESTEP_SECONDS_NEGATIVE")
-						// return
+						rep.Err2(StorageReportSubtimestepFloor, int32(i), subtimestep, testVol)
+						break
 					}
 				}
 				subtimestep = math.Max(subtimestep*0.5, MIN_TIMESTEP_SECONDS_NEGATIVE)
@@ -272,8 +353,10 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 			// netFluxInWithoutRelease = inflow + netAtmosphericFluxInRate
 			volume = volume + (inflow+(netAtmosphericFluxDepthPerSecond*avgArea)-avgOutflow)*subtimestep
 			if volume < 0 {
-				// report()
-				log.Panic().Stack().Err(err).Msg("")
+				// Bounded failure: an empty storage is wrong but usable, and
+				// the report carries the volume that was discarded.
+				rep.Err1(StorageReportVolumeClamped, int32(i), volume)
+				volume = 0.0
 			}
 
 			if volume > volCurveMax {
@@ -286,6 +369,11 @@ func storageWaterBalance(rainfallTS, petTS, inflowTS, demandTS, targetMinimumVol
 			}
 
 			timeRemaining -= subtimestep
+		}
+
+		if nSubtimeSteps > MAX_SUBTIMESTEPS && !budgetReported {
+			rep.Warn2(StorageReportSubtimestepBudget, int32(i), float64(nSubtimeSteps), MAX_SUBTIMESTEPS)
+			budgetReported = true
 		}
 
 		volumeTS[i] = volume

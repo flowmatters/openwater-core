@@ -207,8 +207,74 @@ func (h H5Ref[T]) writeSliceToOpenFile(f *hdf5.File, data data.ND[T], loc []int)
 
 	impl := data.Unroll()
 	err = ds.WriteSubset(&impl, memSpace, filespace)
+	if err != nil {
+		return err
+	}
 
 	return nil
+}
+
+// WriteText writes a 1-D dataset of fixed-length strings, in the layout
+// LoadText reads back: every string padded with NULs to the length of the
+// longest. Parent groups are created as needed.
+//
+// The numeric H5Ref machinery can't express this, since a string is not a
+// data.Number -- the type parameter is unused here and any instantiation will
+// do.
+func (h H5Ref[T]) WriteText(values []string) error {
+	if len(values) == 0 {
+		return errors.New("Cannot write an empty text dataset")
+	}
+
+	lockHDF5(h.Filename)
+	defer unlockHDF5(h.Filename)
+
+	f, err := openWriteOrCreate(h.Filename, true)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	maxLen := 1
+	for _, v := range values {
+		if len(v) > maxLen {
+			maxLen = len(v)
+		}
+	}
+
+	dtype, err := hdf5.T_C_S1.Copy()
+	if err != nil {
+		return prefix("Cannot copy string datatype: ", err)
+	}
+	defer dtype.Close()
+	if err := dtype.SetSize(maxLen); err != nil {
+		return prefix("Cannot size string datatype: ", err)
+	}
+
+	packed := make([]byte, len(values)*maxLen)
+	for i, v := range values {
+		copy(packed[i*maxLen:(i+1)*maxLen], v)
+	}
+
+	space, err := hdf5.CreateSimpleDataspace([]uint{uint(len(values))}, nil)
+	if err != nil {
+		return prefix("Cannot create dataspace: ", err)
+	}
+	defer space.Close()
+
+	group, name, err := openOrCreateParents(f, h.Dataset)
+	if err != nil {
+		return err
+	}
+	defer group.Close()
+
+	ds, err := group.CreateDataset(name, dtype, space)
+	if err != nil {
+		return prefix("Cannot create text dataset "+h.Dataset+": ", err)
+	}
+	defer ds.Close()
+
+	return ds.Write(&packed)
 }
 
 func (h H5Ref[T]) LoadText() ([]string, error) {

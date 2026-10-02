@@ -245,6 +245,33 @@ func shapesMatch(ds *hdf5.Dataset, shape []int) bool {
 	return slice.Equal(dsShape, shape)
 }
 
+// openOrCreateParents walks the group path leading to a dataset, creating any
+// groups that don't exist, and returns the immediate parent group along with
+// the dataset's own name. The caller closes the group.
+func openOrCreateParents(f *hdf5.File, path string) (*hdf5.Group, string, error) {
+	parts := strings.Split(strings.TrimPrefix(path, "/"), "/")
+
+	group, err := f.OpenGroup("/")
+	if err != nil {
+		return nil, "", prefix("Cannot open root group in "+f.FileName()+": ", err)
+	}
+
+	for _, name := range parts[:len(parts)-1] {
+		next, err := group.OpenGroup(name)
+		if err != nil {
+			next, err = group.CreateGroup(name)
+			if err != nil {
+				group.Close()
+				return nil, "", prefix("Cannot open or create group "+name+": ", err)
+			}
+		}
+		group.Close()
+		group = next
+	}
+
+	return group, parts[len(parts)-1], nil
+}
+
 func openOrCreateDataset(f *hdf5.File, path string, shape []int, exampleValue interface{}, compressLevel int) (*hdf5.Dataset, error) {
 	ds, err := f.OpenDataset(path)
 	if err == nil {

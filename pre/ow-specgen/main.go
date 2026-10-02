@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/flowmatters/openwater-core/sim"
 	"github.com/flowmatters/openwater-core/util/logger"
 
 	"github.com/rs/zerolog/log"
@@ -52,6 +54,8 @@ type ModelSpec struct {
 	Implementation yaml.MapSlice
 	Init           yaml.MapSlice
 	ExtractStates  yaml.MapSlice
+	Reports        yaml.MapSlice
+	ReportSpecs    []ReportSpec
 	Flags          struct {
 		GenerateStruct        bool
 		GenerateVector        bool
@@ -59,6 +63,7 @@ type ModelSpec struct {
 		GenerateExtractStates bool
 		ZeroStates            bool
 		PassOutputsAsParams   bool
+		GenerateReports       bool
 	}
 	SingleFunc        string
 	InitFunc          string
@@ -66,23 +71,144 @@ type ModelSpec struct {
 	ExtractStatesFunc string
 }
 
-func processPath(path string) {
+// ReportSpec is one entry from a model's reports: block, ready for codegen.
+type ReportSpec struct {
+	Name         string
+	ConstName    string
+	Code         int
+	Severity     string // the sim.Sev* constant to emit
+	SeverityName string
+	Template     string
+	NArgs        int
+}
+
+var (
+	// '[warning] release rate not converged -- est {0}, avg {1} m^3.s^-1'
+	reportSeverityRe    = regexp.MustCompile(`^\s*\[(?P<Severity>[a-zA-Z]+)\]\s*(?P<Template>.*)$`)
+	reportPlaceholderRe = regexp.MustCompile(`\{(\d+)\}`)
+	reportNameRe        = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
+)
+
+func capitalise(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+func severityConstant(s sim.Severity) (string, error) {
+	switch s {
+	case sim.SevWarning:
+		return "sim.SevWarning", nil
+	case sim.SevError:
+		return "sim.SevError", nil
+	}
+	return "", fmt.Errorf("severity %s cannot be declared on a report", s)
+}
+
+// parseReports turns a model's reports: block into codegen-ready specs.
+//
+// Report messages are free-form English, which makes them the most
+// parse-hazardous thing in an OW-SPEC block: an unquoted value containing ": "
+// is YAML structure, not text. Rather than let that through as a confusing
+// type error, it is called out by name here.
+func parseReports(desc ModelSpec) ([]ReportSpec, error) {
+	if len(desc.Reports) == 0 {
+		return nil, nil
+	}
+
+	if len(desc.Implementation) == 0 {
+		return nil, fmt.Errorf("model %s declares reports but has no implementation block", desc.Name)
+	}
+
+	seen := make(map[string]struct{}, len(desc.Reports))
+	result := make([]ReportSpec, 0, len(desc.Reports))
+
+	for i, entry := range desc.Reports {
+		name := fmt.Sprint(entry.Key)
+
+		if !reportNameRe.MatchString(name) {
+			return nil, fmt.Errorf("model %s: report name %q must be a Go-style identifier", desc.Name, name)
+		}
+		if _, dup := seen[name]; dup {
+			return nil, fmt.Errorf("model %s: duplicate report %q", desc.Name, name)
+		}
+		seen[name] = struct{}{}
+
+		text, ok := entry.Value.(string)
+		if !ok {
+			return nil, fmt.Errorf("model %s: report %q must be a quoted string -- "+
+				"an unquoted message containing \": \" or starting with \"{\" is read as YAML "+
+				"structure rather than text (parsed as %T)", desc.Name, name, entry.Value)
+		}
+
+		matches := reportSeverityRe.FindStringSubmatch(text)
+		if matches == nil {
+			return nil, fmt.Errorf("model %s: report %q must begin with a bracketed severity, "+
+				"e.g. '[warning] message with {0}'", desc.Name, name)
+		}
+
+		severity, err := sim.ParseSeverity(matches[1])
+		if err != nil {
+			return nil, fmt.Errorf("model %s: report %q: %w", desc.Name, name, err)
+		}
+		severityConst, err := severityConstant(severity)
+		if err != nil {
+			return nil, fmt.Errorf("model %s: report %q: %w", desc.Name, name, err)
+		}
+
+		template := strings.TrimSpace(matches[2])
+		if template == "" {
+			return nil, fmt.Errorf("model %s: report %q has a severity but no message", desc.Name, name)
+		}
+
+		nArgs := 0
+		for _, placeholder := range reportPlaceholderRe.FindAllStringSubmatch(template, -1) {
+			idx, err := strconv.Atoi(placeholder[1])
+			if err != nil {
+				return nil, fmt.Errorf("model %s: report %q: bad placeholder %s", desc.Name, name, placeholder[0])
+			}
+			if idx >= sim.MaxReportArgs {
+				return nil, fmt.Errorf("model %s: report %q uses {%d}, but a report carries at most "+
+					"%d arguments ({0} to {%d})", desc.Name, name, idx, sim.MaxReportArgs, sim.MaxReportArgs-1)
+			}
+			if idx+1 > nArgs {
+				nArgs = idx + 1
+			}
+		}
+
+		result = append(result, ReportSpec{
+			Name:         name,
+			ConstName:    fmt.Sprintf("%sReport%s", desc.Name, capitalise(name)),
+			Code:         i,
+			Severity:     severityConst,
+			SeverityName: severity.String(),
+			Template:     template,
+			NArgs:        nArgs,
+		})
+	}
+
+	return result, nil
+}
+
+func processPath(path string) error {
 	fi, err := os.Stat(path)
 	if err != nil {
-		log.Error().Stack().Err(err).Msg("")
-		return
+		return err
 	}
 
 	switch mode := fi.Mode(); {
 	case mode.IsDir():
-		processDirectory(path)
+		return processDirectory(path)
 	case mode.IsRegular():
-		processFile(path)
+		return processFile(path)
 	}
+
+	return nil
 }
 
-func processDirectory(path string) {
-
+func processDirectory(path string) error {
+	return nil
 }
 
 func transform(spec ModelSpec) ModelSpec {
@@ -198,29 +324,32 @@ func transform(spec ModelSpec) ModelSpec {
 	return spec
 }
 
-func processFile(fn string) {
+func processFile(fn string) error {
 	//	directory := filepath.Dir(fn)
 
 	contents, err := os.ReadFile(fn)
 	if err != nil {
-		log.Error().Stack().Err(err).Msg("")
-		return
+		return fmt.Errorf("reading %s: %w", fn, err)
 	}
 
-	packageRe := regexp.MustCompile("^\\s*package\\s+(\\w+)")
+	// (?m) so a file with a licence header or package doc comment above the
+	// package clause is still processed. Without it the clause had to be at
+	// byte 0, and any other file was skipped silently -- generating nothing.
+	packageRe := regexp.MustCompile("(?m)^package\\s+(\\w+)")
 	packageMatch := packageRe.FindSubmatch(contents)
 	if packageMatch == nil {
 		log.Info().Str("Filename", fn).Msg("No package declaration found")
-		return
+		return nil
 	}
 	packageName := packageMatch[1]
 
 	re := regexp.MustCompile("(?smU)/(\\*\\s*OW-SPEC)(.*)(\\*/)")
 
 	specs := re.FindAllSubmatch(contents, -1)
+	var failures error
 	for _, specContents := range specs {
 		if specContents == nil {
-			return
+			continue
 		}
 
 		tabRe := regexp.MustCompile("\t")
@@ -230,8 +359,9 @@ func processFile(fn string) {
 		desc := make(ModelSpecs) // := make(map[interface{}]interface{})
 		err = yaml.Unmarshal(spec, &desc)
 		if err != nil {
-			log.Error().Stack().Err(err).Msg("")
-			return
+			log.Error().Stack().Err(err).Str("Filename", fn).Msg("Invalid OW-SPEC block")
+			failures = errors.Join(failures, fmt.Errorf("parsing OW-SPEC in %s: %w", fn, err))
+			continue
 		}
 
 		for name, description := range desc {
@@ -246,12 +376,24 @@ func processFile(fn string) {
 			description = transform(description)
 
 			description.Filename = fn
-			generateWrapper(description)
+			if err := generateWrapper(description); err != nil {
+				log.Error().Stack().Err(err).Str("Filename", fn).Str("Model", description.Name).Msg("Could not generate wrapper")
+				failures = errors.Join(failures, err)
+			}
 		}
 	}
+
+	return failures
 }
 
-func generateWrapper(desc ModelSpec) {
+func generateWrapper(desc ModelSpec) error {
+	reports, err := parseReports(desc)
+	if err != nil {
+		return err
+	}
+	desc.ReportSpecs = reports
+	desc.Flags.GenerateReports = len(reports) > 0
+
 	tmpl, err := template.New("").Funcs(template.FuncMap{
 		"inc": func(n int) int {
 			return n + 1
@@ -271,8 +413,7 @@ func generateWrapper(desc ModelSpec) {
 	log.Info().Str("Destination Filename", destFn).Msg("Writing generated wrapper")
 	dest, err := os.Create(destFn)
 	if err != nil {
-		log.Error().Stack().Err(err).Msg("")
-		return
+		return fmt.Errorf("creating %s: %w", destFn, err)
 	}
 	defer dest.Close()
 
@@ -321,9 +462,14 @@ func generateWrapper(desc ModelSpec) {
 
 	err = tmpl.ExecuteTemplate(dest, "generated_struct.got", desc)
 	if err != nil {
-		log.Error().Stack().Err(err).Msg("")
-		return
+		// The wrapper on disk is now truncated. Remove it so a later build
+		// can't compile against a half-written file.
+		dest.Close()
+		os.Remove(destFn)
+		return fmt.Errorf("generating %s: %w", destFn, err)
 	}
+
+	return nil
 }
 
 func main() {
@@ -331,7 +477,13 @@ func main() {
 	logger.SetupLogger(false, true)
 	paths := flag.Args()
 
+	exitCode := 0
 	for _, path := range paths {
-		processPath(path)
+		if err := processPath(path); err != nil {
+			log.Error().Stack().Err(err).Str("Path", path).Msg("Failed to process path")
+			exitCode = 1
+		}
 	}
+
+	os.Exit(exitCode)
 }

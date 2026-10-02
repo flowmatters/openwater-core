@@ -2,6 +2,10 @@ package main
 
 import (
 	"flag"
+
+	"github.com/rs/zerolog/log"
+
+	"github.com/flowmatters/openwater-core/sim"
 )
 
 var verbose bool
@@ -37,4 +41,39 @@ func init() {
 	const usageQuiet = "Only log errors and warnings"
 	flag.BoolVar(&quiet, "quiet", false, usageQuiet)
 	flag.BoolVar(&quiet, "q", false, usageQuiet+" (shorthand)")
+}
+
+// Model reporting. Models opt in via a reports: block in their OW-SPEC; see
+// docs/MODEL_REPORTING.md. Reporting is on by default because the disabled
+// path costs ~0.1ns per call and a silent run is the current problem.
+var reportsFlag = flag.String("reports", "warning", "collect model reports at this severity and above: off, warning or error")
+var reportDetailLimit = flag.Int("report-detail-limit", 3, "detail records kept per model, cell and report code. Counts are always complete; 0 = keep every record")
+var reportsFatal = flag.String("reports-fatal", "error", "exit non-zero when a report of this severity or worse was raised: off or error")
+
+func reportSeverity() sim.Severity {
+	switch *reportsFlag {
+	case "off":
+		return sim.SevNone
+	case "warning":
+		return sim.SevWarning
+	case "error":
+		return sim.SevError
+	}
+	log.Fatal().Str("Value", *reportsFlag).Msg("Invalid -reports value; expected off, warning or error")
+	return sim.SevNone
+}
+
+// reportsFatalSeverity is the severity at which a raised report makes ow-sim
+// exit non-zero. Without it, converting a model's log.Panic() sites into
+// reports would turn a loud crash into a wrong-but-complete run with exit
+// code 0, which is how batch and CI runs currently detect breakage.
+func reportsFatalSeverity() sim.Severity {
+	switch *reportsFatal {
+	case "off":
+		return sim.SevNone
+	case "error":
+		return sim.SevError
+	}
+	log.Fatal().Str("Value", *reportsFatal).Msg("Invalid -reports-fatal value; expected off or error")
+	return sim.SevNone
 }

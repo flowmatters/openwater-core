@@ -16,9 +16,9 @@ import (
 	"github.com/flowmatters/openwater-core/io"
 	"github.com/flowmatters/openwater-core/io/protobuf"
 	"github.com/flowmatters/openwater-core/sim"
-	"gonum.org/v1/hdf5"
 	"github.com/golang/protobuf/proto"
 	"github.com/kardianos/osext"
+	"gonum.org/v1/hdf5"
 )
 
 type modelGeneration struct {
@@ -30,13 +30,14 @@ type modelGeneration struct {
 	Outputs    data.ND3[float64]
 }
 
-func (g *modelGeneration) Run() {
+func (g *modelGeneration) Run(reports *sim.ReportSink) {
 	if g.Count == 0 {
 		return
 	}
 
 	g.Model.ApplyParameters(g.Parameters)
 	g.Outputs = sim.InitialiseOutputs(g.Model, g.Inputs.Len(2), g.Inputs.Len(0))
+	sim.AttachReportSink(g.Model, reports)
 	g.Model.Run(g.Inputs, g.States, g.Outputs)
 }
 
@@ -69,6 +70,18 @@ type modelReference struct {
 	// cache-hits that still take+release the lock but do no HDF5 work.
 	genMu sync.Mutex
 
+	// Accumulated model reports for the whole run.
+	//
+	// These live here rather than on modelGeneration deliberately: generations
+	// are purged aggressively (see the PurgeGeneration calls in main.go), some
+	// of them from the writer goroutine, so anything hanging off a generation
+	// is gone long before the end of the run. Reports are written once, at the
+	// end, because the HDF5 layer cannot extend a dataset -- see
+	// docs/MODEL_REPORTING.md.
+	reportCatalog []sim.ReportDescription
+	reports       sim.ReportSet
+	reportMu      sync.Mutex
+
 	// Cached existence checks for the input file's per-model datasets.
 	// The input file structure is read-only during a run, so these only need
 	// to be checked once per model (in initModel), avoiding 2 x Exists()
@@ -97,6 +110,14 @@ func initModel(fn, model, paramFn string) (*modelReference, error) {
 	}
 	result.Dimensions = dimensions
 	result.Generations = make([]*modelGeneration, len(batches))
+
+	// Ask the model once whether it reports at all. Models that declare no
+	// reports: block don't implement sim.Reporting and cost nothing here.
+	if instance, err := result.makeModel(); err == nil {
+		if reporting, ok := instance.(sim.Reporting); ok {
+			result.reportCatalog = reporting.ReportCatalog()
+		}
+	}
 
 	// Cache whether this model has stored inputs/states datasets.
 	// Checked once here to avoid per-generation Exists() calls inside
@@ -276,6 +297,41 @@ func (mr *modelReference) GetGeneration(i int) (*modelGeneration, error) {
 		}
 	}
 	return mr.Generations[i], nil
+}
+
+// NewReportSink builds a sink for one generation, or returns nil when this
+// model doesn't report or reporting is switched off. A nil sink is inert all
+// the way down to the model kernels.
+func (mr *modelReference) NewReportSink(generation int, cells int) *sim.ReportSink {
+	if len(mr.reportCatalog) == 0 || reportSeverity() == sim.SevNone {
+		return nil
+	}
+
+	sink := sim.NewReportSink(cells, len(mr.reportCatalog), reportSeverity(), int32(*reportDetailLimit))
+	if sink != nil {
+		sink.BaseIndex = int(mr.generationLocation(generation))
+	}
+	return sink
+}
+
+// CollectReports takes a finished generation's reports before the generation
+// can be purged.
+func (mr *modelReference) CollectReports(sink *sim.ReportSink) {
+	if sink == nil {
+		return
+	}
+
+	set := sink.Flush()
+
+	mr.reportMu.Lock()
+	defer mr.reportMu.Unlock()
+	mr.reports.Append(set)
+}
+
+func (mr *modelReference) Reports() sim.ReportSet {
+	mr.reportMu.Lock()
+	defer mr.reportMu.Unlock()
+	return mr.reports
 }
 
 func (mr *modelReference) PurgeGeneration(i int) {

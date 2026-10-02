@@ -157,9 +157,84 @@ func RunSingleModelJSON(r io.Reader, w io.Writer, splitOutputs bool) {
 
 	outputs := InitialiseOutputs(model, inputs.Len3(), 1)
 
+	// One cell and no performance pressure, so the cap is generous rather than
+	// absent: a long run of a misbehaving model would otherwise put one log
+	// line per timestep into the response. The per-code totals below stay
+	// complete either way.
+	var sink *ReportSink
+	if reporting, ok := model.(Reporting); ok {
+		catalog := reporting.ReportCatalog()
+		sink = NewReportSink(1, len(catalog), SevWarning, singleRunDetailLimit)
+		reporting.SetReportSink(sink)
+	}
+
 	model.Run(inputs, states, outputs)
 	results.Outputs = outputs
 	results.States = states
+
+	for _, line := range renderReports(model, sink) {
+		log(line)
+	}
+}
+
+// singleRunDetailLimit is how many detail records ow-single reports per code
+// before falling back to a total.
+const singleRunDetailLimit = 20
+
+// renderReports turns a single run's reports into readable log lines. The
+// timestep is reported as an index: a model kernel has no idea what date that
+// is, and ow-single has no model file to ask.
+func renderReports(model TimeSteppingModel, sink *ReportSink) []string {
+	if sink == nil {
+		return nil
+	}
+
+	reporting, ok := model.(Reporting)
+	if !ok {
+		return nil
+	}
+	catalog := reporting.ReportCatalog()
+
+	set := sink.Flush()
+	lines := make([]string, 0, set.Len())
+
+	for i := 0; i < set.Len(); i++ {
+		code := set.Codes[i]
+		if code < 0 || int(code) >= len(catalog) {
+			continue
+		}
+		entry := catalog[code]
+
+		report := Report{NArgs: int32(entry.NArgs)}
+		copy(report.Args[:], set.Args[i*MaxReportArgs:(i+1)*MaxReportArgs])
+
+		if ts := set.Timesteps[i]; ts >= 0 {
+			lines = append(lines, fmt.Sprintf("%s: timestep %d: %s",
+				entry.Severity, ts, entry.Render(report)))
+		} else {
+			lines = append(lines, fmt.Sprintf("%s: %s", entry.Severity, entry.Render(report)))
+		}
+	}
+
+	// Counts are complete even where detail records were capped. Say so per
+	// code, rather than letting the log imply a condition happened only as
+	// often as it was recorded.
+	detailsPerCode := make([]uint32, set.NCodes)
+	for i := 0; i < set.Len(); i++ {
+		if code := set.Codes[i]; code >= 0 && int(code) < set.NCodes {
+			detailsPerCode[code]++
+		}
+	}
+
+	for code := 0; code < set.NCodes && code < len(catalog); code++ {
+		total := set.Counts[code]
+		if total > detailsPerCode[code] {
+			lines = append(lines, fmt.Sprintf("%s: %s occurred %d times in total (%d shown)",
+				catalog[code].Severity, catalog[code].Name, total, detailsPerCode[code]))
+		}
+	}
+
+	return lines
 }
 
 func encodeResults(w io.Writer, runLogs []string, results RunResults,

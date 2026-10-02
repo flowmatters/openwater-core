@@ -24,6 +24,9 @@ type {{.Name}} struct {
   {{range $ix, $d := .Dimensions -}}
   max{{- $d }} int
   {{end}}
+  {{- if .Flags.GenerateReports}}
+  reports *sim.ReportSink
+  {{- end}}
 }
 
 func (m *{{.Name}}) ApplyParameters(parameters data.ND2[float64]) {
@@ -58,6 +61,32 @@ func (m *{{.Name}}) ApplyParameters(parameters data.ND2[float64]) {
 }
 {{end}}
 
+{{if .Flags.GenerateReports -}}
+// Report codes for {{.Name}}, generated from its OW-SPEC reports: block.
+const (
+  {{range $i, $r := .ReportSpecs -}}
+  {{$r.ConstName}} int32 = {{$r.Code}}
+  {{end -}}
+)
+
+var {{lower .Name}}ReportCatalog = []sim.ReportDescription{
+  {{range $i, $r := .ReportSpecs -}}
+  {Name: {{printf "%q" $r.Name}}, Severity: {{$r.Severity}}, Template: {{printf "%q" $r.Template}}, NArgs: {{$r.NArgs}}},
+  {{end -}}
+}
+
+// SetReportSink and ReportCatalog implement sim.Reporting. Only models that
+// declare a reports: block get these, so sim.TimeSteppingModel is unchanged
+// and the model signature hash is unaffected.
+func (m *{{.Name}}) SetReportSink(s *sim.ReportSink) {
+  m.reports = s
+}
+
+func (m *{{.Name}}) ReportCatalog() []sim.ReportDescription {
+  return {{lower .Name}}ReportCatalog
+}
+
+{{end -}}
 func build{{.Name}}() sim.TimeSteppingModel {
 	result := {{.Name}}{}
 	return &result
@@ -215,6 +244,11 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
       outputPosSlice[sim.DIMO_CELL] = i
       statesPosSlice[sim.DIMS_CELL] = i
       inputsPosSlice[sim.DIMI_CELL] = i%numInputSequences
+      {{- if .Flags.GenerateReports}}
+      // One Reporter per cell, written by this goroutine alone. Cell returns
+      // nil when reporting is off, which the Reporter methods handle.
+      rep := m.reports.Cell(i)
+      {{- end}}
 
       {{range $i, $v := .ParameterSpecs}}
       {{- if $v.Dimensions -}}
@@ -275,7 +309,8 @@ func (m *{{.Name}}) Run(inputs data.ND3[float64], states data.ND2[float64], outp
         {{- range .ParameterSpecs}}{{lower .Name}},{{end -}}
         {{- if $oAsP}}
         {{- range $i, $v := .Outputs}}{{if $i}},{{end}}{{lower $v.Key}}Sliced{{end}}
-        {{- end}})
+        {{- end}}
+        {{- if $.Flags.GenerateReports}}{{if and $oAsP $.Outputs}},{{end}}rep{{end}})
 
       {{if $oAsP}}
       {{range $i, $v := .Outputs}}

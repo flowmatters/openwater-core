@@ -14,7 +14,7 @@ type storageRun struct {
 }
 
 // Flat-sided storage: constant surface area at all volumes.
-func runStorage(t *testing.T, rainfall, pet, inflow []float64, initialVolume float64, minRelease, maxRelease []float64) storageRun {
+func runFlatStorage(t *testing.T, rainfall, pet, inflow []float64, initialVolume float64, minRelease, maxRelease []float64) storageRun {
 	n := len(rainfall)
 	zeros := make([]float64, n)
 	levels := []float64{0, 10}
@@ -25,7 +25,8 @@ func runStorage(t *testing.T, rainfall, pet, inflow []float64, initialVolume flo
 	storageWaterBalance(rainfall, pet, inflow, zeros, zeros, zeros,
 		initialVolume, 0, 0, testDeltaT, len(levels),
 		levels, volumes, areas, minRelease, maxRelease,
-		r.volume, r.outflow, r.rainfallVolume, r.evaporationVolume)
+		r.volume, r.outflow, r.rainfallVolume, r.evaporationVolume,
+		nil)
 	return r
 }
 
@@ -40,7 +41,7 @@ func filled(n int, v float64) []float64 {
 func TestRainfallAndEvaporationVolumesAreInCubicMetresPerSecond(t *testing.T) {
 	n := 5
 	// No release, so the storage only changes through rainfall and evaporation
-	r := runStorage(t, filled(n, 10.0), filled(n, 4.0), filled(n, 0.0), 5e6, []float64{0, 0}, []float64{0, 0})
+	r := runFlatStorage(t, filled(n, 10.0), filled(n, 4.0), filled(n, 0.0), 5e6, []float64{0, 0}, []float64{0, 0})
 
 	// 10mm and 4mm over 1e6 m^2, per day
 	expectedRain := 0.010 * 1e6 / testDeltaT
@@ -66,7 +67,7 @@ func TestWaterBalanceClosesIncludingAtmosphericFluxes(t *testing.T) {
 	minRelease := []float64{0, 150}
 	maxRelease := []float64{0, 150}
 	initialVolume := 2e6
-	r := runStorage(t, rainfall, pet, inflow, initialVolume, minRelease, maxRelease)
+	r := runFlatStorage(t, rainfall, pet, inflow, initialVolume, minRelease, maxRelease)
 
 	prev := initialVolume
 	for i := 0; i < n; i++ {

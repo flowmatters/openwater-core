@@ -24,9 +24,12 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 		modelCount++
 
 		nodesRun += gen.Count
-		go func(g *modelGeneration, name string) {
+		go func(g *modelGeneration, mr *modelReference, name string) {
 			if g.Count > 0 {
-				g.Run()
+				sink := mr.NewReportSink(i, g.Count)
+				g.Run(sink)
+				// Collect before the generation can be purged.
+				mr.CollectReports(sink)
 				outputs := g.Outputs
 				if outputs == nil {
 					log.Info().Str("Model Name", name).Int("Generation", i).Msg("No outputs from model in generation")
@@ -35,7 +38,7 @@ func runGeneration(i int, models map[string]*modelReference, modelNames []string
 			} else {
 				simulationDone <- ""
 			}
-		}(gen, modelName)
+		}(gen, models[modelName], modelName)
 	}
 
 	for i := 0; i < modelCount; i++ {
