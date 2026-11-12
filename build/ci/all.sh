@@ -23,9 +23,12 @@ fi
 export VENV_DIR=bin
 python3 --version
 ./build/bootstrap-test-env.sh
+# build.sh first: it generates the model wrappers (generated_*.go, not in
+# git), and the model packages don't compile without them.
+./build/build.sh
+./build/ci/check-tag-version.sh
 # Every platform script above links the thread-safe libhdf5 it just built;
 # OW_EXPECT_HDF5_THREADSAFE makes the io tests fail if that did not take.
 OW_EXPECT_HDF5_THREADSAFE=true OW_TEST_PATH=$PWD/test/files go test -v ./...
-./build/build.sh
 ./build/run_test.sh
 ls -al
