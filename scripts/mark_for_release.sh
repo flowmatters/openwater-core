@@ -46,8 +46,8 @@ fi
 
 # If any warnings were shown, ask for confirmation
 if ! git diff --cached --quiet 2>/dev/null || ! git diff --quiet 2>/dev/null || [ -n "$UNTRACKED" ]; then
-    echo -e "${YELLOW}Uncommitted changes detected. The tag will reference the current commit,${NC}"
-    echo -e "${YELLOW}not these changes. Continue anyway?${NC}"
+    echo -e "${YELLOW}Uncommitted changes detected. The release is built from a clean clone of${NC}"
+    echo -e "${YELLOW}the current commit, so these changes are not in it. Continue anyway?${NC}"
     read -p "Continue? (y/N) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -56,13 +56,28 @@ if ! git diff --cached --quiet 2>/dev/null || ! git diff --quiet 2>/dev/null || 
     fi
 fi
 
-# Build to ensure binaries are up to date with current commit
-echo "Building..."
-./build/build.sh
+# Build HEAD from a clean clone, not the working tree. The version names the
+# model signature, and a working-tree build compiles whatever is there: an
+# untracked model file, or a leftover generated_*.go wrapper (they are
+# gitignored), changes the signature. The tag would then name a signature that
+# CI's clean checkout does not produce, and check-tag-version.sh fails the
+# release build.
+BUILD_ROOT=$(mktemp -d)
+trap 'rm -rf "$BUILD_ROOT"' EXIT
+echo "Building $(git rev-parse --short HEAD) from a clean clone in $BUILD_ROOT..."
+git clone --quiet --no-local "$CORE_DIR" "$BUILD_ROOT/openwater-core"
+git -C "$BUILD_ROOT/openwater-core" checkout --quiet "$(git rev-parse HEAD)"
+# build.sh copies libopenwater into ../bin
+mkdir -p "$BUILD_ROOT/bin"
+(cd "$BUILD_ROOT/openwater-core" && ./build/build.sh) > "$BUILD_ROOT/build.log" 2>&1 || {
+    echo -e "${RED}Error: clean build failed. Last lines of the build log:${NC}"
+    tail -20 "$BUILD_ROOT/build.log"
+    exit 1
+}
 echo
 
-# Get version from ow-sim
-VERSION_OUTPUT=$(./ow-sim --version 2>/dev/null | head -1)
+# Get version from the clean build's ow-sim
+VERSION_OUTPUT=$("$BUILD_ROOT/openwater-core/ow-sim" --version 2>/dev/null | head -1)
 VERSION=$(echo "$VERSION_OUTPUT" | awk '{print $2}')
 
 if [ -z "$VERSION" ]; then
@@ -83,7 +98,7 @@ TAG_EXISTS_REMOTELY=false
 
 if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
     TAG_EXISTS_LOCALLY=true
-    LOCAL_TAG_COMMIT=$(git rev-parse "$TAG_NAME")
+    LOCAL_TAG_COMMIT=$(git rev-parse "$TAG_NAME^{commit}")
     CURRENT_COMMIT=$(git rev-parse HEAD)
 
     echo -e "${YELLOW}WARNING: Tag '${TAG_NAME}' already exists locally${NC}"
