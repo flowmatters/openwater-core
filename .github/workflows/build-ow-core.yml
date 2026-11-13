@@ -129,6 +129,12 @@ jobs:
         with:
           path: ${{ env.HDF5_INSTALL_DIR }}
           key: hdf5-${{ env.HDF5_VERSION }}-macos-threadsafe-v2
+      # The runner's default Python (3.15 from November 2026) has no h5py
+      # wheel, and h5py's source build can't find libhdf5, so the test
+      # environment fails to install. Pin to a version h5py ships wheels for.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - name: build
         run: ./build/ci/all.sh
       - name: upload build
